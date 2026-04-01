@@ -1,10 +1,12 @@
 <div align="center">
 
-<img src="media/UndetectedStealthBrowser.png" alt="Stealth Browser MCP" width="200"/>
+<img src="media/UndetectedStealthBrowser.png" alt="Ghost Browser MCP" width="200"/>
 
-# Stealth Browser MCP
+# Ghost Browser MCP
 
 **Undetectable browser automation for MCP-compatible AI agents.**
+
+**Improved fork of [Stealth Browser MCP](https://github.com/vibheksoni/stealth-browser-mcp) adapted as Ghost Browser MCP.**
 
 Bypass Cloudflare, antibot systems, and social media blocks with real browser instances powered by [nodriver](https://github.com/ultrafunkamsterdam/nodriver) + Chrome DevTools Protocol + [FastMCP](https://github.com/jlowin/fastmcp).
 
@@ -24,7 +26,7 @@ Bypass Cloudflare, antibot systems, and social media blocks with real browser in
 - [Quickstart](#quickstart)
 - [Modular Architecture](#modular-architecture)
 - [Toolbox](#toolbox)
-- [Stealth vs Playwright MCP](#stealth-vs-playwright-mcp)
+- [Ghost vs Playwright MCP](#ghost-vs-playwright-mcp)
 - [Troubleshooting](#troubleshooting)
 - [Examples](#examples)
 - [Showcase](#showcase)
@@ -37,14 +39,14 @@ Bypass Cloudflare, antibot systems, and social media blocks with real browser in
 ## Demo
 
 <div align="center">
-<img src="media/showcase-demo-full.gif" alt="Stealth Browser MCP Demo" width="800" style="border-radius: 8px;">
+<img src="media/showcase-demo-full.gif" alt="Ghost Browser MCP Demo" width="800" style="border-radius: 8px;">
 <br><br>
 <a href="media/Showcase%20Stealth%20Browser%20Mcp.mp4" download>
   <img src="https://img.shields.io/badge/Watch%20HD%20Video-red?style=for-the-badge&logo=video&logoColor=white" alt="Watch HD Video">
 </a>
 </div>
 
-*Stealth Browser MCP bypassing Cloudflare, cloning UI elements, and intercepting network traffic — all through AI chat commands.*
+*Ghost Browser MCP bypassing Cloudflare, cloning UI elements, and intercepting network traffic — all through AI chat commands.*
 
 ---
 
@@ -82,8 +84,8 @@ Or see the official installation docs: https://docs.astral.sh/uv/getting-started
 ### 2. Clone and sync
 
 ```bash
-git clone https://github.com/vibheksoni/stealth-browser-mcp.git
-cd stealth-browser-mcp
+git clone <your-fork-url> ghost_browser
+cd ghost_browser
 uv sync
 ```
 
@@ -95,19 +97,19 @@ This creates a local `.venv` with the dependencies declared in `pyproject.toml`.
 
 Windows:
 ```bash
-claude mcp add-json stealth-browser-mcp "{\"type\":\"stdio\",\"command\":\"C:\\path\\to\\stealth-browser-mcp\\.venv\\Scripts\\python.exe\",\"args\":[\"C:\\path\\to\\stealth-browser-mcp\\src\\server.py\"]}"
+claude mcp add-json ghost_browser "{\"type\":\"stdio\",\"command\":\"C:\\path\\to\\ghost_browser\\.venv\\Scripts\\python.exe\",\"args\":[\"C:\\path\\to\\ghost_browser\\src\\server.py\"]}"
 ```
 
 Mac/Linux:
 ```bash
-claude mcp add-json stealth-browser-mcp '{
+claude mcp add-json ghost_browser '{
   "type": "stdio",
-  "command": "/path/to/stealth-browser-mcp/.venv/bin/python",
-  "args": ["/path/to/stealth-browser-mcp/src/server.py"]
+  "command": "/path/to/ghost_browser/.venv/bin/python",
+  "args": ["/path/to/ghost_browser/src/server.py"]
 }'
 ```
 
-> Replace `/path/to/stealth-browser-mcp/` with your actual project path.
+> Replace `/path/to/ghost_browser/` with your actual project path.
 
 <details>
 <summary><strong>Manual JSON configuration (Claude Desktop, Cursor, etc.)</strong></summary>
@@ -116,9 +118,9 @@ Windows (`%APPDATA%\Claude\claude_desktop_config.json`):
 ```json
 {
   "mcpServers": {
-    "stealth-browser-mcp": {
-      "command": "C:\\path\\to\\stealth-browser-mcp\\.venv\\Scripts\\python.exe",
-      "args": ["C:\\path\\to\\stealth-browser-mcp\\src\\server.py"],
+    "ghost_browser": {
+      "command": "C:\\path\\to\\ghost_browser\\.venv\\Scripts\\python.exe",
+      "args": ["C:\\path\\to\\ghost_browser\\src\\server.py"],
       "env": {}
     }
   }
@@ -129,9 +131,9 @@ Mac/Linux (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 ```json
 {
   "mcpServers": {
-    "stealth-browser-mcp": {
-      "command": "/path/to/stealth-browser-mcp/.venv/bin/python",
-      "args": ["/path/to/stealth-browser-mcp/src/server.py"],
+    "ghost_browser": {
+      "command": "/path/to/ghost_browser/.venv/bin/python",
+      "args": ["/path/to/ghost_browser/src/server.py"],
       "env": {}
     }
   }
@@ -158,7 +160,7 @@ fastmcp install cursor src/server.py
 
 Restart your MCP client and ask your agent:
 
-> "Use stealth-browser to navigate to https://example.com and take a screenshot."
+> "Use ghost_browser to navigate to https://example.com and take a screenshot."
 
 ---
 
@@ -372,9 +374,9 @@ python src/server.py --list-sections
 
 ---
 
-## Stealth vs Playwright MCP
+## Ghost vs Playwright MCP
 
-| Feature | Stealth Browser MCP | Playwright MCP |
+| Feature | Ghost Browser MCP | Playwright MCP |
 |---------|---------------------|----------------|
 | Cloudflare / Queue-It | Consistently bypasses | Commonly blocked |
 | Banking / Gov portals | Works | Frequently blocked |
@@ -396,7 +398,7 @@ Tested on: LinkedIn, Instagram, Twitter/X, Amazon, banking portals, government s
 Install Chrome, Chromium, or Microsoft Edge. The server auto-detects the first available browser. Run `validate_browser_environment_tool()` to diagnose.
 
 **Tools hang or return malformed JSON**
-Debug output was printing to stdout, corrupting the MCP JSON-RPC protocol. This was fixed in [#8](https://github.com/vibheksoni/stealth-browser-mcp/issues/8). Pull the latest `master` branch.
+This fork includes the upstream fix for stdout corruption from [#8](https://github.com/vibheksoni/stealth-browser-mcp/issues/8). Re-sync the environment if you are updating an older checkout.
 
 **Browser crashes on Linux / Docker / CI**
 Run with `--sandbox=false` or ensure your environment supports sandboxing. The server auto-detects root and container environments and adjusts accordingly.
@@ -435,13 +437,13 @@ Cookie template: [docs/examples/cookies_example.txt](docs/examples/cookies_examp
 <img src="media/AugmentHeroClone.PNG" alt="Augment Code Hero Recreation" width="700" style="border-radius: 8px;">
 </div>
 
-**Augment Code hero clone** — A user asked Claude to clone the hero section from [augmentcode.com](https://www.augmentcode.com/). The agent spawned a stealth browser, navigated to the site, extracted the complete element via CDP (styles, structure, assets), and generated a pixel-accurate HTML recreation with responsive design and animations. The entire process took under two minutes of conversation.
+**Augment Code hero clone** — A user asked Claude to clone the hero section from [augmentcode.com](https://www.augmentcode.com/). The agent spawned a ghost browser, navigated to the site, extracted the complete element via CDP (styles, structure, assets), and generated a pixel-accurate HTML recreation with responsive design and animations. The entire process took under two minutes of conversation.
 
 ---
 
 ## Roadmap
 
-Roadmap items are tracked in issues and pull requests in the upstream repository.
+Roadmap items are tracked in this fork and, when relevant, in the upstream repository.
 
 ---
 
@@ -462,6 +464,6 @@ MIT — see [LICENSE](LICENSE).
 
 <div align="center">
 
-[![Star History Chart](https://api.star-history.com/svg?repos=vibheksoni/stealth-browser-mcp&type=Date)](https://www.star-history.com/#vibheksoni/stealth-browser-mcp&Date)
+[![Upstream Star History Chart](https://api.star-history.com/svg?repos=vibheksoni/stealth-browser-mcp&type=Date)](https://www.star-history.com/#vibheksoni/stealth-browser-mcp&Date)
 
 </div>
