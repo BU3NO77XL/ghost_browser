@@ -12,7 +12,6 @@ Bypass Cloudflare, antibot systems, and social media blocks with real browser in
 [![Stars](https://img.shields.io/github/stars/vibheksoni/stealth-browser-mcp?style=flat-square)](https://github.com/vibheksoni/stealth-browser-mcp/stargazers)
 [![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
 [![Discord](https://img.shields.io/badge/Discord-join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/secrets)
-[![PRs Welcome](https://img.shields.io/badge/PRs-welcome-brightgreen?style=flat-square)](CONTRIBUTING.md)
 
 </div>
 
@@ -30,7 +29,6 @@ Bypass Cloudflare, antibot systems, and social media blocks with real browser in
 - [Examples](#examples)
 - [Showcase](#showcase)
 - [Roadmap](#roadmap)
-- [Contributing](#contributing)
 - [Support](#support)
 - [License](#license)
 
@@ -67,36 +65,44 @@ Bypass Cloudflare, antibot systems, and social media blocks with real browser in
 
 ## Quickstart
 
-### 1. Clone and install
+### 1. Install uv
+
+Windows (PowerShell):
+```bash
+powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
+```
+
+macOS / Linux:
+```bash
+curl -LsSf https://astral.sh/uv/install.sh | sh
+```
+
+Or see the official installation docs: https://docs.astral.sh/uv/getting-started/installation/
+
+### 2. Clone and sync
 
 ```bash
 git clone https://github.com/vibheksoni/stealth-browser-mcp.git
 cd stealth-browser-mcp
-python -m venv venv
-
-# Activate virtual environment
-# Windows:
-venv\Scripts\activate
-# Mac/Linux:
-source venv/bin/activate
-
-pip install -r requirements.txt
+uv sync
 ```
 
-### 2. Add to your MCP client
+This creates a local `.venv` with the dependencies declared in `pyproject.toml`.
+
+### 3. Add to your MCP client
 
 **Claude Code CLI (recommended):**
 
 Windows:
 ```bash
-claude mcp add-json stealth-browser-mcp "{\"type\":\"stdio\",\"command\":\"C:\\path\\to\\stealth-browser-mcp\\venv\\Scripts\\python.exe\",\"args\":[\"C:\\path\\to\\stealth-browser-mcp\\src\\server.py\"]}"
+claude mcp add-json stealth-browser-mcp "{\"type\":\"stdio\",\"command\":\"C:\\path\\to\\stealth-browser-mcp\\.venv\\Scripts\\python.exe\",\"args\":[\"C:\\path\\to\\stealth-browser-mcp\\src\\server.py\"]}"
 ```
 
 Mac/Linux:
 ```bash
 claude mcp add-json stealth-browser-mcp '{
   "type": "stdio",
-  "command": "/path/to/stealth-browser-mcp/venv/bin/python",
+  "command": "/path/to/stealth-browser-mcp/.venv/bin/python",
   "args": ["/path/to/stealth-browser-mcp/src/server.py"]
 }'
 ```
@@ -111,7 +117,7 @@ Windows (`%APPDATA%\Claude\claude_desktop_config.json`):
 {
   "mcpServers": {
     "stealth-browser-mcp": {
-      "command": "C:\\path\\to\\stealth-browser-mcp\\venv\\Scripts\\python.exe",
+      "command": "C:\\path\\to\\stealth-browser-mcp\\.venv\\Scripts\\python.exe",
       "args": ["C:\\path\\to\\stealth-browser-mcp\\src\\server.py"],
       "env": {}
     }
@@ -124,7 +130,7 @@ Mac/Linux (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 {
   "mcpServers": {
     "stealth-browser-mcp": {
-      "command": "/path/to/stealth-browser-mcp/venv/bin/python",
+      "command": "/path/to/stealth-browser-mcp/.venv/bin/python",
       "args": ["/path/to/stealth-browser-mcp/src/server.py"],
       "env": {}
     }
@@ -138,17 +144,17 @@ Mac/Linux (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 <summary><strong>FastMCP CLI (untested)</strong></summary>
 
 ```bash
-pip install fastmcp
-fastmcp install claude-desktop src/server.py --with-requirements requirements.txt
+uv tool install fastmcp
+fastmcp install claude-desktop src/server.py
 # OR
-fastmcp install claude-code src/server.py --with-requirements requirements.txt
+fastmcp install claude-code src/server.py
 # OR
-fastmcp install cursor src/server.py --with-requirements requirements.txt
+fastmcp install cursor src/server.py
 ```
 
 </details>
 
-### 3. Test it
+### 4. Test it
 
 Restart your MCP client and ask your agent:
 
@@ -402,9 +408,9 @@ python src/server.py --disable-cdp-functions --disable-dynamic-hooks --disable-p
 ```
 
 **Module not found errors**
-Make sure you activated the virtual environment and installed dependencies:
+Make sure you synchronized the project environment from the repository root:
 ```bash
-pip install -r requirements.txt
+uv sync
 ```
 
 ---
@@ -418,6 +424,9 @@ pip install -r requirements.txt
 
 All driven from a single AI agent conversation.
 
+Prompt templates: [docs/examples/claude_prompts.md](docs/examples/claude_prompts.md)
+Cookie template: [docs/examples/cookies_example.txt](docs/examples/cookies_example.txt)
+
 ---
 
 ## Showcase
@@ -428,21 +437,11 @@ All driven from a single AI agent conversation.
 
 **Augment Code hero clone** — A user asked Claude to clone the hero section from [augmentcode.com](https://www.augmentcode.com/). The agent spawned a stealth browser, navigated to the site, extracted the complete element via CDP (styles, structure, assets), and generated a pixel-accurate HTML recreation with responsive design and animations. The entire process took under two minutes of conversation.
 
-[View the recreation](demo/augment-hero-recreation.html) | [Full walkthrough](demo/augment-hero-clone.md)
-
 ---
 
 ## Roadmap
 
-See the live plan in [ROADMAP.md](ROADMAP.md). Contributions welcome.
-
----
-
-## Contributing
-
-Read [CONTRIBUTING.md](CONTRIBUTING.md) and open a PR. First-time contributors welcome.
-
-If this project saves you time, star the repo — it helps more than you think.
+Roadmap items are tracked in issues and pull requests in the upstream repository.
 
 ---
 

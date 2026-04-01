@@ -12,6 +12,7 @@ __pycache__/
 .pytest_cache/
 
 # Virtual environments
+.venv/
 venv/
 env/
 ENV/
@@ -40,6 +41,7 @@ test_*.py
 # Development files
 .env.local
 .env.development
+.uv-cache/
 debug_logs/
 screenshots/
 
@@ -56,5 +58,4 @@ element_clones/
 media/
 
 # Development scripts
-run_server.sh
-run_server.bat
+scripts/
