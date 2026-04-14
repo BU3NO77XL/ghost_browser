@@ -1,493 +1,177 @@
-"""Handler for manual login scenarios - allows AI agent to pause and wait for user login.
+"""Handler for manual login scenarios.
 
-Key design: when navigate() detects a login page, it registers the instance here.
-The AI agent then asks the user to log in manually and calls confirm_manual_login
-with the SAME instance_id to resume control of the SAME browser window.
+Flow:
+  1. navigate() detects login page → register_pending_login() + watcher starts
+  2. Watcher polls every 1.5s — detects when user leaves login page, sets flag
+  3. User tells AI they logged in → AI calls confirm_manual_login
+  4. confirm_manual_login clears pending state, returns success + current URL
+  5. AI continues automation normally. Cookies are handled separately via CDP tools.
 """
 
-
-from typing import Dict, Optional, Any
+import asyncio
 from datetime import datetime
-from pathlib import Path
+from typing import Any, Dict, Optional
 
-import nodriver as uc
 from nodriver import Tab
 
 from debug_logger import debug_logger
 
+LOGIN_URL_INDICATORS = (
+    'login', 'signin', 'sign-in', 'log-in', 'logon', 'log_in',
+    'auth', 'authenticate', 'sso', 'oauth',
+    'accounts.google.com', 'login.microsoftonline.com',
+    'login.live.com', 'appleid.apple.com',
+)
+
 
 class ManualLoginHandler:
-    """Manages manual login scenarios where AI agent needs to wait for user interaction.
-    
-    Lifecycle:
-    1. navigate() detects login page -> calls register_pending_login()
-    2. AI agent tells user to log in manually in the open browser
-    3. User logs in and tells the AI agent
-    4. AI agent calls confirm_manual_login tool -> calls confirm_login()
-    5. confirm_login() checks auth on the SAME tab, saves cookies, returns success
-    """
-    
     def __init__(self):
-        # Instances waiting for manual login: {instance_id: {tab, url, registered_at, ...}}
-        self._pending_logins: Dict[str, dict] = {}
-    
-    def register_pending_login(
-        self,
-        instance_id: str,
-        tab: Tab,
-        url: str,
-        cookies_file: str = "cookies.txt"
-    ) -> None:
+        self._pending: Dict[str, dict] = {}  # instance_id → {url, registered_at}
+        self._lock = asyncio.Lock()  # Protect concurrent access
+
+    # ------------------------------------------------------------------
+    # Pending state
+    # ------------------------------------------------------------------
+
+    async def register_pending_login(self, instance_id: str, tab: Tab, url: str) -> None:
+        async with self._lock:
+            self._pending[instance_id] = {
+                'url': url,
+                'registered_at': datetime.now().isoformat(),
+            }
+        debug_logger.log_info("manual_login_handler", "register_pending_login",
+                              f"Pending login for {instance_id}. URL: {url}")
+        from login_watcher import login_watcher
+        await login_watcher.start_watching(instance_id, tab)
+
+    async def is_pending_login(self, instance_id: str) -> bool:
+        async with self._lock:
+            return instance_id in self._pending
+
+    async def get_pending_info(self, instance_id: str) -> Optional[dict]:
+        async with self._lock:
+            info = self._pending.get(instance_id)
+            if not info:
+                return None
+            return {'instance_id': instance_id, **info, 'status': 'waiting_for_user'}
+
+    async def _clear_pending(self, instance_id: str) -> None:
+        async with self._lock:
+            self._pending.pop(instance_id, None)
+
+    # ------------------------------------------------------------------
+    # Confirm login — just clears state and returns current URL
+    # ------------------------------------------------------------------
+
+    async def confirm_login(self, instance_id: str, tab: Tab,
+                            skip_login_check: bool = False) -> Dict[str, Any]:
         """
-        Register a browser instance as waiting for manual login.
-        Called by navigate() when it detects the page is a login page.
-        
-        Args:
-            instance_id: The browser instance ID (same one returned by spawn_browser)
-            tab: The active browser tab (kept alive for the user to interact with)
-            url: The URL that triggered login detection
-            cookies_file: Path to cookies file for saving after login
+        Confirm login: clears pending state and returns the current URL.
+        Does NOT save cookies — use CDP tools for that separately.
+
+        skip_login_check=False → verify user is no longer on login page first.
+        skip_login_check=True  → skip check (watcher already confirmed URL changed).
         """
-        self._pending_logins[instance_id] = {
-            'tab': tab,
-            'url': url,
-            'cookies_file': cookies_file,
-            'registered_at': datetime.now().isoformat(),
-            'status': 'waiting_for_user',
-        }
-        debug_logger.log_info(
-            "manual_login_handler",
-            "register_pending_login",
-            f"Instance {instance_id} registered as pending login. URL: {url}"
-        )
-    
-    def is_pending_login(self, instance_id: str) -> bool:
-        """Check if an instance is waiting for manual login."""
-        return instance_id in self._pending_logins
-    
-    def get_pending_info(self, instance_id: str) -> Optional[dict]:
-        """Get pending login info for an instance (without the tab object)."""
-        info = self._pending_logins.get(instance_id)
-        if not info:
-            return None
-        return {
-            'instance_id': instance_id,
-            'url': info['url'],
-            'registered_at': info['registered_at'],
-            'status': info['status'],
-        }
-    
-    def get_all_pending(self) -> list:
-        """Get all instances waiting for manual login."""
-        return [
-            self.get_pending_info(iid)
-            for iid in self._pending_logins
-        ]
-    
-    async def confirm_login(
-        self,
-        instance_id: str,
-        tab: Tab,
-        cookies_file: str = None,
-    ) -> Dict[str, Any]:
-        """
-        Confirm that manual login was completed on the given instance.
-        Checks authentication status and saves cookies if successful.
-        
-        This is called by the confirm_manual_login MCP tool. The tab is passed
-        from browser_manager to ensure we use the SAME browser instance.
-        
-        Args:
-            instance_id: The browser instance ID
-            tab: The active tab from browser_manager (same instance)
-            cookies_file: Override cookies file path (uses pending registration default if None)
-            
-        Returns:
-            Dict with success status, authentication details, and cookie save info
-        """
-        pending = self._pending_logins.get(instance_id)
-        if cookies_file is None:
-            cookies_file = pending.get('cookies_file', 'cookies.txt') if pending else "cookies.txt"
-        
         try:
-            # Step 1: Check if still on login page
-            is_login = await self.detect_login_page(tab)
-            
-            # Step 2: Check authentication indicators
-            auth_status = await self.check_authentication_status(tab)
-            
-            current_url = await tab.evaluate("window.location.href")
-            
-            if is_login and not auth_status.get('is_authenticated', False):
-                debug_logger.log_warning(
-                    "manual_login_handler",
-                    "confirm_login",
-                    f"Instance {instance_id} still appears to be on login page: {current_url}"
-                )
-                return {
-                    'success': False,
-                    'message': 'Ainda parece estar na página de login. Verifique se o login foi concluído e tente novamente.',
-                    'current_url': current_url,
-                    'is_login_page': True,
-                    'auth_indicators': auth_status.get('indicators', {}),
-                    'instance_id': instance_id,
-                }
-            
-            # Step 3: Login confirmed — save cookies
-            cookie_save_result = await self._save_cookies_from_browser(tab, cookies_file)
-            
-            # Step 4: Clean up pending entry
-            if instance_id in self._pending_logins:
-                del self._pending_logins[instance_id]
-            
-            debug_logger.log_info(
-                "manual_login_handler",
-                "confirm_login",
-                f"Login confirmed for instance {instance_id}. URL: {current_url}. "
-                f"Cookies saved: {cookie_save_result.get('cookies_saved', 0)}"
-            )
-            
+            if not skip_login_check:
+                still_on_login = await self.detect_login_page(tab)
+                if still_on_login:
+                    try:
+                        current_url = await asyncio.wait_for(
+                            tab.evaluate("window.location.href"), timeout=3.0)
+                    except Exception:
+                        current_url = "unknown"
+                    debug_logger.log_warning("manual_login_handler", "confirm_login",
+                                             f"{instance_id} still on login page: {current_url}")
+                    return {
+                        'success': False,
+                        'message': 'Ainda na página de login. Conclua o login e tente novamente.',
+                        'current_url': current_url,
+                        'is_login_page': True,
+                        'instance_id': instance_id,
+                    }
+
+            try:
+                current_url = await asyncio.wait_for(
+                    tab.evaluate("window.location.href"), timeout=3.0)
+            except Exception:
+                current_url = "unknown"
+
+            await self._clear_pending(instance_id)
+
+            debug_logger.log_info("manual_login_handler", "confirm_login",
+                                  f"Login confirmed for {instance_id}. URL: {current_url}")
             return {
                 'success': True,
-                'message': 'Login confirmado com sucesso! Cookies salvos. O agente pode continuar usando esta mesma instância.',
+                'message': 'Login confirmado. Instância pronta para uso.',
                 'current_url': current_url,
-                'is_login_page': False,
-                'auth_indicators': auth_status.get('indicators', {}),
-                'cookies_saved': cookie_save_result,
                 'instance_id': instance_id,
             }
-            
+
+        except asyncio.TimeoutError:
+            debug_logger.log_error("manual_login_handler", "confirm_login",
+                                   f"Timeout for {instance_id}")
+            return {
+                'success': False,
+                'message': 'Timeout ao confirmar login.',
+                'instance_id': instance_id,
+                'error': 'timeout',
+            }
         except Exception as e:
             debug_logger.log_error("manual_login_handler", "confirm_login", e)
             return {
                 'success': False,
-                'message': f'Erro ao confirmar login: {str(e)}',
+                'message': f'Erro: {e}',
                 'instance_id': instance_id,
+                'error': type(e).__name__,
             }
+
+    # ------------------------------------------------------------------
+    # Login page detection — used by navigate() and confirm_login()
+    # ------------------------------------------------------------------
 
     async def detect_login_page(self, tab: Tab) -> bool:
-        """
-        Detect if current page is a login page by checking URL and form elements.
-        
-        Args:
-            tab: Browser tab to check
-            
-        Returns:
-            bool: True if on login page, False otherwise
-        """
+        """Returns True if current page looks like a login page."""
         try:
-            current_url = await tab.evaluate("window.location.href")
-            
-            # Common login page indicators in URL
-            login_url_indicators = [
-                'login', 'signin', 'sign-in', 'auth', 'authenticate',
-                'log-in', 'logon', 'log_in', 'sso', 'oauth',
-                'accounts.google.com', 'login.microsoftonline.com',
-                'login.live.com', 'appleid.apple.com',
-            ]
-            
-            url_lower = current_url.lower()
-            url_match = any(indicator in url_lower for indicator in login_url_indicators)
-            
-            if url_match:
-                debug_logger.log_info(
-                    "manual_login_handler",
-                    "detect_login_page",
-                    f"Login page detected by URL: {current_url}"
-                )
+            url = await asyncio.wait_for(
+                tab.evaluate("window.location.href"), timeout=3.0)
+
+            if any(ind in url.lower() for ind in LOGIN_URL_INDICATORS):
+                debug_logger.log_info("manual_login_handler", "detect_login_page",
+                                      f"Login page by URL: {url}")
                 return True
-            
-            # Check for common login form elements in the DOM
-            has_login_form = await tab.evaluate("""
+
+            has_form = await asyncio.wait_for(tab.evaluate("""
                 (() => {
-                    // Check for password input
-                    const passwordInputs = document.querySelectorAll('input[type="password"]');
-                    if (passwordInputs.length > 0) return true;
-                    
-                    // Check for login-related forms
-                    const forms = document.querySelectorAll('form');
-                    for (const form of forms) {
-                        const action = (form.action || '').toLowerCase();
-                        const id = (form.id || '').toLowerCase();
-                        const cls = (form.className || '').toLowerCase();
-                        if (action.includes('login') || action.includes('signin') || action.includes('auth') ||
-                            id.includes('login') || id.includes('signin') ||
-                            cls.includes('login') || cls.includes('signin')) {
-                            return true;
-                        }
+                    if (document.querySelector('input[type="password"]')) return true;
+                    for (const btn of document.querySelectorAll('button, input[type="submit"]')) {
+                        const t = (btn.textContent || btn.value || '').toLowerCase();
+                        if (t.includes('login') || t.includes('entrar') || t.includes('signin')) return true;
                     }
-                    
-                    // Check for login/signin buttons
-                    const allClickables = Array.from(document.querySelectorAll('button, input[type="submit"], a[role="button"]'));
-                    const hasLoginButton = allClickables.some(el => {
-                        const text = (el.textContent || el.value || '').toLowerCase().trim();
-                        return (
-                            text === 'login' || text === 'log in' || text === 'sign in' ||
-                            text === 'signin' || text === 'entrar' || text === 'fazer login' ||
-                            text === 'iniciar sessão'
-                        );
-                    });
-                    if (hasLoginButton) return true;
-                    
-                    // Check for email/username inputs combined with submit
-                    const emailInputs = document.querySelectorAll(
-                        'input[type="email"], input[name*="email"], input[name*="username"], ' +
-                        'input[name*="user"], input[autocomplete="username"], input[autocomplete="email"]'
-                    );
-                    const submitButtons = document.querySelectorAll('button[type="submit"], input[type="submit"]');
-                    if (emailInputs.length > 0 && submitButtons.length > 0) return true;
-                    
+                    for (const f of document.querySelectorAll('form')) {
+                        const id = (f.id || '').toLowerCase();
+                        const cls = (f.className || '').toLowerCase();
+                        if (id.includes('login') || cls.includes('login')) return true;
+                    }
                     return false;
                 })()
-            """)
-            
-            if has_login_form:
-                debug_logger.log_info(
-                    "manual_login_handler",
-                    "detect_login_page",
-                    "Login page detected by form elements"
-                )
+            """), timeout=3.0)
+
+            if bool(has_form):
+                debug_logger.log_info("manual_login_handler", "detect_login_page",
+                                      "Login page by DOM")
                 return True
-            
+
             return False
-            
-        except Exception as e:
-            debug_logger.log_error("manual_login_handler", "detect_login_page", e)
+
+        except asyncio.TimeoutError:
+            debug_logger.log_error("manual_login_handler", "detect_login_page",
+                                   "Timeout — assuming not login page")
             return False
-    
-    async def check_authentication_status(self, tab: Tab) -> Dict[str, Any]:
-        """
-        Check if user is authenticated by looking for common indicators.
-        
-        Args:
-            tab: Browser tab to check
-            
-        Returns:
-            Dict with authentication status, confidence, and indicator details
-        """
-        try:
-            current_url = await tab.evaluate("window.location.href")
-            
-            auth_check = await tab.evaluate("""
-                (() => {
-                    const indicators = {
-                        hasUserMenu: false,
-                        hasLogoutButton: false,
-                        hasProfileLink: false,
-                        hasAuthToken: false,
-                        hasSessionCookie: false,
-                        hasDashboardContent: false
-                    };
-                    
-                    // Check for user menu/profile/avatar elements
-                    const userMenuSelectors = [
-                        '[class*="user-menu"]', '[class*="profile-menu"]',
-                        '[class*="account-menu"]', '[id*="user-menu"]',
-                        '[class*="avatar"]', '[class*="user-avatar"]',
-                        '[class*="profile-pic"]', '[data-testid*="avatar"]',
-                        '[aria-label*="account"]', '[aria-label*="profile"]'
-                    ];
-                    indicators.hasUserMenu = userMenuSelectors.some(sel => 
-                        document.querySelector(sel) !== null
-                    );
-                    
-                    // Check for logout/signout buttons
-                    const allElements = Array.from(document.querySelectorAll('button, a, [role="menuitem"]'));
-                    indicators.hasLogoutButton = allElements.some(el => {
-                        const text = (el.textContent || '').toLowerCase();
-                        const href = (el.href || '').toLowerCase();
-                        return text.includes('logout') || text.includes('sign out') || 
-                               text.includes('log out') || text.includes('sair') ||
-                               text.includes('desconectar') || text.includes('encerrar sessão') ||
-                               href.includes('logout') || href.includes('signout');
-                    });
-                    
-                    // Check for profile/account links
-                    const links = Array.from(document.querySelectorAll('a'));
-                    indicators.hasProfileLink = links.some(link => {
-                        const href = (link.href || '').toLowerCase();
-                        const text = (link.textContent || '').toLowerCase();
-                        return href.includes('profile') || href.includes('account') || href.includes('settings') ||
-                               href.includes('minha-conta') || href.includes('meu-perfil') ||
-                               text.includes('my account') || text.includes('minha conta');
-                    });
-                    
-                    // Check localStorage for auth tokens
-                    try {
-                        const storageKeys = Object.keys(localStorage);
-                        indicators.hasAuthToken = storageKeys.some(key => {
-                            const k = key.toLowerCase();
-                            return k.includes('token') || k.includes('auth') || 
-                                   k.includes('session') || k.includes('jwt') ||
-                                   k.includes('access_token') || k.includes('id_token');
-                        });
-                    } catch (e) {}
-                    
-                    // Check for session cookies
-                    const cookieStr = document.cookie.toLowerCase();
-                    indicators.hasSessionCookie = cookieStr.includes('session') ||
-                                                  cookieStr.includes('auth') ||
-                                                  cookieStr.includes('token') ||
-                                                  cookieStr.includes('logged_in') ||
-                                                  cookieStr.includes('user');
-                    
-                    // Check for dashboard/main content (not a login form)
-                    const hasDashboard = document.querySelector(
-                        '[class*="dashboard"], [class*="home-content"], [class*="main-content"], ' + 
-                        '[class*="feed"], [class*="inbox"], [class*="workspace"], nav[class*="main"]'
-                    ) !== null;
-                    indicators.hasDashboardContent = hasDashboard;
-                    
-                    return indicators;
-                })()
-            """)
-            
-            # Calculate confidence score
-            confidence_score = sum([
-                auth_check.get('hasUserMenu', False),
-                auth_check.get('hasLogoutButton', False),
-                auth_check.get('hasProfileLink', False),
-                auth_check.get('hasAuthToken', False),
-                auth_check.get('hasSessionCookie', False),
-                auth_check.get('hasDashboardContent', False),
-            ])
-            
-            # Authenticated if at least 1 strong indicator or 2 weak indicators
-            is_authenticated = (
-                auth_check.get('hasLogoutButton', False) or  # strong signal
-                auth_check.get('hasDashboardContent', False) or  # strong signal
-                confidence_score >= 2  # multiple weak signals
-            )
-            
-            return {
-                'is_authenticated': is_authenticated,
-                'confidence_score': confidence_score,
-                'max_score': 6,
-                'indicators': auth_check,
-                'current_url': current_url
-            }
-            
         except Exception as e:
-            debug_logger.log_error("manual_login_handler", "check_authentication_status", e)
-            return {
-                'is_authenticated': False,
-                'confidence_score': 0,
-                'error': str(e)
-            }
-
-    async def _save_cookies_from_browser(
-        self,
-        tab: Tab,
-        cookies_file: str = "cookies.txt"
-    ) -> Dict[str, Any]:
-        """
-        Extract all cookies from the browser and save them to cookies.txt in Netscape format.
-        This preserves cookies for future sessions so the login persists.
-        
-        Args:
-            tab: Browser tab to extract cookies from
-            cookies_file: Path to save cookies file
-            
-        Returns:
-            Dict with save results
-        """
-        try:
-            # Get all cookies via CDP
-            cookies_response = await tab.send(uc.cdp.network.get_all_cookies())
-            
-            if not cookies_response:
-                return {'cookies_saved': 0, 'reason': 'no_cookies_returned'}
-            
-            # Resolve file path
-            file_path = Path(cookies_file).expanduser()
-            if not file_path.is_absolute():
-                cwd_candidate = (Path.cwd() / file_path).resolve()
-                repo_root_candidate = (Path(__file__).resolve().parent.parent / file_path).resolve()
-                if cwd_candidate.parent.exists():
-                    file_path = cwd_candidate
-                elif repo_root_candidate.parent.exists():
-                    file_path = repo_root_candidate
-            
-            # Read existing cookies to preserve entries that are not overwritten.
-            existing_cookie_lines: Dict[tuple, str] = {}
-            if file_path.exists():
-                try:
-                    content = file_path.read_text(encoding="utf-8-sig", errors="ignore")
-                    for raw_line in content.splitlines():
-                        line = raw_line.strip()
-                        if not line or line.startswith('#') or line.startswith('//'):
-                            continue
-                        parts = line.split('\t')
-                        if len(parts) != 7:
-                            continue
-                        domain_field, _include_subdomains, path, _secure, _expires, name, _value = parts
-                        normalized_domain = domain_field.replace('#HttpOnly_', '', 1)
-                        cookie_key = (normalized_domain, name, path or '/')
-                        existing_cookie_lines[cookie_key] = line
-                except Exception:
-                    pass
-            
-            # Build Netscape cookie lines from browser cookies
-            new_cookie_lines: Dict[tuple, str] = {}
-            
-            for cookie in cookies_response:
-                domain = getattr(cookie, 'domain', '') or ''
-                name = getattr(cookie, 'name', '') or ''
-                value = getattr(cookie, 'value', '') or ''
-                path = getattr(cookie, 'path', '/') or '/'
-                secure = getattr(cookie, 'secure', False)
-                expires = getattr(cookie, 'expires', 0) or 0
-                http_only = getattr(cookie, 'http_only', False)
-                
-                if not domain or not name:
-                    continue
-                
-                cookie_key = (domain, name, path)
-                
-                # Netscape format: domain  include_subdomains  path  secure  expires  name  value
-                # include_subdomains=TRUE when domain starts with '.' (applies to subdomains)
-                # include_subdomains=FALSE when host-only (no dot prefix)
-                include_subdomains_flag = "FALSE" if not domain.startswith('.') else "TRUE"
-                secure_flag = "TRUE" if secure else "FALSE"
-                expires_int = int(expires) if expires else 0
-                
-                # If http_only, prefix domain with #HttpOnly_
-                domain_field = f"#HttpOnly_{domain}" if http_only else domain
-                
-                line = f"{domain_field}\t{include_subdomains_flag}\t{path}\t{secure_flag}\t{expires_int}\t{name}\t{value}"
-                new_cookie_lines[cookie_key] = line
-
-            # Merge existing + new cookies, where new cookies overwrite same key.
-            merged_cookie_lines = dict(existing_cookie_lines)
-            merged_cookie_lines.update(new_cookie_lines)
-            
-            # Write cookies file
-            header = "# Netscape HTTP Cookie File\n# Auto-saved by stealth_browser after manual login\n# https://curl.se/docs/http-cookies.html\n\n"
-            
-            file_path.write_text(
-                header + "\n".join(merged_cookie_lines.values()) + "\n",
-                encoding="utf-8"
-            )
-            
-            debug_logger.log_info(
-                "manual_login_handler",
-                "_save_cookies_from_browser",
-                f"Saved {len(new_cookie_lines)} updated cookies ({len(merged_cookie_lines)} total) to {file_path}"
-            )
-            
-            return {
-                'cookies_saved': len(new_cookie_lines),
-                'cookies_total': len(merged_cookie_lines),
-                'file_path': str(file_path),
-            }
-            
-        except Exception as e:
-            debug_logger.log_error("manual_login_handler", "_save_cookies_from_browser", e)
-            return {
-                'cookies_saved': 0,
-                'error': str(e),
-            }
+            debug_logger.log_error("manual_login_handler", "detect_login_page",
+                                   f"{type(e).__name__}: {e}")
+            return False
 
 
-# Global instance
 manual_login_handler = ManualLoginHandler()

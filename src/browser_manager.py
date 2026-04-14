@@ -1,9 +1,8 @@
 """Browser instance management with nodriver."""
 
 import asyncio
-import sys
 import uuid
-from typing import Dict, Optional, List
+from typing import Dict, Optional, List, Any
 from datetime import datetime, timedelta
 
 import nodriver as uc
@@ -99,7 +98,8 @@ class BrowserManager:
                 width=options.viewport_width,
                 height=options.viewport_height
             )
-            print(f"[DEBUG] Set viewport to {options.viewport_width}x{options.viewport_height}", file=sys.stderr)
+            debug_logger.log_info("browser_manager", "spawn_browser",
+                                  f"Viewport set to {options.viewport_width}x{options.viewport_height}")
 
             await self._setup_dynamic_hooks(tab, instance_id)
 
@@ -139,6 +139,59 @@ class BrowserManager:
             
         except Exception as e:
             debug_logger.log_error("browser_manager", "_setup_dynamic_hooks", f"Failed to setup dynamic hooks for {instance_id}: {e}")
+
+    async def check_instance_health(self, instance_id: str) -> Dict[str, Any]:
+        """
+        Check if browser instance is healthy and WebSocket connection is alive.
+
+        Args:
+            instance_id (str): The ID of the browser instance.
+
+        Returns:
+            Dict with 'healthy' (bool), 'reason' (str), and 'can_recover' (bool)
+        """
+        tab = await self.get_tab(instance_id)
+        if not tab:
+            return {
+                "healthy": False,
+                "reason": "Tab not found",
+                "can_recover": False
+            }
+
+        try:
+            # Quick health check - try to evaluate simple expression
+            result = await asyncio.wait_for(
+                tab.evaluate("1+1"),
+                timeout=3.0
+            )
+            if result == 2:
+                return {
+                    "healthy": True,
+                    "reason": "Connection is alive",
+                    "can_recover": True
+                }
+        except asyncio.TimeoutError:
+            return {
+                "healthy": False,
+                "reason": "WebSocket timeout - connection may be dead",
+                "can_recover": False,
+                "recommendation": "Close this instance and create a new one"
+            }
+        except Exception as e:
+            error_msg = str(e).lower()
+            if 'websocket' in error_msg or 'http 500' in error_msg or 'connection' in error_msg:
+                return {
+                    "healthy": False,
+                    "reason": f"WebSocket connection lost: {str(e)}",
+                    "can_recover": False,
+                    "recommendation": "Close this instance and create a new one. The browser process may have crashed."
+                }
+            return {
+                "healthy": False,
+                "reason": f"Unknown error: {str(e)}",
+                "can_recover": False,
+                "recommendation": "Try closing and recreating the instance"
+            }
 
     async def get_instance(self, instance_id: str) -> Optional[dict]:
         """
@@ -342,7 +395,6 @@ class BrowserManager:
 
         tabs = []
         for tab in browser.tabs:
-            await tab
             tabs.append({
                 'tab_id': str(tab.target.target_id),
                 'url': getattr(tab, 'url', '') or '',
@@ -463,48 +515,92 @@ class BrowserManager:
             return None
 
         try:
-            url = await tab.evaluate("window.location.href")
-            title = await tab.evaluate("document.title")
-            ready_state = await tab.evaluate("document.readyState")
+            # Add timeout to prevent hanging on WebSocket errors
+            url = await asyncio.wait_for(tab.evaluate("window.location.href"), timeout=5.0)
+            title = await asyncio.wait_for(tab.evaluate("document.title"), timeout=5.0)
+            ready_state = await asyncio.wait_for(tab.evaluate("document.readyState"), timeout=5.0)
 
-            cookies = await tab.send(uc.cdp.network.get_cookies())
+            # Use storage API instead of deprecated network API
+            try:
+                cookies_result = await asyncio.wait_for(
+                    tab.send(uc.cdp.storage.get_cookies(browser_context_id=None)),
+                    timeout=5.0
+                )
+                cookies = cookies_result.get('cookies', []) if isinstance(cookies_result, dict) else []
+            except asyncio.TimeoutError:
+                # Fallback to JavaScript if CDP is slow
+                debug_logger.log_warning("browser_manager", "get_page_state", "CDP storage timeout, using JavaScript fallback")
+                try:
+                    cookie_string = await asyncio.wait_for(tab.evaluate("document.cookie"), timeout=3.0)
+                    # Just return empty list for page state - cookies aren't critical here
+                    cookies = []
+                except Exception:
+                    cookies = []
+            except Exception as e:
+                debug_logger.log_warning("browser_manager", "get_page_state", f"Failed to get cookies: {e}")
+                cookies = []
 
             local_storage = {}
             session_storage = {}
 
             try:
-                local_storage_keys = await tab.evaluate("Object.keys(localStorage)")
+                local_storage_keys = await asyncio.wait_for(
+                    tab.evaluate("Object.keys(localStorage)"), timeout=3.0
+                )
                 for key in local_storage_keys:
-                    value = await tab.evaluate(f"localStorage.getItem('{key}')")
+                    value = await asyncio.wait_for(
+                        tab.evaluate(f"localStorage.getItem('{key}')"), timeout=2.0
+                    )
                     local_storage[key] = value
 
-                session_storage_keys = await tab.evaluate("Object.keys(sessionStorage)")
+                session_storage_keys = await asyncio.wait_for(
+                    tab.evaluate("Object.keys(sessionStorage)"), timeout=3.0
+                )
                 for key in session_storage_keys:
-                    value = await tab.evaluate(f"sessionStorage.getItem('{key}')")
+                    value = await asyncio.wait_for(
+                        tab.evaluate(f"sessionStorage.getItem('{key}')"), timeout=2.0
+                    )
                     session_storage[key] = value
-            except Exception:
+            except (asyncio.TimeoutError, Exception) as e:
+                debug_logger.log_warning("browser_manager", "get_page_state", f"Failed to get storage: {e}")
                 pass
 
-            viewport = await tab.evaluate("""
-                ({
-                    width: window.innerWidth,
-                    height: window.innerHeight,
-                    devicePixelRatio: window.devicePixelRatio
-                })
-            """)
+            try:
+                viewport = await asyncio.wait_for(tab.evaluate("""
+                    (function() {
+                        return {
+                            width: window.innerWidth,
+                            height: window.innerHeight,
+                            devicePixelRatio: window.devicePixelRatio
+                        };
+                    })()
+                """), timeout=3.0)
+                
+                # Ensure viewport is a dict
+                if not isinstance(viewport, dict):
+                    viewport = {"width": 1920, "height": 1080, "devicePixelRatio": 1}
+            except (asyncio.TimeoutError, Exception) as e:
+                debug_logger.log_warning("browser_manager", "get_page_state", f"Failed to get viewport: {e}")
+                viewport = {"width": 1920, "height": 1080, "devicePixelRatio": 1}
 
             return PageState(
                 instance_id=instance_id,
                 url=url,
                 title=title,
                 ready_state=ready_state,
-                cookies=cookies.get('cookies', []),
+                cookies=cookies,
                 local_storage=local_storage,
                 session_storage=session_storage,
                 viewport=viewport
             )
 
+        except asyncio.TimeoutError:
+            raise Exception(f"Timeout ao obter estado da página - a conexão WebSocket pode estar perdida")
         except Exception as e:
+            # Check if it's a WebSocket error
+            error_msg = str(e).lower()
+            if 'websocket' in error_msg or 'http 500' in error_msg:
+                raise Exception(f"Conexão WebSocket perdida - o browser pode ter crashado. Feche e recrie a instância. Erro: {str(e)}")
             raise Exception(f"Failed to get page state: {str(e)}")
 
     async def cleanup_inactive(self, timeout_minutes: int = 30):

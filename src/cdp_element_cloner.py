@@ -106,8 +106,10 @@ class CDPElementCloner:
         try:
             node_details = await tab.send(uc.cdp.dom.describe_node(node_id=node_id))
             outer_html = await tab.send(uc.cdp.dom.get_outer_html(node_id=node_id))
+            # node_name is e.g. "BODY", "DIV" — use it as tagName
+            tag_name = node_details.node_name or node_details.local_name or ""
             return {
-                "tagName": node_details.tag_name,
+                "tagName": tag_name,
                 "nodeId": int(node_id),
                 "nodeName": node_details.node_name,
                 "localName": node_details.local_name,
@@ -134,9 +136,12 @@ class CDPElementCloner:
             Dict[str, str]: Dictionary of computed style properties and their values.
         """
         try:
-            computed_styles_list = await tab.send(uc.cdp.css.get_computed_style_for_node(node_id))
+            result = await tab.send(uc.cdp.css.get_computed_style_for_node(node_id))
+            # get_computed_style_for_node returns a tuple: (List[CSSComputedStyleProperty], extra)
+            computed_styles_list = result[0] if isinstance(result, (tuple, list)) else result
             styles = {}
             for style_prop in computed_styles_list:
+                # CSSComputedStyleProperty has .name and .value directly
                 styles[style_prop.name] = style_prop.value
             debug_logger.log_info("cdp_cloner", "_get_computed_styles", f"Got {len(styles)} computed styles")
             return styles
@@ -254,7 +259,7 @@ class CDPElementCloner:
         if not css_style:
             return {}
         return {
-            "cssText": css_style.css_text_ or "",
+            "cssText": css_style.css_text or "",
             "properties": [
                 {
                     "name": prop.name,
@@ -265,7 +270,7 @@ class CDPElementCloner:
                     "parsedOk": prop.parsed_ok,
                     "disabled": prop.disabled
                 }
-                for prop in css_style.css_properties_
+                for prop in (css_style.css_properties or [])
             ]
         }
 
@@ -285,7 +290,7 @@ class CDPElementCloner:
                 "selectorText": rule_match.rule.selector_list.text if rule_match.rule.selector_list else "",
                 "origin": str(rule_match.rule.origin),
                 "style": self._css_style_to_dict(rule_match.rule.style),
-                "styleSheetId": str(rule_match.rule.style_sheet_id_) if rule_match.rule.style_sheet_id_ else None
+                "styleSheetId": str(rule_match.rule.style_sheet_id) if rule_match.rule.style_sheet_id else None
             }
         }
 
@@ -301,8 +306,8 @@ class CDPElementCloner:
         """
         return {
             "pseudoType": str(pseudo_element.pseudo_type),
-            "pseudoIdentifier": pseudo_element.pseudo_identifier_,
-            "matches": [self._rule_match_to_dict(match) for match in pseudo_element.matches_]
+            "pseudoIdentifier": pseudo_element.pseudo_identifier,
+            "matches": [self._rule_match_to_dict(match) for match in (pseudo_element.matches or [])]
         }
 
     def _inherited_style_to_dict(self, inherited_style) -> Dict[str, Any]:

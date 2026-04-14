@@ -169,7 +169,7 @@ class DynamicHook:
                 }
             }
             
-            exec(self.function_code, namespace)
+            exec(self.function_code, namespace)  # nosec B102 — intentional sandboxed exec with AST validation
             
             if 'process_request' not in namespace:
                 raise ValueError("Function must define 'process_request(request)'")
@@ -215,7 +215,7 @@ class DynamicHook:
                     return False
                 try:
                     request_data = request.to_dict()
-                    result = eval(
+                    result = eval(  # nosec B307 — restricted eval: no builtins, AST-validated expression only
                         compile(condition_code, "<hook_condition>", "eval"),
                         {"__builtins__": {}},
                         {"request": request_data},
@@ -356,7 +356,8 @@ class DynamicHookSystem:
             debug_logger.log_error("dynamic_hook_system", "_on_request_paused", f"Error processing {stage if 'stage' in locals() else 'request'}: {e}")
             try:
                 await tab.send(uc.cdp.fetch.continue_request(request_id=event.request_id))
-            except:
+            except Exception as continue_error:
+                debug_logger.log_error("dynamic_hook_system", "_on_request_paused", f"Failed to continue request: {continue_error}")
                 pass
     
     async def _process_request_hooks(self, tab, request: RequestInfo, event=None):
@@ -390,8 +391,7 @@ class DynamicHookSystem:
                     response_body = body_result[0]  # body content
                     debug_logger.log_info("dynamic_hook_system", "_process_request_hooks", f"Retrieved response body ({len(response_body)} chars)")
                 except Exception as e:
-                    debug_logger.log_error("dynamic_hook_system", "_process_request_hooks", f"Failed to get response body: {e}")
-            
+                    debug_logger.log_error("dynamic_hook_system", "_process_request_hooks", f"Failed to get response body: {e}")            
             hook = matching_hooks[0]
             
             request_data = request.to_dict()
@@ -431,7 +431,8 @@ class DynamicHookSystem:
                     await tab.send(uc.cdp.fetch.continue_response(request_id=uc.cdp.fetch.RequestId(request.request_id)))
                 else:
                     await tab.send(uc.cdp.fetch.continue_request(request_id=uc.cdp.fetch.RequestId(request.request_id)))
-            except:
+            except Exception as continue_error:
+                debug_logger.log_error("dynamic_hook_system", "_process_request_hooks", f"Failed to continue after error: {continue_error}")
                 pass
     
     async def create_hook(self, name: str, requirements: Dict[str, Any], function_code: str, 
@@ -610,7 +611,8 @@ class DynamicHookSystem:
                     await tab.send(uc.cdp.fetch.continue_response(request_id=uc.cdp.fetch.RequestId(request.request_id)))
                 else:
                     await tab.send(uc.cdp.fetch.continue_request(request_id=uc.cdp.fetch.RequestId(request.request_id)))
-            except:
+            except Exception as continue_error:
+                debug_logger.log_error("dynamic_hook_system", "_execute_hook_action", f"Failed to continue after action error: {continue_error}")
                 pass
 
 

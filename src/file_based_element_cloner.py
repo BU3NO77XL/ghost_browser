@@ -599,7 +599,8 @@ class FileBasedElementCloner:
                         data = json.load(f)
                         if '_metadata' in data:
                             file_info['metadata'] = data['_metadata']
-                except:
+                except Exception:
+                    # If can't read metadata, skip it
                     pass
                 files.append(file_info)
             except Exception as e:

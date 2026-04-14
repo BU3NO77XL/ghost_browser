@@ -260,12 +260,13 @@ class DebugLogger:
         """
         try:
             self.clear_debug_view()
-        except:
+        except Exception as e:
+            # If lock fails, force clear by recreating structures
             self._errors = []
             self._warnings = []
             self._info = []
             self._stats = defaultdict(int)
-            print("[DEBUG] Debug logs force-cleared (lock bypass)", file=sys.stderr)
+            print(f"[DEBUG] Debug logs force-cleared (lock bypass): {e}", file=sys.stderr)
 
     def enable(self):
         """

@@ -10,10 +10,13 @@ import nodriver as uc
 from nodriver import Tab
 
 from models import NetworkRequest, NetworkResponse
+from debug_logger import debug_logger
 
 
 class NetworkInterceptor:
     """Intercepts and manages network traffic for browser instances."""
+
+    MAX_REQUESTS_PER_INSTANCE = 500  # prevent unbounded memory growth
 
     def __init__(self):
         self._requests: Dict[str, NetworkRequest] = {}
@@ -47,31 +50,32 @@ class NetworkInterceptor:
                     
                     if resource_type.lower() in resource_patterns:
                         url_patterns.extend(resource_patterns[resource_type.lower()])
-                        print(f"[DEBUG] Added URL patterns for {resource_type}: {resource_patterns[resource_type.lower()]}", file=sys.stderr)
+                        debug_logger.log_info("network_interceptor", "setup_interception",
+                                              f"Added URL patterns for {resource_type}")
                     else:
-                        # Assume it's already a URL pattern
                         url_patterns.append(resource_type)
-                        print(f"[DEBUG] Added custom URL pattern: {resource_type}", file=sys.stderr)
+                        debug_logger.log_info("network_interceptor", "setup_interception",
+                                              f"Added custom URL pattern: {resource_type}")
                 
-                # Use network.set_blocked_ur_ls to block the URL patterns
                 if url_patterns:
                     await tab.send(uc.cdp.network.set_blocked_ur_ls(urls=url_patterns))
-                    print(f"[DEBUG] Blocked {len(url_patterns)} URL patterns: {url_patterns}", file=sys.stderr)
+                    debug_logger.log_info("network_interceptor", "setup_interception",
+                                          f"Blocked {len(url_patterns)} URL patterns")
             
             tab.add_handler(
                 uc.cdp.network.RequestWillBeSent,
-                lambda event: asyncio.create_task(self._on_request(event, instance_id)),
+                lambda event, _=None: asyncio.create_task(self._on_request(event, instance_id)),
             )
             tab.add_handler(
                 uc.cdp.network.ResponseReceived,
-                lambda event: asyncio.create_task(self._on_response(event, instance_id)),
+                lambda event, _=None: asyncio.create_task(self._on_response(event, instance_id)),
             )
             
             async with self._lock:
                 if instance_id not in self._instance_requests:
                     self._instance_requests[instance_id] = []
         except Exception as e:
-            print(f"[DEBUG] Error in setup_interception: {e}", file=sys.stderr)
+            debug_logger.log_error("network_interceptor", "setup_interception", e)
             raise Exception(f"Failed to setup network interception: {str(e)}")
 
     async def _on_request(self, event, instance_id: str):
@@ -104,6 +108,12 @@ class NetworkInterceptor:
             async with self._lock:
                 self._requests[request_id] = network_request
                 self._instance_requests[instance_id].append(request_id)
+                # Evict oldest entries if limit exceeded (prevent memory leak)
+                instance_reqs = self._instance_requests[instance_id]
+                if len(instance_reqs) > self.MAX_REQUESTS_PER_INSTANCE:
+                    oldest_id = instance_reqs.pop(0)
+                    self._requests.pop(oldest_id, None)
+                    self._responses.pop(oldest_id, None)
         except Exception:
             pass
 
@@ -258,21 +268,38 @@ class NetworkInterceptor:
         Returns: bool - True if successful.
         """
         try:
-            if url:
-                # For specific URL, get all cookies for that URL and delete them
-                cookies = await tab.send(uc.cdp.network.get_cookies(urls=[url]))
-                for cookie in cookies:
-                    await tab.send(
-                        uc.cdp.network.delete_cookies(
-                            name=cookie.name,
-                            url=url
-                        )
-                    )
-            else:
-                # Clear all browser cookies using the proper method
-                await tab.send(uc.cdp.network.clear_browser_cookies())
+            # Use JS to clear cookies first (safe, no WebSocket corruption risk)
+            try:
+                await asyncio.wait_for(
+                    tab.evaluate("""
+                        (function() {
+                            var cookies = document.cookie.split(';');
+                            for (var i = 0; i < cookies.length; i++) {
+                                var cookie = cookies[i];
+                                var eqPos = cookie.indexOf('=');
+                                var name = eqPos > -1 ? cookie.substr(0, eqPos).trim() : cookie.trim();
+                                document.cookie = name + '=;expires=Thu, 01 Jan 1970 00:00:00 GMT;path=/';
+                            }
+                        })()
+                    """),
+                    timeout=3.0
+                )
+            except Exception:
+                pass
+
+            # Also clear via CDP storage (best effort, don't let it corrupt WebSocket)
+            try:
+                await asyncio.wait_for(
+                    tab.send(uc.cdp.storage.clear_cookies(browser_context_id=None)),
+                    timeout=4.0
+                )
+            except Exception as e:
+                debug_logger.log_warning("network_interceptor", "clear_cookies",
+                                         f"CDP clear failed (best effort): {type(e).__name__}")
+
             return True
         except Exception as e:
+            raise Exception(f"Failed to clear cookies: {str(e)}")
             raise Exception(f"Failed to clear cookies: {str(e)}")
 
     async def set_cookie(self, tab: Tab, cookie: Dict[str, Any]):
@@ -284,7 +311,6 @@ class NetworkInterceptor:
         Returns: bool - True if successful.
         """
         try:
-            orig_expires = cookie.get("expires")
             # nodriver's CDP wrapper expects `expires` to be a TimeSinceEpoch
             # (a float subclass with to_json), not a raw int.
             expires = cookie.get("expires")
@@ -293,14 +319,15 @@ class NetworkInterceptor:
             elif isinstance(expires, str) and expires.strip().isdigit():
                 cookie["expires"] = uc.cdp.network.TimeSinceEpoch(float(expires.strip()))
 
-            await tab.send(uc.cdp.network.set_cookie(**cookie))
-            return True
-        except Exception as e:
-            new_expires = cookie.get("expires")
-            raise Exception(
-                "Failed to set cookie: "
-                f"{str(e)} (expires {orig_expires!r} -> {new_expires!r}, type={type(new_expires).__name__})"
+            await asyncio.wait_for(
+                tab.send(uc.cdp.network.set_cookie(**cookie)),
+                timeout=10.0
             )
+            return True
+        except asyncio.TimeoutError:
+            raise Exception("Timeout ao definir cookie - a página pode estar travada")
+        except Exception as e:
+            raise Exception(f"Failed to set cookie: {str(e)}")
 
     async def get_cookies(self, tab: Tab, urls: Optional[List[str]] = None) -> List[Dict[str, Any]]:
         """
@@ -310,17 +337,68 @@ class NetworkInterceptor:
         urls: Optional[List[str]] - List of URLs to get cookies for, or None for all.
         Returns: List[Dict[str, Any]] - List of cookies.
         """
+        cookies = []
         try:
-            if urls:
-                result = await tab.send(uc.cdp.network.get_cookies(urls=urls))
-            else:
-                result = await tab.send(uc.cdp.network.get_all_cookies())
-            if isinstance(result, dict):
-                return result.get("cookies", [])
-            elif isinstance(result, list):
-                return result
-            else:
-                return []
+            # Use JavaScript first — it's faster and doesn't risk corrupting
+            # the nodriver WebSocket state via asyncio.wait_for cancellation.
+            try:
+                cookie_string = await asyncio.wait_for(
+                    tab.evaluate("document.cookie"),
+                    timeout=3.0
+                )
+                hostname = ""
+                try:
+                    hostname = await asyncio.wait_for(
+                        tab.evaluate("window.location.hostname"),
+                        timeout=2.0
+                    )
+                except Exception:
+                    pass
+
+                if cookie_string and isinstance(cookie_string, str):
+                    for cookie_pair in cookie_string.split('; '):
+                        if '=' in cookie_pair:
+                            name, value = cookie_pair.split('=', 1)
+                            cookies.append({
+                                'name': name.strip(),
+                                'value': value.strip(),
+                                'domain': hostname,
+                                'path': '/'
+                            })
+
+                # If JS returned cookies, great. If empty, try CDP as supplement.
+                if not cookies:
+                    try:
+                        result = await asyncio.wait_for(
+                            tab.send(uc.cdp.storage.get_cookies(browser_context_id=None)),
+                            timeout=4.0
+                        )
+                        cdp_cookies = result.get("cookies", []) if isinstance(result, dict) else (result if isinstance(result, list) else [])
+                        if isinstance(cdp_cookies, list) and cdp_cookies:
+                            cookies = cdp_cookies
+                    except Exception as cdp_err:
+                        debug_logger.log_warning("network_interceptor", "get_cookies",
+                                                 f"CDP fallback also failed: {type(cdp_err).__name__}")
+
+            except Exception as js_err:
+                debug_logger.log_warning("network_interceptor", "get_cookies",
+                                         f"JS cookie read failed: {type(js_err).__name__}: {js_err}")
+
+            # Filter by URLs if specified
+            if urls and isinstance(cookies, list):
+                from urllib.parse import urlparse
+                filtered = []
+                for cookie in cookies:
+                    cookie_domain = cookie.get("domain", "").lstrip(".")
+                    for url in urls:
+                        url_host = urlparse(url).hostname or ""
+                        if cookie_domain in url_host or url_host.endswith(f".{cookie_domain}"):
+                            filtered.append(cookie)
+                            break
+                return filtered
+
+            return cookies if isinstance(cookies, list) else []
+
         except Exception as e:
             raise Exception(f"Failed to get cookies: {str(e)}")
 

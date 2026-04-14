@@ -29,7 +29,7 @@ class InMemoryStorage:
         self._load_from_disk()
 
     def _load_from_disk(self):
-        """Load persisted data from disk if available."""
+        """Load persisted data from disk, discarding stale instances from previous runs."""
         with self._lock:
             try:
                 if not self._storage_file.exists():
@@ -40,7 +40,12 @@ class InMemoryStorage:
                 instances = loaded.get("instances")
                 if not isinstance(instances, dict):
                     loaded["instances"] = {}
+                # Discard all stored instances — they belong to a previous server run
+                # and their browser processes no longer exist. Starting fresh prevents
+                # ghost instances from polluting list_instances().
+                loaded["instances"] = {}
                 self._data = loaded
+                self._persist_to_disk()
             except Exception:
                 self._data = {"instances": {}}
 

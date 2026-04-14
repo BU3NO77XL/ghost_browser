@@ -579,7 +579,8 @@ class ElementCloner:
                 node_id = element.node_id
             elif hasattr(element, 'backend_node_id'):
                 node_info = await tab.send(cdp.dom.describe_node(backend_node_id=element.backend_node_id))
-                node_id = node_info.node.node_id
+                # describe_node returns Node directly
+                node_id = node_info.node_id
             else:
                 return {"error": "Could not get node ID from element"}
             
@@ -587,7 +588,9 @@ class ElementCloner:
             
             if include_computed:
                 debug_logger.log_info("element_cloner", "extract_styles_cdp", "Getting computed styles via CDP")
-                computed_styles_list = await tab.send(cdp.css.get_computed_style_for_node(node_id))
+                computed_result = await tab.send(cdp.css.get_computed_style_for_node(node_id))
+                # Returns tuple: (List[CSSComputedStyleProperty], extra_fields)
+                computed_styles_list = computed_result[0] if isinstance(computed_result, (tuple, list)) else computed_result
                 result["computed_styles"] = {prop.name: prop.value for prop in computed_styles_list}
                 
             if include_css_rules:

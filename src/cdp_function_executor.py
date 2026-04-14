@@ -93,11 +93,19 @@ class CDPFunctionExecutor:
             bool: True if enabled, False otherwise.
         """
         try:
-            await tab.send(uc.cdp.runtime.enable())
+            await asyncio.wait_for(tab.send(uc.cdp.runtime.enable()), timeout=5.0)
             debug_logger.log_info("cdp_function_executor", "enable_runtime", f"Runtime enabled for tab")
             return True
+        except asyncio.TimeoutError:
+            debug_logger.log_error("cdp_function_executor", "enable_runtime", "Timeout ao habilitar runtime - conexão WebSocket pode estar perdida")
+            return False
         except Exception as e:
-            debug_logger.log_error("cdp_function_executor", "enable_runtime", e)
+            error_msg = str(e).lower()
+            if 'websocket' in error_msg or 'http 500' in error_msg:
+                debug_logger.log_error("cdp_function_executor", "enable_runtime", f"Conexão WebSocket perdida: {e}")
+            else:
+                debug_logger.log_error("cdp_function_executor", "enable_runtime", e)
+            return False
             return False
 
     async def list_cdp_commands(self) -> List[str]:

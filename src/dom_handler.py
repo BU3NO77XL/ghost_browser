@@ -93,7 +93,8 @@ class DOMHandler:
                             )
                             if not is_visible:
                                 continue
-                        except:
+                        except Exception:
+                            # If visibility check fails, include element anyway
                             pass
 
                     bbox = None
@@ -231,7 +232,8 @@ class DOMHandler:
             if clear_first:
                 try:
                     await element.apply("(elem) => { elem.value = ''; }")
-                except:
+                except Exception:
+                    # Fallback: select all and delete
                     await element.send_keys('\ue009' + 'a')
                     await element.send_keys('\ue017')
                 await asyncio.sleep(0.1)
@@ -320,7 +322,8 @@ class DOMHandler:
             if clear_first:
                 try:
                     await element.apply("(elem) => { elem.value = ''; }")
-                except:
+                except Exception:
+                    # Fallback: Ctrl+A and Delete
                     await tab.send(cdp.input_.dispatch_key_event(
                         "rawKeyDown", 
                         modifiers=2,  # Ctrl
@@ -504,7 +507,8 @@ class DOMHandler:
                             if not is_visible:
                                 await asyncio.sleep(0.5)
                                 continue
-                        except:
+                        except Exception:
+                            # If visibility check fails, continue waiting
                             pass
 
                     if text_content:

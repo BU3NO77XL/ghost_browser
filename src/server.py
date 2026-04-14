@@ -66,6 +66,12 @@ async def app_lifespan(server):
         server (Any): The server instance for which the lifespan is being managed.
     """
     debug_logger.log_info("server", "startup", "Starting Browser Automation MCP Server...")
+    # Clean up stale instances from previous runs on startup
+    try:
+        persistent_storage.clear_all()
+        debug_logger.log_info("server", "startup", "Cleared stale instances from persistent storage")
+    except Exception as e:
+        debug_logger.log_error("server", "startup", f"Failed to clear storage on startup: {e}")
     try:
         yield
     finally:
@@ -108,6 +114,35 @@ mcp = FastMCP(
     All browser instances are undetectable by anti-bot systems.
     
     ============================================================
+    CRITICAL — WEBSOCKET CONNECTION HANDLING
+    ============================================================
+    
+    Browser automation uses WebSocket (Chrome DevTools Protocol) for communication.
+    WebSocket connections can die if:
+    - Browser crashes or becomes unresponsive
+    - Network issues occur
+    - Browser process is killed
+    
+    SYMPTOMS of dead WebSocket:
+    - Errors mentioning "WebSocket", "HTTP 500", "connection"
+    - Timeouts on simple operations
+    - Tools failing with connection errors
+    
+    PROTOCOL when WebSocket dies:
+    1. Use 'check_instance_health' to verify connection status
+    2. If healthy=false and can_recover=false:
+       - Call 'close_instance' to clean up
+       - Call 'spawn_browser' to create fresh instance
+       - Continue automation with new instance
+    3. DO NOT keep trying to use a dead instance
+    4. DO NOT ask user to fix it - just recreate automatically
+    
+    BEST PRACTICE:
+    - If you get WebSocket errors, immediately check health and recreate
+    - Don't waste time retrying operations on dead connections
+    - Inform user briefly: "Browser connection lost, recreating instance..."
+    
+    ============================================================
     CRITICAL MANDATORY PROTOCOL — LOGIN HANDLING
     ============================================================
     
@@ -121,16 +156,23 @@ mcp = FastMCP(
     STEP 4: After user confirms, call 'confirm_manual_login' with the SAME instance_id.
     STEP 5: Only after confirm_manual_login returns success=true, resume normal automation.
     
+    IMPORTANT — AUTO-DETECTION:
+    The system monitors the browser in background. When the user logs in and navigates
+    away from the login page, the watcher detects it automatically.
+    When the user tells you they logged in, call confirm_manual_login ONCE. Do NOT loop.
+    If it returns success=true, proceed immediately.
+    If it returns success=false, tell the user and ask them to try again — do NOT retry automatically.
+    
     PROHIBITED ACTIONS when login_required=true:
     - DO NOT spawn a new browser instance
     - DO NOT close the current browser instance
     - DO NOT try to fill in login forms automatically
     - DO NOT try alternative URLs or workarounds
     - DO NOT conclude that the task is impossible
-    - DO NOT say you cannot access the site
+    - DO NOT call confirm_manual_login more than once without user instruction
     
     The browser window is OPEN and VISIBLE to the user. The user WILL log in manually.
-    Your ONLY job is to WAIT and then call confirm_manual_login after user confirmation.
+    Your ONLY job is to WAIT and then call confirm_manual_login ONCE after user confirmation.
     ============================================================
     """,
     lifespan=app_lifespan,
@@ -142,7 +184,7 @@ dom_handler = DOMHandler()
 cdp_function_executor = CDPFunctionExecutor()
 
 
-def _check_pending_login_guard(instance_id: str) -> Optional[Dict[str, Any]]:
+async def _check_pending_login_guard(instance_id: str) -> Optional[Dict[str, Any]]:
     """
     Guard function: blocks tool execution if instance is pending manual login.
 
@@ -152,9 +194,9 @@ def _check_pending_login_guard(instance_id: str) -> Optional[Dict[str, Any]]:
     Returns None if the instance is NOT pending (tool can proceed).
     Returns a blocking response dict if the instance IS pending.
     """
-    if not manual_login_handler.is_pending_login(instance_id):
+    if not await manual_login_handler.is_pending_login(instance_id):
         return None
-    pending = manual_login_handler.get_pending_info(instance_id)
+    pending = await manual_login_handler.get_pending_info(instance_id)
     return {
         "blocked": True,
         "action_required": "STOP_AND_WAIT_FOR_USER",
@@ -560,8 +602,26 @@ async def get_instance_state(instance_id: str) -> Optional[Dict[str, Any]]:
     """
     state = await browser_manager.get_page_state(instance_id)
     if state:
-        return state.dict()
+        return state.model_dump(mode="json")
     return None
+
+@section_tool("browser-management")
+async def check_instance_health(instance_id: str) -> Dict[str, Any]:
+    """
+    Check if browser instance is healthy and WebSocket connection is alive.
+    
+    Use this when you suspect the browser connection is broken or before
+    performing operations that might fail due to connection issues.
+
+    Args:
+        instance_id (str): Browser instance ID.
+
+    Returns:
+        Dict[str, Any]: Health status with 'healthy' (bool), 'reason' (str), 
+                       and 'can_recover' (bool). If not healthy and can't recover,
+                       you should close and recreate the instance.
+    """
+    return await browser_manager.check_instance_health(instance_id)
 
 @section_tool("browser-management")
 async def navigate(
@@ -671,11 +731,10 @@ async def navigate(
         is_login_page = await manual_login_handler.detect_login_page(tab)
 
         if is_login_page:
-            manual_login_handler.register_pending_login(
+            await manual_login_handler.register_pending_login(
                 instance_id=instance_id,
                 tab=tab,
                 url=final_url,
-                cookies_file=cookies_file,
             )
             return {
                 "url": final_url,
@@ -694,8 +753,7 @@ async def navigate(
                     "Por favor, faça o login manualmente na janela do navegador. Quando terminar, me avise.' "
                     "(2) STOP and WAIT for the user to reply confirming they logged in. "
                     "DO NOT take any other action until the user responds. "
-                    "(3) After user confirms, call 'confirm_manual_login' with "
-                    f"instance_id='{instance_id}'. "
+                    f"(3) After user confirms, call confirm_manual_login(instance_id='{instance_id}'). "
                     "PROHIBITED: opening new browser, closing this browser, filling login forms, "
                     "trying alternative URLs, or concluding this task is impossible. "
                     "The user WILL log in manually. Your ONLY job is to WAIT."
@@ -715,58 +773,52 @@ async def navigate(
 @section_tool("browser-management")
 async def confirm_manual_login(
     instance_id: str,
-    cookies_file: str = "cookies.txt",
 ) -> Dict[str, Any]:
     """
-    Resume control of the browser after the user completed manual login.
+    Confirm that the user completed manual login and recover the browser instance.
 
-    This tool connects to the SAME open browser instance — it does NOT create a new browser.
-    It verifies the user's authentication and saves cookies for future sessions.
-
-    WHEN TO CALL:
-    - ONLY after navigate() returned login_required=true
-    - ONLY after you asked the user to log in manually in the browser
-    - ONLY after the user replied confirming they finished login
-
-    WHAT HAPPENS:
-    1. Connects to the SAME browser instance (no new browser created)
-    2. Verifies authentication was successful
-    3. Saves all cookies to file for future sessions
-    4. Returns the browser ready for continued automation
+    Call this ONCE after the user tells you they finished logging in.
+    Does NOT save cookies — use get_cookies / set_cookie CDP tools separately if needed.
 
     Args:
-        instance_id (str): The SAME instance_id from navigate's login_required response.
-        cookies_file (str): Path to save authenticated cookies.
+        instance_id (str): The instance_id from navigate's login_required response.
 
     Returns:
-        Dict: success=true means browser is authenticated and ready.
-              success=false means user should try logging in again.
+        Dict: success=true + current_url means instance is ready to use.
     """
-    # Get the tab from the SAME browser instance — no new browser is created
+    from login_watcher import login_watcher
+
     tab = await browser_manager.get_tab(instance_id)
     if not tab:
-        raise Exception(
-            f"Instância não encontrada: {instance_id}. "
-            "A instância pode ter sido fechada. Verifique com list_instances."
-        )
+        raise Exception(f"Instância não encontrada: {instance_id}. Verifique com list_instances.")
 
-    try:
-        result = await manual_login_handler.confirm_login(
-            instance_id=instance_id,
-            tab=tab,
-            cookies_file=cookies_file,
-        )
+    # Check watcher detection BEFORE stopping it
+    watcher_detected = await login_watcher.consume_detected(instance_id)
 
-        if result.get('success'):
-            # Update instance state with the new URL after login
-            current_url = result.get('current_url', '')
-            title = await tab.evaluate("document.title")
+    result = await manual_login_handler.confirm_login(
+        instance_id=instance_id,
+        tab=tab,
+        skip_login_check=watcher_detected,
+    )
+
+    if result.get('success'):
+        # Only stop watcher after successful confirmation
+        await login_watcher.stop_watching(instance_id)
+        current_url = result.get('current_url', '')
+        if current_url and current_url != 'unknown':
+            try:
+                title = await asyncio.wait_for(tab.evaluate("document.title"), timeout=3.0)
+            except Exception:
+                title = "Browser Instance"
             await browser_manager.update_instance_state(instance_id, current_url, title)
+    else:
+        # Confirm failed (still on login page) — restart watcher so detection
+        # can happen again without requiring another navigate() call
+        is_still_pending = await manual_login_handler.is_pending_login(instance_id)
+        if is_still_pending:
+            await login_watcher.start_watching(instance_id, tab)
 
-        return result
-
-    except Exception as e:
-        raise Exception(f"Erro ao confirmar login: {str(e)}")
+    return result
 
 
 @section_tool("browser-management")
@@ -776,51 +828,59 @@ async def check_login_status(
     """
     Check if the user has completed login on an open browser instance.
 
-    Use this to verify authentication status before calling confirm_manual_login.
-    This connects to the SAME browser instance — it does NOT open a new one.
-
     Args:
-        instance_id (str): Browser instance ID (same one from navigate's response).
+        instance_id (str): Browser instance ID.
 
     Returns:
-        Dict[str, Any]: Authentication status. Key fields:
-            - is_login_page (bool): True if still on login page (user hasn't logged in yet)
-            - is_authenticated (bool): True if login appears successful
-            - pending_manual_login (bool): True if this instance is waiting for user login
-            - message (str): Human-readable status description
+        Dict[str, Any]:
+            - is_login_page (bool): True if still on login page
+            - is_authenticated (bool): True if login was detected
+            - pending_manual_login (bool): True if still waiting
+            - message (str): What to do next
     """
+    from login_watcher import login_watcher
+
     tab = await browser_manager.get_tab(instance_id)
     if not tab:
         raise Exception(f"Instância não encontrada: {instance_id}")
 
+    is_pending  = await manual_login_handler.is_pending_login(instance_id)
+    is_detected = await login_watcher.is_login_detected(instance_id)
+
     try:
-        is_login_page = await manual_login_handler.detect_login_page(tab)
-        auth_status = await manual_login_handler.check_authentication_status(tab)
-        is_pending = manual_login_handler.is_pending_login(instance_id)
+        current_url = await asyncio.wait_for(
+            tab.evaluate("window.location.href"), timeout=3.0)
+    except Exception:
+        current_url = "unknown"
 
-        current_url = await tab.evaluate("window.location.href")
-        title = await tab.evaluate("document.title")
-
+    if is_detected:
         return {
             "instance_id": instance_id,
             "current_url": current_url,
-            "title": title,
-            "is_login_page": is_login_page,
-            "is_authenticated": auth_status.get('is_authenticated', False),
-            "confidence_score": auth_status.get('confidence_score', 0),
-            "max_score": auth_status.get('max_score', 6),
-            "indicators": auth_status.get('indicators', {}),
+            "is_login_page": False,
+            "is_authenticated": True,
             "pending_manual_login": is_pending,
-            "message": (
-                "O usuário ainda está na página de login. Aguarde o login manual."
-                if is_login_page
-                else "O login parece ter sido concluído." if auth_status.get('is_authenticated')
-                else "Não foi possível confirmar autenticação, mas não parece ser uma página de login."
-            ),
+            "message": "Login detectado pelo watcher. Chame confirm_manual_login para continuar.",
         }
 
-    except Exception as e:
-        raise Exception(f"Erro ao verificar status de login: {str(e)}")
+    if not is_pending:
+        return {
+            "instance_id": instance_id,
+            "current_url": current_url,
+            "is_login_page": False,
+            "is_authenticated": True,
+            "pending_manual_login": False,
+            "message": "Instância pronta.",
+        }
+
+    return {
+        "instance_id": instance_id,
+        "current_url": current_url,
+        "is_login_page": True,
+        "is_authenticated": False,
+        "pending_manual_login": True,
+        "message": "Aguardando login manual. O watcher detectará automaticamente quando o usuário fizer login.",
+    }
 
 
 @section_tool("browser-management")
@@ -834,7 +894,7 @@ async def go_back(instance_id: str) -> bool:
     Returns:
         bool: True if navigation was successful.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -854,7 +914,7 @@ async def go_forward(instance_id: str) -> bool:
     Returns:
         bool: True if navigation was successful.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -875,7 +935,7 @@ async def reload_page(instance_id: str, ignore_cache: bool = False) -> bool:
     Returns:
         bool: True if reload was successful.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -905,7 +965,7 @@ async def query_elements(
     Returns:
         List[Dict[str, Any]]: List of matching elements with their properties.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -921,10 +981,12 @@ async def query_elements(
         try:
             if hasattr(elem, 'model_dump'):
                 elem_dict = elem.model_dump()
-            else:
+            elif hasattr(elem, 'dict'):
                 elem_dict = elem.dict()
+            else:
+                elem_dict = elem
             result.append(elem_dict)
-            debug_logger.log_info('Server', 'query_elements', f'Converted element {i+1} to dict: {list(elem_dict.keys())}')
+            debug_logger.log_info('Server', 'query_elements', f'Converted element {i+1} to dict: {list(elem_dict.keys()) if isinstance(elem_dict, dict) else type(elem_dict).__name__}')
         except Exception as e:
             debug_logger.log_error('Server', 'query_elements', e, {'element_index': i})
     debug_logger.log_info('Server', 'query_elements', f'Returning {len(result)} results to MCP client')
@@ -949,7 +1011,7 @@ async def click_element(
     Returns:
         bool: True if clicked successfully.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     if isinstance(timeout, str):
@@ -984,7 +1046,7 @@ async def type_text(
     Returns:
         bool: True if typed successfully.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     if isinstance(delay_ms, str):
@@ -1013,7 +1075,7 @@ async def paste_text(
     Returns:
         bool: True if pasted successfully.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -1042,7 +1104,7 @@ async def select_option(
     Returns:
         bool: True if selected successfully.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -1073,7 +1135,7 @@ async def get_element_state(
     Returns:
         Dict[str, Any]: Element state including attributes, style, position, etc.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -1102,7 +1164,7 @@ async def wait_for_element(
     Returns:
         bool: True if element found.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     if isinstance(timeout, str):
@@ -1131,7 +1193,7 @@ async def scroll_page(
     Returns:
         bool: True if scrolled successfully.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     if isinstance(amount, str):
@@ -1158,7 +1220,7 @@ async def execute_script(
     Returns:
         Dict[str, Any]: Script execution result.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -1193,7 +1255,7 @@ async def get_page_content(
     Returns:
         Dict[str, Any]: Page content including HTML, text, and metadata.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -1226,7 +1288,7 @@ async def take_screenshot(
     Returns:
         Union[str, Dict]: File path if file_path provided, otherwise optimized base64 data or file info dict.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     from PIL import Image
@@ -1308,7 +1370,7 @@ async def list_network_requests(
     Returns:
         Union[List[Dict[str, Any]], Dict[str, Any]]: List of network requests, or file metadata if response too large.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     requests = await network_interceptor.list_requests(instance_id, filter_type)
@@ -1341,7 +1403,7 @@ async def get_request_details(
     """
     request = await network_interceptor.get_request(request_id)
     if request:
-        return request.dict()
+        return request.model_dump(mode="json")
     return None
 
 
@@ -1360,7 +1422,7 @@ async def get_response_details(
     """
     response = await network_interceptor.get_response(request_id)
     if response:
-        return response.dict()
+        return response.model_dump(mode="json")
     return None
 
 
@@ -1379,7 +1441,7 @@ async def get_response_content(
     Returns:
         Optional[str]: Response body as text (base64 encoded for binary).
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -1410,7 +1472,7 @@ async def modify_headers(
     Returns:
         bool: True if modified successfully.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -1434,7 +1496,7 @@ async def get_cookies(
     Returns:
         List[Dict[str, Any]]: List of cookies.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -1472,7 +1534,7 @@ async def set_cookie(
     Returns:
         bool: True if set successfully.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -1517,7 +1579,7 @@ async def clear_cookies(
     Returns:
         bool: True if cleared successfully.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -1537,12 +1599,12 @@ async def get_browser_state_resource(instance_id: str) -> str:
     Returns:
         str: JSON string of the browser state or error message.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     state = await browser_manager.get_page_state(instance_id)
     if state:
-        return json.dumps(state.dict(), indent=2)
+        return json.dumps(state.model_dump(mode="json"), indent=2)
     return json.dumps({"error": "Instance not found"})
 
 
@@ -1557,7 +1619,7 @@ async def get_cookies_resource(instance_id: str) -> str:
     Returns:
         str: JSON string of cookies or error message.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -1578,11 +1640,11 @@ async def get_network_resource(instance_id: str) -> str:
     Returns:
         str: JSON string of network requests.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     requests = await network_interceptor.list_requests(instance_id)
-    return json.dumps([req.dict() for req in requests], indent=2)
+    return json.dumps([req.model_dump(mode="json") for req in requests], indent=2)
 
 
 @mcp.resource("browser://{instance_id}/console")
@@ -1596,7 +1658,7 @@ async def get_console_resource(instance_id: str) -> str:
     Returns:
         str: JSON string of console logs or error message.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     state = await browser_manager.get_page_state(instance_id)
@@ -1719,7 +1781,7 @@ async def list_tabs(instance_id: str) -> List[Dict[str, str]]:
     Returns:
         List[Dict[str, str]]: List of tabs with their details.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     return await browser_manager.list_tabs(instance_id)
@@ -1740,7 +1802,7 @@ async def switch_tab(
     Returns:
         bool: True if switched successfully.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     return await browser_manager.switch_to_tab(instance_id, tab_id)
@@ -1761,7 +1823,7 @@ async def close_tab(
     Returns:
         bool: True if closed successfully.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     return await browser_manager.close_tab(instance_id, tab_id)
@@ -1778,13 +1840,12 @@ async def get_active_tab(instance_id: str) -> Dict[str, Any]:
     Returns:
         Dict[str, Any]: Active tab information.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_active_tab(instance_id)
     if not tab:
         return {"error": "No active tab found"}
-    await tab
     return {
         "tab_id": str(tab.target.target_id),
         "url": getattr(tab, 'url', '') or '',
@@ -1808,7 +1869,7 @@ async def new_tab(
     Returns:
         Dict[str, Any]: New tab information.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     browser = await browser_manager.get_browser(instance_id)
@@ -1850,7 +1911,7 @@ async def extract_element_styles(
     Returns:
         Dict[str, Any]: Complete styling data including computed styles, CSS rules, pseudo-elements.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -1889,7 +1950,7 @@ async def extract_element_structure(
     Returns:
         Dict[str, Any]: HTML structure, attributes, position, and children data.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -1928,7 +1989,7 @@ async def extract_element_events(
     Returns:
         Dict[str, Any]: Event listeners, inline handlers, framework handlers, detected frameworks.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -1967,7 +2028,7 @@ async def extract_element_animations(
     Returns:
         Dict[str, Any]: Animation data, transition data, transform data, keyframe rules.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2006,7 +2067,7 @@ async def extract_element_assets(
     Returns:
         Dict[str, Any]: Images, background images, fonts, icons, videos, audio assets.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2020,7 +2081,7 @@ async def extract_element_assets(
         include_fonts=include_fonts,
         fetch_external=fetch_external
     )
-    return await response_handler.handle_response(result, f"element_assets_{instance_id}_{selector.replace(' ', '_')}")
+    return response_handler.handle_response(result, f"element_assets_{instance_id}_{selector.replace(' ', '_')}")
 
 
 @section_tool("element-extraction")
@@ -2047,7 +2108,7 @@ async def extract_element_styles_cdp(
     Returns:
         Dict[str, Any]: Styling data extracted using CDP
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2084,7 +2145,7 @@ async def extract_related_files(
     Returns:
         Dict[str, Any]: Stylesheets, scripts, imports, modules, framework detection.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2097,7 +2158,7 @@ async def extract_related_files(
         follow_imports=follow_imports,
         max_depth=max_depth
     )
-    return await response_handler.handle_response(result, f"related_files_{instance_id}")
+    return response_handler.handle_response(result, f"related_files_{instance_id}")
 
 
 @section_tool("element-extraction")
@@ -2128,7 +2189,7 @@ async def clone_element_complete(
     Returns:
         Dict[str, Any]: Complete element clone with styles, structure, events, animations, assets, related files.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     parsed_options = None
@@ -2216,9 +2277,9 @@ async def reload_status() -> str:
         for module_name in modules_to_check:
             if module_name in sys.modules:
                 module = sys.modules[module_name]
-                modules_info.append(f"✅ {module_name}: {getattr(module, '__file__', 'built-in')}")
+                modules_info.append(f"[OK] {module_name}: {getattr(module, '__file__', 'built-in')}")
             else:
-                modules_info.append(f"❌ {module_name}: Not loaded")
+                modules_info.append(f"[MISSING] {module_name}: Not loaded")
         return "\n".join(modules_info)
     except Exception as e:
         return f"Error checking module status: {str(e)}"
@@ -2261,7 +2322,7 @@ async def clone_element_progressive(
     Returns:
         Dict[str, Any]: Base structure with element_id for progressive expansion.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2452,7 +2513,7 @@ async def clone_element_to_file(
     Returns:
         Dict[str, Any]: File path and summary information about the cloned element.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2489,7 +2550,7 @@ async def extract_complete_element_to_file(
     Returns:
         Dict[str, Any]: File path and concise summary instead of massive data dump.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2526,7 +2587,7 @@ async def extract_complete_element_cdp(
     Returns:
         Dict[str, Any]: Complete element data with 100% accuracy.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2559,7 +2620,7 @@ async def extract_element_styles_to_file(
     Returns:
         Dict[str, Any]: File path and summary of extracted styles.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2598,7 +2659,7 @@ async def extract_element_structure_to_file(
     Returns:
         Dict[str, Any]: File path and summary of extracted structure.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2637,7 +2698,7 @@ async def extract_element_events_to_file(
     Returns:
         Dict[str, Any]: File path and summary of extracted events.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2676,7 +2737,7 @@ async def extract_element_animations_to_file(
     Returns:
         Dict[str, Any]: File path and summary of extracted animations.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2715,7 +2776,7 @@ async def extract_element_assets_to_file(
     Returns:
         Dict[str, Any]: File path and summary of extracted assets.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2796,7 +2857,7 @@ async def execute_cdp_command(
         
         params = {"expression": "document.title", "returnByValue": True}
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2818,7 +2879,7 @@ async def get_execution_contexts(
     Returns:
         List[Dict[str, Any]]: List of execution contexts with their details.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2852,7 +2913,7 @@ async def discover_global_functions(
     Returns:
         List[Dict[str, Any]]: List of discovered functions with their details.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2905,7 +2966,7 @@ async def discover_object_methods(
     Returns:
         List[Dict[str, Any]]: List of discovered methods.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2922,7 +2983,7 @@ async def discover_object_methods(
         for method in methods
     ]
     
-    return await response_handler.handle_response(
+    return response_handler.handle_response(
         methods_data,
         f"object_methods_{object_path.replace('.', '_')}"
     )
@@ -2945,7 +3006,7 @@ async def call_javascript_function(
     Returns:
         Dict[str, Any]: Function call result.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2969,7 +3030,7 @@ async def inspect_function_signature(
     Returns:
         Dict[str, Any]: Function signature and details.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -2995,7 +3056,7 @@ async def inject_and_execute_script(
     Returns:
         Dict[str, Any]: Script execution result.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -3021,7 +3082,7 @@ async def create_persistent_function(
     Returns:
         Dict[str, Any]: Function creation result.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -3045,7 +3106,7 @@ async def execute_function_sequence(
     Returns:
         List[Dict[str, Any]]: List of function call results.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     from cdp_function_executor import FunctionCall
@@ -3079,7 +3140,7 @@ async def create_python_binding(
     Returns:
         Dict[str, Any]: Binding creation result.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -3087,7 +3148,7 @@ async def create_python_binding(
         return {"success": False, "error": f"Instance not found: {instance_id}"}
     try:
         exec_globals = {}
-        exec(python_code, exec_globals)
+        exec(python_code, exec_globals)  # nosec B102 — CDP function executor, user-controlled feature
         python_function = None
         for name, obj in exec_globals.items():
             if callable(obj) and not name.startswith('_'):
@@ -3115,7 +3176,7 @@ async def execute_python_in_browser(
     Returns:
         Dict[str, Any]: Execution result.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     tab = await browser_manager.get_tab(instance_id)
@@ -3137,7 +3198,7 @@ async def get_function_executor_info(
     Returns:
         Dict[str, Any]: Function executor state and capabilities.
     """
-    guard = _check_pending_login_guard(instance_id)
+    guard = await _check_pending_login_guard(instance_id)
     if guard:
         return guard
     return await cdp_function_executor.get_function_executor_info(instance_id)
@@ -3326,7 +3387,7 @@ if __name__ == "__main__":
                       help="Transport protocol to use")
     parser.add_argument("--port", type=int, default=int(os.getenv("PORT", 8000)),
                       help="Port for HTTP transport")
-    parser.add_argument("--host", default="0.0.0.0",
+    parser.add_argument("--host", default="0.0.0.0",  # nosec B104 — MCP server must bind all interfaces in container
                       help="Host for HTTP transport")
     
     parser.add_argument("--disable-browser-management", action="store_true",
@@ -3413,3 +3474,4 @@ if __name__ == "__main__":
         mcp.run(transport="http", host=args.host, port=args.port)
     else:
         mcp.run(transport="stdio")
+

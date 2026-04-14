@@ -250,3 +250,7 @@ AGENTS.md
 Checklist.md
 src/.storage/
 src/.tmp_stealth_storage_*.json
+
+# Test reports (generated locally, uploaded as CI artifacts)
+reports/*
+!reports/.gitkeep

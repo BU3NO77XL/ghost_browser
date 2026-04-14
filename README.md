@@ -1,469 +1,351 @@
-<div align="center">
+# Ghost Browser MCP — Análise Completa de Capacidades
 
-<img src="media/UndetectedStealthBrowser.png" alt="Ghost Browser MCP" width="200"/>
+<pre>
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣀⣀⣀⣀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣴⣾⣿⣿⣿⣿⣿⣿⣶⣄⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣠⣾⣿⣿⣿⣿⣿⠿⢿⣿⣿⣿⣿⣆⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⣿⣿⣿⣿⣿⠁⠀⠿⢿⣿⡿⣿⣿⡆⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢀⣴⣿⣿⣿⣿⣿⣿⣿⣿⣦⣤⣴⣿⠃⠀⠿⣿⡇⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⣠⣾⣿⣿⣿⣿⣿⣿⡿⠋⠁⣿⠟⣿⣿⢿⣧⣤⣴⣿⡇⠀
+⠀⠀⠀⠀⢀⣠⣴⣿⣿⣿⣿⣿⣿⣿⣿⣿⣷⠀⠀⠀⠀⠘⠁⢸⠟⢻⣿⡿⠀⠀
+⠀⠀⠙⠻⢿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣴⣇⢀⣤⠀⠀⠀⠀⠘⣿⠃⠀⠀
+⠀⠀⠀⠀⠀⢈⣽⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣴⣿⢀⣴⣾⠇⠀⠀⠀
+⠀⠀⣀⣤⣶⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠏⠀⠀⠀⠀
+⠀⠀⠉⠉⠉⠉⣡⣾⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⡿⠃⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⣠⣾⣿⣿⣿⣿⡿⠟⣿⣿⣿⣿⣿⣿⣿⣿⣿⣿⠟⠁⠀⠀⠀⠀⠀⠀
+⠀⠀⣴⡾⠿⠿⠿⠛⠋⠉⠀⢸⣿⣿⣿⣿⠿⠋⢸⣿⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⢠⣿⡿⠟⠋⠁⠀⠀⡿⠋⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
+⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠉⠀⠀⠀⠀⠀⠀⠈⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀
 
-# Ghost Browser MCP
+  ██████╗ ██╗  ██╗ ██████╗ ███████╗████████╗
+ ██╔════╝ ██║  ██║██╔═══██╗██╔════╝╚══██╔══╝
+ ██║  ███╗███████║██║   ██║███████╗   ██║
+ ██║   ██║██╔══██║██║   ██║╚════██║   ██║
+ ╚██████╔╝██║  ██║╚██████╔╝███████║   ██║
+  ╚═════╝ ╚═╝  ╚═╝ ╚═════╝ ╚══════╝   ╚═╝
 
-**Undetectable browser automation for MCP-compatible AI agents.**
+  
+</pre>
 
-**Improved fork of [Stealth Browser MCP](https://github.com/vibheksoni/stealth-browser-mcp) adapted as Ghost Browser MCP.**
-
-Bypass Cloudflare, antibot systems, and social media blocks with real browser instances powered by [nodriver](https://github.com/ultrafunkamsterdam/nodriver) + Chrome DevTools Protocol + [FastMCP](https://github.com/jlowin/fastmcp).
-
-[![MCP](https://img.shields.io/badge/MCP-Compatible-blue?style=flat-square)](https://modelcontextprotocol.io)
-[![Stars](https://img.shields.io/github/stars/vibheksoni/stealth-browser-mcp?style=flat-square)](https://github.com/vibheksoni/stealth-browser-mcp/stargazers)
-[![License](https://img.shields.io/badge/License-MIT-green?style=flat-square)](LICENSE)
-[![Discord](https://img.shields.io/badge/Discord-join-5865F2?style=flat-square&logo=discord&logoColor=white)](https://discord.gg/secrets)
-
-</div>
-
----
-
-## Table of Contents
-
-- [Demo](#demo)
-- [Features](#features)
-- [Quickstart](#quickstart)
-- [Modular Architecture](#modular-architecture)
-- [Toolbox](#toolbox)
-- [Ghost vs Playwright MCP](#ghost-vs-playwright-mcp)
-- [Troubleshooting](#troubleshooting)
-- [Examples](#examples)
-- [Showcase](#showcase)
-- [Roadmap](#roadmap)
-- [Support](#support)
-- [License](#license)
+> Um Chrome completamente controlável por IA via Model Context Protocol.  
+> Esta documentação cobre capacidades técnicas, casos de uso legítimos, riscos de segurança e comparação com ferramentas similares.
 
 ---
 
-## Demo
+## O que é o Ghost Browser MCP?
 
-<div align="center">
-<img src="media/showcase-demo-full.gif" alt="Ghost Browser MCP Demo" width="800" style="border-radius: 8px;">
-<br><br>
-<a href="media/Showcase%20Stealth%20Browser%20Mcp.mp4" download>
-  <img src="https://img.shields.io/badge/Watch%20HD%20Video-red?style=for-the-badge&logo=video&logoColor=white" alt="Watch HD Video">
-</a>
-</div>
+É um **Chromium real exposto como ferramentas MCP**, controlado inteiramente por um agente de IA. Não é um scraper simples, não é um headless básico — é um browser completo onde cada ação que um humano faria com mouse e teclado pode ser executada programaticamente pela IA em tempo real.
 
-*Ghost Browser MCP bypassing Cloudflare, cloning UI elements, and intercepting network traffic — all through AI chat commands.*
+A base técnica é o **Chrome DevTools Protocol (CDP)**, o mesmo protocolo que o DevTools do Chrome usa internamente. Isso significa acesso de baixo nível a absolutamente tudo que acontece dentro do browser.
 
----
-
-## Features
-
-- **Antibot bypass** — Works on Cloudflare, Queue-It, and other protection systems that block traditional automation
-- **92 tools across 11 sections** — From basic navigation to advanced CDP function execution
-- **Modular loading** — Run the full 92-tool arsenal or a minimal 21-tool core; disable what you don't need
-- **Pixel-accurate element cloning** — Extract complete elements with all CSS, DOM structure, events, and assets via CDP
-- **Network interception** — Inspect every request, response, header, and payload through your AI agent
-- **Dynamic hook system** — AI-generated Python functions that intercept and modify network traffic in real-time
-- **Instant text input** — Paste large content via CDP or type with human-like keystrokes and newline support
-- **Cross-platform** — Windows, macOS, Linux, Docker, and CI/CD pipelines with automatic environment detection
-- **Browser support** — Chrome, Chromium, and Microsoft Edge (automatic detection)
-- **Clean MCP integration** — No custom brokers or wrappers; works with Claude Code, Claude Desktop, Cursor, and any MCP client
-
----
-
-## Quickstart
-
-### 1. Install uv
-
-Windows (PowerShell):
-```bash
-powershell -ExecutionPolicy ByPass -c "irm https://astral.sh/uv/install.ps1 | iex"
 ```
-
-macOS / Linux:
-```bash
-curl -LsSf https://astral.sh/uv/install.sh | sh
-```
-
-Or see the official installation docs: https://docs.astral.sh/uv/getting-started/installation/
-
-### 2. Clone and sync
-
-```bash
-git clone <your-fork-url> ghost_browser
-cd ghost_browser
-uv sync
-```
-
-This creates a local `.venv` with the dependencies declared in `pyproject.toml`.
-
-### 3. Add to your MCP client
-
-**Claude Code CLI (recommended):**
-
-Windows:
-```bash
-claude mcp add-json ghost_browser "{\"type\":\"stdio\",\"command\":\"C:\\path\\to\\ghost_browser\\.venv\\Scripts\\python.exe\",\"args\":[\"C:\\path\\to\\ghost_browser\\src\\server.py\"]}"
-```
-
-Mac/Linux:
-```bash
-claude mcp add-json ghost_browser '{
-  "type": "stdio",
-  "command": "/path/to/ghost_browser/.venv/bin/python",
-  "args": ["/path/to/ghost_browser/src/server.py"]
-}'
-```
-
-> Replace `/path/to/ghost_browser/` with your actual project path.
-
-<details>
-<summary><strong>Manual JSON configuration (Claude Desktop, Cursor, etc.)</strong></summary>
-
-Windows (`%APPDATA%\Claude\claude_desktop_config.json`):
-```json
-{
-  "mcpServers": {
-    "ghost_browser": {
-      "command": "C:\\path\\to\\ghost_browser\\.venv\\Scripts\\python.exe",
-      "args": ["C:\\path\\to\\ghost_browser\\src\\server.py"],
-      "env": {}
-    }
-  }
-}
-```
-
-Mac/Linux (`~/Library/Application Support/Claude/claude_desktop_config.json`):
-```json
-{
-  "mcpServers": {
-    "ghost_browser": {
-      "command": "/path/to/ghost_browser/.venv/bin/python",
-      "args": ["/path/to/ghost_browser/src/server.py"],
-      "env": {}
-    }
-  }
-}
-```
-
-</details>
-
-<details>
-<summary><strong>FastMCP CLI (untested)</strong></summary>
-
-```bash
-uv tool install fastmcp
-fastmcp install claude-desktop src/server.py
-# OR
-fastmcp install claude-code src/server.py
-# OR
-fastmcp install cursor src/server.py
-```
-
-</details>
-
-### 4. Test it
-
-Restart your MCP client and ask your agent:
-
-> "Use ghost_browser to navigate to https://example.com and take a screenshot."
-
----
-
-## Modular Architecture
-
-Choose exactly what functionality you need. Run the full 92-tool suite or strip it down to 21 core tools.
-
-| Mode | Tools | Use Case |
-|------|-------|----------|
-| **Full** (default) | 92 | Complete browser automation and debugging |
-| **Minimal** (`--minimal`) | 21 | Core browser automation only |
-| **Custom** (`--disable-*`) | Your choice | Disable specific sections |
-
-```bash
-python src/server.py --minimal
-python src/server.py --disable-cdp-functions --disable-dynamic-hooks
-python src/server.py --list-sections
-```
-
-**Available sections:**
-
-| Section | Tools | Description |
-|---------|-------|-------------|
-| `browser-management` | 10 | Core browser operations |
-| `element-interaction` | 11 | Page interaction and manipulation |
-| `element-extraction` | 9 | Element cloning and extraction |
-| `file-extraction` | 9 | File-based extraction tools |
-| `network-debugging` | 5 | Network monitoring and interception |
-| `cdp-functions` | 13 | Chrome DevTools Protocol execution |
-| `progressive-cloning` | 10 | Advanced element cloning |
-| `cookies-storage` | 3 | Cookie and storage management |
-| `tabs` | 5 | Tab management |
-| `debugging` | 7 | Debug and system tools |
-| `dynamic-hooks` | 10 | AI-powered network hooks |
-
----
-
-## Toolbox
-
-<details>
-<summary><strong>Browser Management</strong></summary>
-
-| Tool | Description |
-|------|-------------|
-| `spawn_browser()` | Create undetectable browser instance |
-| `navigate()` | Navigate to URLs |
-| `close_instance()` | Clean shutdown of browser |
-| `list_instances()` | Manage multiple sessions |
-| `get_instance_state()` | Full browser state information |
-| `go_back()` | Navigate back in history |
-| `go_forward()` | Navigate forward in history |
-| `reload_page()` | Reload current page |
-| `hot_reload()` | Reload modules without restart |
-| `reload_status()` | Check module reload status |
-
-</details>
-
-<details>
-<summary><strong>Element Interaction</strong></summary>
-
-| Tool | Description |
-|------|-------------|
-| `query_elements()` | Find elements by CSS/XPath |
-| `click_element()` | Natural clicking |
-| `type_text()` | Human-like typing with newline support |
-| `paste_text()` | Instant text pasting via CDP |
-| `scroll_page()` | Natural scrolling |
-| `wait_for_element()` | Smart waiting |
-| `execute_script()` | Run JavaScript |
-| `select_option()` | Dropdown selection |
-| `get_element_state()` | Element properties |
-
-</details>
-
-<details>
-<summary><strong>Element Extraction (CDP-accurate)</strong></summary>
-
-| Tool | Description |
-|------|-------------|
-| `extract_complete_element_cdp()` | Complete CDP-based element clone |
-| `clone_element_complete()` | Complete element cloning |
-| `extract_complete_element_to_file()` | Save complete extraction to file |
-| `extract_element_styles()` | 300+ CSS properties via CDP |
-| `extract_element_styles_cdp()` | Pure CDP styles extraction |
-| `extract_element_structure()` | Full DOM tree |
-| `extract_element_events()` | React/Vue/framework listeners |
-| `extract_element_animations()` | CSS animations/transitions |
-| `extract_element_assets()` | Images, fonts, videos |
-| `extract_related_files()` | Related CSS/JS files |
-
-</details>
-
-<details>
-<summary><strong>File-Based Extraction</strong></summary>
-
-| Tool | Description |
-|------|-------------|
-| `extract_element_styles_to_file()` | Save styles to file |
-| `extract_element_structure_to_file()` | Save structure to file |
-| `extract_element_events_to_file()` | Save events to file |
-| `extract_element_animations_to_file()` | Save animations to file |
-| `extract_element_assets_to_file()` | Save assets to file |
-| `clone_element_to_file()` | Save complete clone to file |
-| `list_clone_files()` | List saved clone files |
-| `cleanup_clone_files()` | Clean up old clone files |
-
-</details>
-
-<details>
-<summary><strong>Network Debugging and Interception</strong></summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_network_requests()` | List captured network requests |
-| `get_request_details()` | Inspect headers and payload for a request |
-| `get_response_content()` | Get response data from a request |
-| `modify_headers()` | Add custom headers to requests |
-| `spawn_browser(block_resources=[...])` | Block tracking scripts, ads, etc. |
-| `create_dynamic_hook()` | Create Python functions to intercept/modify requests |
-| `create_simple_dynamic_hook()` | Quick hook creation with presets |
-| `list_dynamic_hooks()` | List active hooks with statistics |
-| `get_dynamic_hook_details()` | Inspect hook source code |
-| `remove_dynamic_hook()` | Remove a hook |
-| `get_hook_documentation()` | Request object structure and HookAction types |
-| `get_hook_examples()` | 10 detailed examples: blockers, redirects, proxies |
-| `get_hook_requirements_documentation()` | Pattern matching and best practices |
-| `get_hook_common_patterns()` | Ad blocking, API proxying, auth injection |
-| `validate_hook_function()` | Validate hook code before deployment |
-
-</details>
-
-<details>
-<summary><strong>CDP Function Execution</strong></summary>
-
-| Tool | Description |
-|------|-------------|
-| `execute_cdp_command()` | Direct CDP commands (use snake_case) |
-| `discover_global_functions()` | Find JavaScript functions |
-| `discover_object_methods()` | Discover object methods (93+ methods) |
-| `call_javascript_function()` | Execute any function |
-| `inject_and_execute_script()` | Run custom JS code |
-| `inspect_function_signature()` | Inspect function details |
-| `create_persistent_function()` | Functions that survive reloads |
-| `execute_function_sequence()` | Execute function sequences |
-| `create_python_binding()` | Create Python-JS bindings |
-| `execute_python_in_browser()` | Execute Python code via py2js |
-| `get_execution_contexts()` | Get JS execution contexts |
-| `list_cdp_commands()` | List available CDP commands |
-| `get_function_executor_info()` | Get executor state info |
-
-</details>
-
-<details>
-<summary><strong>Progressive Element Cloning</strong></summary>
-
-| Tool | Description |
-|------|-------------|
-| `clone_element_progressive()` | Initial lightweight structure |
-| `expand_styles()` | On-demand styles expansion |
-| `expand_events()` | On-demand events expansion |
-| `expand_children()` | Progressive children expansion |
-| `expand_css_rules()` | Expand CSS rules data |
-| `expand_pseudo_elements()` | Expand pseudo-elements |
-| `expand_animations()` | Expand animations data |
-| `list_stored_elements()` | List stored elements |
-| `clear_stored_element()` | Clear specific element |
-| `clear_all_elements()` | Clear all stored elements |
-
-</details>
-
-<details>
-<summary><strong>Cookie and Storage</strong></summary>
-
-| Tool | Description |
-|------|-------------|
-| `get_cookies()` | Read cookies |
-| `set_cookie()` | Set cookies |
-| `clear_cookies()` | Clear cookies |
-| `get_instance_state()` | localStorage and sessionStorage snapshot |
-| `execute_script()` | Read/modify storage via JS |
-
-</details>
-
-<details>
-<summary><strong>Tabs</strong></summary>
-
-| Tool | Description |
-|------|-------------|
-| `list_tabs()` | List open tabs |
-| `new_tab()` | Create new tab |
-| `switch_tab()` | Change active tab |
-| `close_tab()` | Close tab |
-| `get_active_tab()` | Get current tab |
-
-</details>
-
-<details>
-<summary><strong>Page Analysis and Debugging</strong></summary>
-
-| Tool | Description |
-|------|-------------|
-| `take_screenshot()` | Capture screenshots |
-| `get_page_content()` | HTML and metadata |
-| `get_debug_view()` | Debug info with pagination |
-| `clear_debug_view()` | Clear debug logs |
-| `export_debug_logs()` | Export logs (JSON/pickle/gzip) |
-| `get_debug_lock_status()` | Debug lock status |
-| `validate_browser_environment_tool()` | Diagnose platform issues and browser compatibility |
-
-</details>
-
----
-
-## Ghost vs Playwright MCP
-
-| Feature | Ghost Browser MCP | Playwright MCP |
-|---------|---------------------|----------------|
-| Cloudflare / Queue-It | Consistently bypasses | Commonly blocked |
-| Banking / Gov portals | Works | Frequently blocked |
-| Social media automation | Full automation | Captchas and bans |
-| UI element cloning | CDP-accurate extraction | Limited |
-| Network debugging | Full request/response inspection via AI | Basic |
-| API reverse engineering | Payload inspection through chat | Manual tools only |
-| Dynamic hook system | AI-generated Python functions for real-time interception | Not available |
-| Modular architecture | 11 sections, 21–92 tools | Fixed ~20 tools |
-| Total tools | 92 (customizable) | ~20 |
-
-Tested on: LinkedIn, Instagram, Twitter/X, Amazon, banking portals, government sites, Cloudflare-protected APIs, Nike SNKRS, Ticketmaster, Supreme.
-
----
-
-## Troubleshooting
-
-**No compatible browser found**
-Install Chrome, Chromium, or Microsoft Edge. The server auto-detects the first available browser. Run `validate_browser_environment_tool()` to diagnose.
-
-**Tools hang or return malformed JSON**
-This fork includes the upstream fix for stdout corruption from [#8](https://github.com/vibheksoni/stealth-browser-mcp/issues/8). Re-sync the environment if you are updating an older checkout.
-
-**Browser crashes on Linux / Docker / CI**
-Run with `--sandbox=false` or ensure your environment supports sandboxing. The server auto-detects root and container environments and adjusts accordingly.
-
-**Too many tools cluttering the AI chat**
-Use `--minimal` for 21 core tools, or selectively disable sections:
-```bash
-python src/server.py --disable-cdp-functions --disable-dynamic-hooks --disable-progressive-cloning
-```
-
-**Module not found errors**
-Make sure you synchronized the project environment from the repository root:
-```bash
-uv sync
+Usuário / IA
+     ↓
+  MCP Tools
+     ↓
+  CDP (Chrome DevTools Protocol)
+     ↓
+  Chromium real
+     ↓
+  Internet / Aplicação alvo
 ```
 
 ---
 
-## Examples
+## Arquitetura dos Módulos
 
-- **Market research** — Extract pricing and features from competitors, output a comparison table
-- **UI cloning** — Recreate a pricing section with exact fonts, styles, and interactions
-- **Inventory monitoring** — Watch a product page and alert when stock changes
-- **API reverse engineering** — Intercept requests, map endpoints, and inspect data flow
-
-All driven from a single AI agent conversation.
-
-Prompt templates: [docs/examples/claude_prompts.md](docs/examples/claude_prompts.md)
-Cookie template: [docs/examples/cookies_example.txt](docs/examples/cookies_example.txt)
-
----
-
-## Showcase
-
-<div align="center">
-<img src="media/AugmentHeroClone.PNG" alt="Augment Code Hero Recreation" width="700" style="border-radius: 8px;">
-</div>
-
-**Augment Code hero clone** — A user asked Claude to clone the hero section from [augmentcode.com](https://www.augmentcode.com/). The agent spawned a ghost browser, navigated to the site, extracted the complete element via CDP (styles, structure, assets), and generated a pixel-accurate HTML recreation with responsive design and animations. The entire process took under two minutes of conversation.
+```
+ghost_browser/
+├── browser_manager.py      # Spawn/controle de instâncias
+├── network_interceptor.py  # Interceptação de rede (o mais poderoso)
+├── dom_handler.py          # Extração e manipulação de DOM
+├── debug_logger.py         # Logging completo de tudo
+├── models.py               # Estruturas de dados (HookAction, etc.)
+└── persistent_storage.py   # Armazenamento de elementos clonados
+```
 
 ---
 
-## Roadmap
+## As 6 Camadas de Poder
 
-Roadmap items are tracked in this fork and, when relevant, in the upstream repository.
+### 1. Browser Control
+Controle total do ciclo de vida do browser.
 
----
+- Spawn de múltiplas instâncias simultâneas e independentes
+- Cada instância com viewport, user-agent, proxy e cookies próprios
+- Modo headless ou visível
+- Gerenciamento de abas (abrir, fechar, trocar, listar)
+- Navegação com controle de wait conditions (`load`, `domcontentloaded`, `networkidle`)
+- Histórico (back/forward), reload com/sem cache
+- Health check de instâncias
 
-## Support
-
-If this tool saved you time or made you money, consider supporting development:
-
-- [Buy me a coffee](https://buymeacoffee.com/vibheksoni)
-- [Join the Discord](https://discord.gg/secrets)
-
----
-
-## License
-
-MIT — see [LICENSE](LICENSE).
+**Exemplo prático:** rodar 10 browsers em paralelo, cada um com um proxy diferente, fazendo tarefas independentes ao mesmo tempo.
 
 ---
 
-<div align="center">
+### 2. DOM Extraction — Clonagem Pixel Perfect
 
-[![Upstream Star History Chart](https://api.star-history.com/svg?repos=vibheksoni/stealth-browser-mcp&type=Date)](https://www.star-history.com/#vibheksoni/stealth-browser-mcp&Date)
+O conjunto de ferramentas mais sofisticado para extração de interface.
 
-</div>
+| Ferramenta | O que faz |
+|---|---|
+| `clone_element_complete` | Extrai tudo de um elemento: estilos, CSS rules, eventos, animações, assets |
+| `extract_complete_element_cdp` | Usa CDP nativo — 100% preciso, sem limitações de JS |
+| `extract_element_styles` | Estilos computados + CSS rules + pseudo-elementos |
+| `extract_element_structure` | HTML, atributos, hierarquia de filhos |
+| `extract_element_events` | Event listeners, handlers inline, handlers de frameworks (React/Vue) |
+| `extract_element_animations` | CSS animations, transitions, transforms, keyframes |
+| `extract_element_assets` | Imagens, backgrounds, fontes |
+| `clone_element_progressive` | Extração incremental para elementos gigantes |
+| `expand_styles/events/children` | Expansão seletiva por categoria |
+
+**O que isso significa na prática:** dado qualquer elemento de qualquer site, você obtém uma representação completa e fiel o suficiente para recriar o componente do zero em qualquer stack.
+
+---
+
+### 3. Network Interception — O Mais Poderoso
+
+Intercepta **toda** requisição HTTP/HTTPS antes de sair ou depois de chegar, com capacidade de modificar em tempo real.
+
+#### Ações disponíveis via Dynamic Hooks:
+
+```
+continue  → deixa passar normalmente
+block     → cancela a requisição
+redirect  → manda para outra URL
+modify    → altera URL, método, headers, body
+fulfill   → retorna resposta fake sem bater no servidor
+```
+
+#### Estrutura de um Hook:
+
+```python
+def process_request(request):
+    # request contém:
+    # - request_id, instance_id
+    # - url, method, headers, post_data
+    # - resource_type (Document, Script, Image, XHR...)
+    # - stage (request ou response)
+    
+    return HookAction(action="modify", headers={
+        **request["headers"],
+        "X-Custom-Header": "valor"
+    })
+```
+
+Hooks são aplicados em tempo real, com prioridade configurável, para instâncias específicas ou todas.
+
+---
+
+### 4. JavaScript Runtime
+
+Execução de JS arbitrário com acesso total ao contexto da página.
+
+- `execute_script` — JS simples no contexto da página
+- `inject_and_execute_script` — injeção com contexto específico
+- `discover_global_functions` — lista todas as funções globais disponíveis
+- `discover_object_methods` — inspeciona métodos de qualquer objeto
+- `inspect_function_signature` — lê a assinatura de qualquer função
+- `call_javascript_function` — chama funções com argumentos
+- `execute_function_sequence` — executa sequências de chamadas
+- `create_persistent_function` — cria funções que sobrevivem a reloads
+- `create_python_binding` — cria bridge Python ↔ JavaScript
+- `get_execution_contexts` — lista todos os contextos de execução (iframes, workers)
+
+---
+
+### 5. CDP Direto
+
+Acesso raw ao Chrome DevTools Protocol. Qualquer comando que o Chrome suporta internamente, você executa.
+
+```python
+execute_cdp_command(instance_id, "CSS.getComputedStyleForNode", {...})
+execute_cdp_command(instance_id, "DOMDebugger.getEventListeners", {...})
+execute_cdp_command(instance_id, "Network.getCookies", {...})
+```
+
+Isso inclui capacidades que nem Playwright nem Puppeteer expõem diretamente.
+
+---
+
+### 6. Debug & Monitoring
+
+- Log completo de erros, warnings e info
+- Captura de todas as requisições de rede com filtro por tipo
+- Acesso a headers, cookies, body de request e response
+- Export de logs em JSON, Pickle ou Gzip
+- Screenshots automáticos (viewport ou full page)
+- Extração de conteúdo completo da página
+
+---
+
+## Usos White Hat
+
+### Desenvolvimento & Design
+
+**Clonagem de componentes para design systems**
+Extrai qualquer componente de qualquer site com estilos exatos, eventos, animações e assets. Útil para recriar padrões de UI em projetos próprios ou documentar sistemas de design existentes.
+
+**Proxy de desenvolvimento local**
+Redireciona chamadas de API de produção para `localhost` enquanto navega no site real. Testa mudanças de backend sem precisar de ambiente completo.
+
+```python
+# Hook: redireciona API de prod para local
+def process_request(request):
+    if "api.meusite.com" in request["url"]:
+        new_url = request["url"].replace("api.meusite.com", "localhost:3000")
+        return HookAction(action="redirect", url=new_url)
+    return HookAction(action="continue")
+```
+
+**Mock de APIs para testes**
+Substitui respostas reais por dados controlados sem precisar de servidor mock separado. Testa edge cases impossíveis de reproduzir em produção.
+
+---
+
+### QA & Automação de Testes
+
+**Testes E2E sem framework adicional**
+Navega, clica, digita, verifica DOM — tudo controlado pela IA que adapta o fluxo baseado no que vê na tela.
+
+**Simulação de APIs lentas ou com erro**
+```python
+def process_request(request):
+    if "/api/checkout" in request["url"]:
+        return HookAction(
+            action="fulfill",
+            status_code=503,
+            body='{"error": "Service unavailable"}'
+        )
+```
+
+**Testes de regressão visual**
+Screenshots automáticos antes e depois de mudanças, comparação de DOM estrutural.
+
+---
+
+### Segurança Ofensiva (Autorizada)
+
+**Reconhecimento de aplicação (pentest)**
+Mapeia automaticamente toda a estrutura de uma SPA — endpoints de API, parâmetros, fluxos de autenticação, dados expostos no DOM — muito mais rápido que análise manual.
+
+**Auditoria de headers de segurança**
+Captura todos os headers de resposta, verifica ausência de `Content-Security-Policy`, `X-Frame-Options`, `HSTS`, etc.
+
+**Análise de vazamento de dados no frontend**
+Inspeciona localStorage, sessionStorage, cookies, variáveis globais JS em busca de dados sensíveis expostos desnecessariamente.
+
+**Interceptação de tokens para análise**
+Em ambiente de teste autorizado, captura JWTs, analisa claims, verifica algoritmos fracos.
+
+---
+
+### Pesquisa & Inteligência
+
+**Monitoramento de mudanças em sites**
+Detecta alterações de preço, conteúdo, estrutura de DOM em sites concorrentes ou de interesse.
+
+**Extração de dados estruturados**
+Scraping de dados públicos com capacidade de lidar com SPAs, lazy loading, autenticação e paginação dinâmica.
+
+---
+
+## Usos Black Hat — Riscos Reais
+
+> ⚠️ Esta seção existe para que você entenda o que proteger, não para ensinar ataques.
+
+### Por que o Ghost é perigoso em mãos erradas
+
+O HTTPS não protege contra ele. O Ghost opera **depois** do TLS, dentro do browser, onde os dados já estão descriptografados. Firewalls de rede não veem nada suspeito — é tráfego legítimo de browser.
+
+---
+
+**Credential Stuffing Automatizado**
+Login automatizado em escala com listas de credenciais vazadas. Detecta sucesso/falha no DOM, bypassa CAPTCHAs visuais simples, rotaciona proxies por instância.
+
+**Session Hijacking**
+Em uma máquina comprometida, extrai todos os cookies de sessão, tokens JWT, dados de localStorage de qualquer site aberto — sem precisar da senha, só da sessão ativa.
+
+**Phishing Dinâmico**
+Clona qualquer site em segundos com assets reais. O clone é praticamente indistinguível porque puxa imagens, fontes e estilos diretamente do original. Pode ser atualizado automaticamente quando o original muda.
+
+**Man-in-the-Middle via Hooks**
+Com acesso à máquina, intercepta respostas de API em tempo real e as modifica antes de renderizar — troca números de conta bancária, altera conteúdo de páginas, injeta scripts em respostas HTML.
+
+**Form Grabbing**
+Injeta event listeners em campos de formulário via JS, captura tudo que o usuário digita (senhas, cartões, CPF) antes de submeter, envia para servidor externo.
+
+**Bypass de Proteções Client-Side**
+Executa JS diretamente no contexto da página, desabilita validações, remove elementos de proteção, altera variáveis de estado antes de submeter formulários.
+
+**Reconhecimento Automatizado em Escala**
+Mapeia estrutura interna de aplicações, descobre endpoints não documentados, extrai dados expostos inadvertidamente no DOM ou em respostas de API.
+
+---
+
+## Ghost Browser MCP vs Burp Suite
+
+| Aspecto | Ghost Browser MCP | Burp Suite |
+|---|---|---|
+| **Natureza** | Browser ativo controlado por IA | Proxy passivo/ativo de segurança |
+| **Posição** | Dentro do browser (pós-TLS) | Entre browser e servidor |
+| **Controle de UI** | Total (clica, digita, navega) | Nenhum |
+| **Execução de JS** | Sim, arbitrário | Não |
+| **Manipulação de DOM** | Sim, completa | Não |
+| **Interceptação de rede** | Sim, com lógica programável | Sim, manual ou com macros |
+| **Automação** | Total, via IA | Parcial (Burp Macros, extensões) |
+| **Scan de vulnerabilidades** | Não nativo | Sim (Scanner embutido) |
+| **Interface** | Nenhuma (código puro) | GUI completa |
+| **Operador** | IA autônoma | Analista humano |
+| **Velocidade** | Alta (paralelo, sem UI) | Limitada pelo humano |
+| **Curva de aprendizado** | Baixa (IA abstrai complexidade) | Alta (requer conhecimento técnico) |
+| **Custo** | Open source / MCP | Pago (Community gratuita limitada) |
+
+### Quando usar cada um
+
+**Use Burp Suite quando:**
+- Precisa de análise manual profunda de requisições
+- Quer usar o scanner de vulnerabilidades automatizado
+- Está fazendo pentest formal com relatório
+- Precisa de ferramentas especializadas (Intruder, Repeater, Sequencer)
+- O alvo tem proteções anti-bot que detectam automação
+
+**Use Ghost Browser MCP quando:**
+- Precisa de automação completa de browser
+- Quer que a IA tome decisões baseadas no que vê na tela
+- Está clonando/analisando interfaces
+- Precisa de mock de APIs em desenvolvimento
+- Quer escalar operações em paralelo
+- Precisa interagir com SPAs complexas
+
+**Use os dois juntos quando:**
+- Ghost navega e interage, Burp captura e analisa o tráfego gerado
+- Cobertura completa: automação + análise profunda
+
+---
+
+## O que Protege Contra Uso Malicioso
+
+Entender os vetores de ataque ajuda a se defender:
+
+- **MFA robusto** — mesmo com sessão roubada, segundo fator bloqueia
+- **Detecção de comportamento anômalo** — velocidade de ações, padrões de navegação
+- **Rate limiting agressivo** no servidor — limita credential stuffing
+- **CSP (Content Security Policy)** — dificulta injeção de scripts
+- **SameSite cookies** — reduz impacto de session hijacking
+- **Não dar acesso físico à máquina** — a maioria dos ataques requer acesso local
+- **Monitoramento de exfiltração** — detecta dados saindo em volume anormal
+
+---
+
+## Conclusão
+
+O Ghost Browser MCP é essencialmente um **Chrome com superpoderes controlado por IA**. A combinação de browser real + interceptação de rede + extração de DOM via CDP + execução de JS num único MCP cria uma ferramenta que não tem equivalente direto no mercado.
+
+Para desenvolvimento e segurança legítima, é extraordinariamente produtivo. Para quem entende os riscos, é também um lembrete de por que segurança em profundidade importa — nenhuma proteção client-side é confiável quando o browser em si pode ser controlado.
+
+A ferramenta é neutra. O que define o lado é a intenção e a autorização.
+
+---
+
+*Documentação gerada com base em análise das capacidades do Ghost Browser MCP v1.x*
