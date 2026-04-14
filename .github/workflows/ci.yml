@@ -11,6 +11,12 @@ concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
   cancel-in-progress: true
 
+# Permissions for GHCR push and security tab
+permissions:
+  contents: read
+  packages: write
+  security-events: write
+
 env:
   PYTHON_VERSION: "3.12"
   UV_VERSION: "latest"
