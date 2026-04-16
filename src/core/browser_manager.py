@@ -76,15 +76,31 @@ class BrowserManager:
                 f"Platform: {platform_info['system']} | Root: {platform_info['is_root']} | Container: {platform_info['is_container']} | CI: {platform_info['is_ci']} | Headless: {effective_headless} | Sandbox: {effective_sandbox} | Browser: {browser_type} ({browser_executable})",
             )
 
-            config = uc.Config(
-                headless=effective_headless,
-                user_data_dir=options.user_data_dir,
-                sandbox=effective_sandbox,
-                browser_executable_path=browser_executable,
-                browser_args=browser_args,
-            )
+            max_start_attempts = 3 if platform_info["is_ci"] else 1
+            browser = None
+            for attempt in range(1, max_start_attempts + 1):
+                config = uc.Config(
+                    headless=effective_headless,
+                    user_data_dir=options.user_data_dir,
+                    sandbox=effective_sandbox,
+                    browser_executable_path=browser_executable,
+                    browser_args=browser_args,
+                )
 
-            browser = await uc.start(config=config)
+                try:
+                    browser = await uc.start(config=config)
+                    break
+                except Exception as start_error:
+                    self._cleanup_failed_start(instance_id)
+                    if attempt >= max_start_attempts:
+                        raise
+                    debug_logger.log_warning(
+                        "browser_manager",
+                        "spawn_browser",
+                        f"Browser start attempt {attempt}/{max_start_attempts} failed: {start_error}. Retrying...",
+                    )
+                    await asyncio.sleep(float(attempt))
+
             tab = browser.main_tab
 
             if hasattr(browser, "_process") and browser._process:
@@ -142,6 +158,37 @@ class BrowserManager:
             raise Exception(f"Failed to spawn browser: {str(e)}")
 
         return instance
+
+    def _cleanup_failed_start(self, instance_id: str):
+        """Clean up partially registered nodriver browsers after failed startup."""
+        try:
+            import shutil
+
+            from nodriver.core import util as uc_util
+
+            registered = uc_util.get_registered_instances()
+            for browser in list(registered):
+                if getattr(browser, "connection", None) is not None:
+                    continue
+
+                pid = getattr(browser, "_process_pid", None)
+                process = getattr(browser, "_process", None)
+                if not pid and process is not None:
+                    pid = getattr(process, "pid", None)
+                if pid:
+                    process_cleanup._kill_process_fast(pid, instance_id)
+
+                config = getattr(browser, "config", None)
+                if config and not getattr(config, "uses_custom_data_dir", True):
+                    shutil.rmtree(config.user_data_dir, ignore_errors=True)
+
+                registered.discard(browser)
+        except Exception as e:
+            debug_logger.log_warning(
+                "browser_manager",
+                "_cleanup_failed_start",
+                f"Failed to clean up partial browser start: {e}",
+            )
 
     async def _setup_dynamic_hooks(self, tab: Tab, instance_id: str):
         """Setup dynamic hook system for browser instance."""
