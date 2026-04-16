@@ -415,13 +415,14 @@ class FileBasedElementCloner:
                 "summary": {
                     "has_animations": animation_data.get("animations", {}).get(
                         "animation_name", "none"
-                    ) != "none",
+                    )
+                    != "none",
                     "has_transitions": animation_data.get("transitions", {}).get(
                         "transition_property", "none"
-                    ) != "none",
-                    "has_transforms": animation_data.get("transforms", {}).get(
-                        "transform", "none"
-                    ) != "none",
+                    )
+                    != "none",
+                    "has_transforms": animation_data.get("transforms", {}).get("transform", "none")
+                    != "none",
                     "keyframes_count": len(animation_data.get("keyframes", [])),
                 },
             }
@@ -632,9 +633,8 @@ class FileBasedElementCloner:
             if "animations" in complete_data:
                 animations = complete_data["animations"]
                 summary["components"]["animations"] = {
-                    "has_animations": animations.get("animations", {}).get(
-                        "animation_name", "none"
-                    ) != "none",
+                    "has_animations": animations.get("animations", {}).get("animation_name", "none")
+                    != "none",
                     "keyframes_count": len(animations.get("keyframes", [])),
                 }
             if "assets" in complete_data:

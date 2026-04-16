@@ -393,7 +393,9 @@ class ElementCloner:
                                 }
                         except Exception as e:
                             debug_logger.log_warning(
-                                "element_cloner", "extract_assets", f"Could not fetch asset {url}: {e}"
+                                "element_cloner",
+                                "extract_assets",
+                                f"Could not fetch asset {url}: {e}",
                             )
 
             debug_logger.log_info(

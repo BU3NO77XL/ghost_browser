@@ -27,6 +27,7 @@ def _make_deps(tab=None):
 
 def _register():
     from tools.target_management import register
+
     mcp = MagicMock()
     registered = {}
 
@@ -34,6 +35,7 @@ def _register():
         def decorator(func):
             registered[func.__name__] = func
             return func
+
         return decorator
 
     return register, mcp, section_tool, registered
@@ -44,10 +46,12 @@ async def test_target_get_targets_no_browser_type():
     register, mcp, section_tool, registered = _register()
 
     tab = AsyncMock()
-    tab.send = AsyncMock(return_value=[
-        _make_target("t-1", "page"),
-        _make_target("t-2", "browser"),
-    ])
+    tab.send = AsyncMock(
+        return_value=[
+            _make_target("t-1", "page"),
+            _make_target("t-2", "browser"),
+        ]
+    )
     deps, _ = _make_deps(tab)
 
     with patch("core.login_guard.check_pending_login_guard", return_value=None):

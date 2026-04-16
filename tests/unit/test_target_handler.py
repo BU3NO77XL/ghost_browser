@@ -13,8 +13,14 @@ def _make_tab():
     return tab
 
 
-def _make_target(target_id="t-1", type_="page", title="Test", url="https://example.com",
-                 attached=False, opener_id=None):
+def _make_target(
+    target_id="t-1",
+    type_="page",
+    title="Test",
+    url="https://example.com",
+    attached=False,
+    opener_id=None,
+):
     t = MagicMock()
     t.target_id = target_id
     t.type_ = type_
@@ -28,13 +34,14 @@ def _make_target(target_id="t-1", type_="page", title="Test", url="https://examp
 
 # ── get_targets ───────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_get_targets_filters_browser_type():
     """Property 3 setup: browser-type targets must be excluded."""
     tab = _make_tab()
     targets = [
         _make_target("t-1", "page"),
-        _make_target("t-2", "browser"),   # should be filtered out
+        _make_target("t-2", "browser"),  # should be filtered out
         _make_target("t-3", "worker"),
     ]
     tab.send = AsyncMock(return_value=targets)
@@ -60,6 +67,7 @@ async def test_get_targets_returns_correct_fields():
 
 # ── get_target_info ───────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_get_target_info_returns_matching_target_id():
     """Property 3: returned target_id must equal the input target_id."""
@@ -71,6 +79,7 @@ async def test_get_target_info_returns_matching_target_id():
 
 
 # ── create_target ─────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_create_target_extracts_string_target_id():
@@ -84,6 +93,7 @@ async def test_create_target_extracts_string_target_id():
 
 
 # ── error handling ────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_targets_timeout():

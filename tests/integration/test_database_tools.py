@@ -15,6 +15,7 @@ def _make_deps(tab=None):
 
 def _register():
     from tools.database_management import register
+
     mcp = MagicMock()
     registered = {}
 
@@ -22,6 +23,7 @@ def _register():
         def decorator(func):
             registered[func.__name__] = func
             return func
+
         return decorator
 
     return register, mcp, section_tool, registered
@@ -67,6 +69,7 @@ async def test_execute_websql_query_tool():
 
     tab = AsyncMock()
     import json
+
     payload = json.dumps({"columns": ["id", "name"], "rows": [[1, "Alice"]], "sql_error": None})
     mock_result = MagicMock()
     mock_result.result = MagicMock()
@@ -89,6 +92,7 @@ async def test_execute_websql_query_with_args_tool():
 
     tab = AsyncMock()
     import json
+
     payload = json.dumps({"columns": ["id"], "rows": [[42]], "sql_error": None})
     mock_result = MagicMock()
     mock_result.result = MagicMock()
@@ -99,9 +103,7 @@ async def test_execute_websql_query_with_args_tool():
     with patch("core.login_guard.check_pending_login_guard", return_value=None):
         register(mcp, section_tool, deps)
         result = await registered["execute_websql_query"](
-            "inst-1", database_id="myDB",
-            query="SELECT id FROM users WHERE id = ?",
-            query_args=[42]
+            "inst-1", database_id="myDB", query="SELECT id FROM users WHERE id = ?", query_args=[42]
         )
         assert isinstance(result, dict)
 

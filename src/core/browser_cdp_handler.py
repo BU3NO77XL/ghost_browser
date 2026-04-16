@@ -41,9 +41,7 @@ class BrowserCDPHandler:
             raise
 
     @staticmethod
-    async def set_window_bounds(
-        tab: Tab, window_id: int, bounds: Dict[str, Any]
-    ) -> bool:
+    async def set_window_bounds(tab: Tab, window_id: int, bounds: Dict[str, Any]) -> bool:
         debug_logger.log_info(
             "BrowserCDPHandler",
             "set_window_bounds",
@@ -55,9 +53,11 @@ class BrowserCDPHandler:
                 top=bounds.get("top"),
                 width=bounds.get("width"),
                 height=bounds.get("height"),
-                window_state=cdp.browser.WindowState(bounds["window_state"])
-                if bounds.get("window_state")
-                else None,
+                window_state=(
+                    cdp.browser.WindowState(bounds["window_state"])
+                    if bounds.get("window_state")
+                    else None
+                ),
             )
             await tab.send(
                 cdp.browser.set_window_bounds(
@@ -92,9 +92,7 @@ class BrowserCDPHandler:
         )
         try:
             bounds = await tab.send(
-                cdp.browser.get_window_bounds(
-                    window_id=cdp.browser.WindowID(window_id)
-                )
+                cdp.browser.get_window_bounds(window_id=cdp.browser.WindowID(window_id))
             )
             return {
                 "left": getattr(bounds, "left", None),
@@ -159,9 +157,7 @@ class BrowserCDPHandler:
 
     @staticmethod
     async def reset_permissions(tab: Tab, origin: Optional[str] = None) -> bool:
-        debug_logger.log_info(
-            "BrowserCDPHandler", "reset_permissions", "Resetting permissions"
-        )
+        debug_logger.log_info("BrowserCDPHandler", "reset_permissions", "Resetting permissions")
         try:
             # Note: cdp.browser.reset_permissions() doesn't accept origin parameter
             await tab.send(cdp.browser.reset_permissions())
@@ -190,9 +186,7 @@ class BrowserCDPHandler:
             f"Setting download behavior to '{behavior}'",
         )
         if behavior in ("allow", "allowAndName") and not download_path:
-            raise ValueError(
-                "download_path is required when behavior is 'allow' or 'allowAndName'"
-            )
+            raise ValueError("download_path is required when behavior is 'allow' or 'allowAndName'")
         try:
             await tab.send(
                 cdp.browser.set_download_behavior(

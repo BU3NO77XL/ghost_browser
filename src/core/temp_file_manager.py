@@ -84,9 +84,7 @@ class TempFileManager:
         path = Path(path)
         self._tracked.append(path)
         if instance_id:
-            self._instance_files.setdefault(instance_id, []).append(
-                (path, time.monotonic())
-            )
+            self._instance_files.setdefault(instance_id, []).append((path, time.monotonic()))
 
     # ------------------------------------------------------------------
     # Instance lifecycle hooks

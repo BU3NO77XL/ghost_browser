@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── enable_heap_profiler ──────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_enable_heap_profiler_success():
     tab = _make_tab()
@@ -31,6 +32,7 @@ async def test_enable_heap_profiler_already_enabled():
 
 
 # ── collect_garbage ───────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_collect_garbage_success():
@@ -62,6 +64,7 @@ async def test_collect_garbage_timeout():
 
 # ── start_sampling ────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_start_sampling_default_interval():
     tab = _make_tab()
@@ -87,6 +90,7 @@ async def test_start_sampling_websocket_error():
 
 
 # ── stop_sampling ─────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_stop_sampling_success():
@@ -144,6 +148,7 @@ async def test_stop_sampling_websocket_error():
 
 # ── start_tracking_heap_objects ───────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_start_tracking_heap_objects_default():
     tab = _make_tab()
@@ -170,6 +175,7 @@ async def test_start_tracking_heap_objects_websocket_error():
 
 # ── stop_tracking_heap_objects ────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_stop_tracking_heap_objects_success():
     tab = _make_tab()
@@ -188,6 +194,7 @@ async def test_stop_tracking_heap_objects_timeout():
 
 
 # ── get_object_by_heap_id ─────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_object_by_heap_id_success():

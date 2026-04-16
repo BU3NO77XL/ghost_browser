@@ -93,9 +93,7 @@ class LogHandler:
             raise
 
     @staticmethod
-    async def start_violations_report(
-        tab: Tab, settings: List[Dict[str, Any]]
-    ) -> bool:
+    async def start_violations_report(tab: Tab, settings: List[Dict[str, Any]]) -> bool:
         """
         Start violation reporting with the given settings.
 
@@ -147,9 +145,7 @@ class LogHandler:
         Returns:
             bool: True if successful.
         """
-        debug_logger.log_info(
-            "LogHandler", "stop_violations_report", "Stopping violations report"
-        )
+        debug_logger.log_info("LogHandler", "stop_violations_report", "Stopping violations report")
         try:
             await tab.send(cdp.log.stop_violations_report())
             return True

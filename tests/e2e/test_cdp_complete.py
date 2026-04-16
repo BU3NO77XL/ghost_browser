@@ -821,10 +821,7 @@ class TestCrossDomainWorkflow:
             assert state["security_state"] in ("secure", "insecure", "neutral")
 
             # 2. Set some storage data
-            await execute_script(
-                iid,
-                script="localStorage.setItem('audit_key', 'audit_value')"
-            )
+            await execute_script(iid, script="localStorage.setItem('audit_key', 'audit_value')")
 
             # 3. Read it back via CDP
             storage = await get_local_storage(iid, origin="https://httpbin.org")

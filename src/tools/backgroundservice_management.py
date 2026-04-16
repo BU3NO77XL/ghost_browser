@@ -10,9 +10,7 @@ def register(mcp, section_tool, deps):
     browser_manager = deps["browser_manager"]
 
     @section_tool("backgroundservice-management")
-    async def start_observing_background_service(
-        instance_id: str, service: str
-    ) -> bool:
+    async def start_observing_background_service(instance_id: str, service: str) -> bool:
         """
         Start observing background service events for a given service type.
 
@@ -40,9 +38,7 @@ def register(mcp, section_tool, deps):
         return await BackgroundServiceHandler.start_observing(tab, service)
 
     @section_tool("backgroundservice-management")
-    async def stop_observing_background_service(
-        instance_id: str, service: str
-    ) -> bool:
+    async def stop_observing_background_service(instance_id: str, service: str) -> bool:
         """
         Stop observing background service events for a given service type.
 
@@ -62,9 +58,7 @@ def register(mcp, section_tool, deps):
         return await BackgroundServiceHandler.stop_observing(tab, service)
 
     @section_tool("backgroundservice-management")
-    async def get_background_service_events(
-        instance_id: str, service: str
-    ) -> List[Dict[str, Any]]:
+    async def get_background_service_events(instance_id: str, service: str) -> List[Dict[str, Any]]:
         """
         Retrieve recorded background service events for a given service type.
 
@@ -86,9 +80,7 @@ def register(mcp, section_tool, deps):
         return await BackgroundServiceHandler.get_events(tab, service)
 
     @section_tool("backgroundservice-management")
-    async def clear_background_service_events(
-        instance_id: str, service: str
-    ) -> bool:
+    async def clear_background_service_events(instance_id: str, service: str) -> bool:
         """
         Clear all recorded background service events for a given service type.
 

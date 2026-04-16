@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── list_animations ───────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_list_animations_empty():
     tab = _make_tab()
@@ -49,6 +50,7 @@ async def test_list_animations_timeout():
 
 # ── pause_animation ───────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_pause_animation_success():
     tab = _make_tab()
@@ -69,6 +71,7 @@ async def test_pause_animation_websocket_error():
 
 # ── play_animation ────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_play_animation_success():
     tab = _make_tab()
@@ -87,6 +90,7 @@ async def test_play_animation_timeout():
 
 
 # ── set_playback_rate ─────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_set_playback_rate_normal():
@@ -128,6 +132,7 @@ async def test_set_playback_rate_websocket_error():
 
 # ── seek_animation ────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_seek_animation_success():
     tab = _make_tab()
@@ -153,6 +158,7 @@ async def test_seek_animation_timeout():
 
 
 # ── get_animation_timing ──────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_animation_timing_success():

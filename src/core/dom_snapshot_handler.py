@@ -71,9 +71,7 @@ class DOMSnapshotHandler:
         include_dom_rects: bool = False,
         include_blended_background_colors: bool = False,
     ) -> Dict[str, Any]:
-        debug_logger.log_info(
-            "DOMSnapshotHandler", "capture_snapshot", "Capturing DOM snapshot"
-        )
+        debug_logger.log_info("DOMSnapshotHandler", "capture_snapshot", "Capturing DOM snapshot")
         # Apply default computed styles when empty or None
         if not computed_styles:
             computed_styles = DEFAULT_COMPUTED_STYLES

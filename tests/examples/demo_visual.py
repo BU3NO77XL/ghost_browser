@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 """Ghost Browser MCP — Visual Demo Completo com Efeitos Visuais"""
+
 import asyncio
 import pytest
 import sys
@@ -10,8 +11,14 @@ import server as _srv
 
 # Cores ANSI
 _R, _G, _Y, _B, _M, _C, _W, _X = (
-    "\033[91m", "\033[92m", "\033[93m", "\033[94m",
-    "\033[95m", "\033[96m", "\033[97m", "\033[0m"
+    "\033[91m",
+    "\033[92m",
+    "\033[93m",
+    "\033[94m",
+    "\033[95m",
+    "\033[96m",
+    "\033[97m",
+    "\033[0m",
 )
 
 
@@ -182,18 +189,16 @@ async def _extract_page_data(tab):
     """)
     # Parse JSON string result
     import json
+
     if isinstance(result, str):
         return json.loads(result)
     elif isinstance(result, list) and len(result) > 0:
         return result[0]
-    return result if isinstance(result, dict) else {
-        'title': 'N/A',
-        'url': 'N/A',
-        'headings': [],
-        'links': [],
-        'images': [],
-        'forms': []
-    }
+    return (
+        result
+        if isinstance(result, dict)
+        else {"title": "N/A", "url": "N/A", "headings": [], "links": [], "images": [], "forms": []}
+    )
 
 
 async def _smooth_scroll(tab, direction="down", amount=500):
@@ -234,20 +239,25 @@ async def _count_elements(tab):
     """)
     # Parse JSON string result
     import json
+
     if isinstance(result, str):
         return json.loads(result)
     elif isinstance(result, list) and len(result) > 0:
         return result[0]
-    return result if isinstance(result, dict) else {
-        'total_elements': 0,
-        'divs': 0,
-        'paragraphs': 0,
-        'links': 0,
-        'images': 0,
-        'buttons': 0,
-        'inputs': 0,
-        'forms': 0
-    }
+    return (
+        result
+        if isinstance(result, dict)
+        else {
+            "total_elements": 0,
+            "divs": 0,
+            "paragraphs": 0,
+            "links": 0,
+            "images": 0,
+            "buttons": 0,
+            "inputs": 0,
+            "forms": 0,
+        }
+    )
 
 
 BASE = "https://httpbin.org"
@@ -262,9 +272,7 @@ class TestVisualDemoCompleto:
             # -- STEP 01: Spawn -----------------------------------------------
             _banner(1, "Spawn Browser", _M)
             print("  -> Iniciando instância Chromium via nodriver...")
-            r = await _srv.spawn_browser(
-                viewport_width=1280, viewport_height=800, headless=False
-            )
+            r = await _srv.spawn_browser(viewport_width=1280, viewport_height=800, headless=False)
             iid = r["instance_id"]
             _ok(f"instance_id = {iid[:20]}...")
             _ok(f"viewport    = 1280x800")
@@ -298,7 +306,7 @@ class TestVisualDemoCompleto:
             els = await _srv.query_elements(iid, "h1")
             count = len(els) if isinstance(els, list) else len(els.get("elements", []))
             _ok(f"Encontrado {count} elemento(s) h1")
-            
+
             print("  -> Destacando h1 com cor azul/roxa...")
             await _highlight_element(tab, "h1", duration=3)
             await _inject_ghost_badge(tab, "Highlight h1 ✓")
@@ -324,7 +332,9 @@ class TestVisualDemoCompleto:
             await _inject_ghost_badge(tab, "Analisando elementos...")
             elem_count = await _count_elements(tab)
             _ok(f"Total de elementos: {elem_count.get('total_elements', 0)}")
-            _ok(f"DIVs: {elem_count.get('divs', 0)} | Parágrafos: {elem_count.get('paragraphs', 0)}")
+            _ok(
+                f"DIVs: {elem_count.get('divs', 0)} | Parágrafos: {elem_count.get('paragraphs', 0)}"
+            )
             _ok(f"Links: {elem_count.get('links', 0)} | Imagens: {elem_count.get('images', 0)}")
             _ok(f"Botões: {elem_count.get('buttons', 0)} | Inputs: {elem_count.get('inputs', 0)}")
             await _inject_ghost_badge(tab, "Análise completa ✓")
@@ -336,30 +346,30 @@ class TestVisualDemoCompleto:
             long_url = "https://en.wikipedia.org/wiki/Web_scraping"
             await _srv.navigate(iid, long_url, inject_cookies=False)
             await _pause(1)
-            
+
             # Reinjetar estilos e badge na nova página
             tab = await _srv.browser_manager.get_tab(iid)
             await _inject_highlight_style(tab)
             await _inject_ghost_badge(tab, "Página longa carregada ✓")
             _ok("Página Wikipedia carregada")
             await _pause(2)
-            
+
             print("  -> Scroll para baixo (500px)...")
             await _inject_ghost_badge(tab, "Scrolling ↓")
             await _smooth_scroll(tab, "down", 500)
             await _pause(1)
-            
+
             print("  -> Scroll para o final da página...")
             await _inject_ghost_badge(tab, "Scrolling ↓↓↓")
             await _smooth_scroll(tab, "bottom")
             await _pause(2)
-            
+
             print("  -> Scroll para o topo...")
             await _inject_ghost_badge(tab, "Scrolling ↑↑↑")
             await _smooth_scroll(tab, "top")
             _ok("Scroll automático executado com sucesso")
             await _pause(2)
-            
+
             print("  -> Voltando para httpbin.org...")
             await _srv.navigate(iid, f"{BASE}/html", inject_cookies=False)
             await _pause(1)
@@ -376,7 +386,7 @@ class TestVisualDemoCompleto:
             await _inject_ghost_badge(tab, "Dark Mode 🌙")
             _ok("Modo dark ativado (background escuro)")
             await _pause(3)
-            
+
             print("  -> Voltando para modo claro...")
             await _toggle_dark_mode(tab, False)
             await _inject_ghost_badge(tab, "Light Mode ☀️")
@@ -390,7 +400,7 @@ class TestVisualDemoCompleto:
             await _inject_ghost_badge(tab, "iPhone 14 📱")
             _ok("Viewport alterado para 390x844 (iPhone 14)")
             await _pause(2)
-            
+
             print("  -> Voltando para desktop...")
             await _srv.emulate_device(iid, device="desktop")
             await _inject_ghost_badge(tab, "Desktop 🖥️")
@@ -403,13 +413,13 @@ class TestVisualDemoCompleto:
             print(f"  -> Navegando para {url_img}...")
             await _srv.navigate(iid, url_img, inject_cookies=False)
             await _pause(1)
-            
+
             # Reinjetar badge na página de imagem
             tab = await _srv.browser_manager.get_tab(iid)
             await _inject_highlight_style(tab)
             await _inject_ghost_badge(tab, "Carregando imagem...")
             await _pause(1)
-            
+
             reqs = await _srv.list_network_requests(iid)
             req_count = len(reqs) if isinstance(reqs, list) else len(reqs.get("requests", []))
             _ok(f"Capturadas {req_count} requisições")
@@ -421,13 +431,13 @@ class TestVisualDemoCompleto:
             print("  -> Navegando de volta para html...")
             await _srv.navigate(iid, f"{BASE}/html", inject_cookies=False)
             await _pause(1)
-            
+
             # Reinjetar estilos e badge
             tab = await _srv.browser_manager.get_tab(iid)
             await _inject_highlight_style(tab)
             await _inject_ghost_badge(tab, "Preparando captura...")
             await _pause(1)
-            
+
             print("  -> Capturando screenshot...")
             r = await _srv.take_screenshot(iid, file_path="tests/reports/httpbin_demo_visual.png")
             if isinstance(r, dict):
@@ -436,7 +446,7 @@ class TestVisualDemoCompleto:
                 _ok(f"Screenshot: {type(r).__name__}")
             await _inject_ghost_badge(tab, "Screenshot 📸")
             await _pause(1)
-            
+
             print("  -> Gerando PDF...")
             r = await _srv.print_to_pdf(iid, output_path="tests/reports/httpbin_demo_visual.pdf")
             if isinstance(r, dict):
@@ -458,11 +468,11 @@ class TestVisualDemoCompleto:
             })()
             """)
             _ok("Badge e estilos removidos")
-            
+
             print("  -> Fechando instância...")
             await _srv.close_instance(iid)
             _ok("Instância fechada com sucesso")
-            
+
             print(f"\n{_G}{'='*58}")
             print(f"{_G}  [OK] DEMO COMPLETO - httpbin.org - CDP Avançado")
             print(f"{_G}  [OK] Badge, Highlights, Dark Mode, Extração de Dados")

@@ -43,15 +43,18 @@ class ProgressPlugin:
         try:
             tmp = self.path + ".tmp"
             with open(tmp, "w", encoding="utf-8") as f:
-                json.dump({
-                    "total":   self.total,
-                    "done":    self.done,
-                    "passed":  self.passed,
-                    "failed":  self.failed,
-                    "skipped": self.skipped,
-                    "current": self.current,
-                    "ts":      time.time(),
-                }, f)
+                json.dump(
+                    {
+                        "total": self.total,
+                        "done": self.done,
+                        "passed": self.passed,
+                        "failed": self.failed,
+                        "skipped": self.skipped,
+                        "current": self.current,
+                        "ts": time.time(),
+                    },
+                    f,
+                )
             os.replace(tmp, self.path)
         except Exception:
             pass
@@ -66,14 +69,14 @@ class ProgressPlugin:
         We track the outcome and only count the test as done after teardown.
         """
         nodeid = report.nodeid
-        
+
         # Track the worst outcome for this test across all phases
         if nodeid not in self._test_outcomes:
             self._test_outcomes[nodeid] = {"setup": None, "call": None, "teardown": None}
-        
+
         self._test_outcomes[nodeid][report.when] = report.outcome
         self.current = nodeid
-        
+
         # Update counters based on the phase
         if report.when == "setup":
             if report.failed:
@@ -86,7 +89,7 @@ class ProgressPlugin:
                 self.skipped += 1
                 self.done += 1
                 self._write()
-        
+
         elif report.when == "call":
             # Only update if setup didn't fail or skip
             if self._test_outcomes[nodeid]["setup"] not in ("failed", "skipped"):
@@ -97,18 +100,18 @@ class ProgressPlugin:
                 elif report.skipped:
                     self.skipped += 1
                 self._write()
-        
+
         elif report.when == "teardown":
             # Teardown is the final phase - count test as done if not already counted
             if self._test_outcomes[nodeid]["setup"] not in ("failed", "skipped"):
                 # Test was counted in call phase, just mark as done
                 self.done += 1
-                
+
                 # If teardown failed but call passed, update to failed
                 if report.failed and self._test_outcomes[nodeid]["call"] == "passed":
                     self.passed -= 1
                     self.failed += 1
-                
+
                 self._write()
 
 

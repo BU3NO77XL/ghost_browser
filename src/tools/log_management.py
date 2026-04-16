@@ -74,9 +74,7 @@ def register(mcp, section_tool, deps):
         return await LogHandler.clear_log(tab)
 
     @section_tool("log-management")
-    async def log_start_violations_report(
-        instance_id: str, settings: List[Dict]
-    ) -> bool:
+    async def log_start_violations_report(instance_id: str, settings: List[Dict]) -> bool:
         """
         Start violation reporting for a browser instance.
 

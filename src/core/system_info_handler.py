@@ -22,9 +22,7 @@ class SystemInfoHandler:
         Returns:
             Dict with keys ``gpu``, ``model_name``, and ``command_line``.
         """
-        debug_logger.log_info(
-            "SystemInfoHandler", "get_info", "Fetching system info"
-        )
+        debug_logger.log_info("SystemInfoHandler", "get_info", "Fetching system info")
         try:
             result = await tab.send(cdp.system_info.get_info())
             # Convert the GPUInfo object to a serialisable dict.
@@ -98,9 +96,7 @@ class SystemInfoHandler:
         Returns:
             List of dicts each with ``id``, ``type``, and ``cpu_time`` keys.
         """
-        debug_logger.log_info(
-            "SystemInfoHandler", "get_process_info", "Fetching process info"
-        )
+        debug_logger.log_info("SystemInfoHandler", "get_process_info", "Fetching process info")
         try:
             result = await tab.send(cdp.system_info.get_process_info())
             processes = [

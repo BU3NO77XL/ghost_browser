@@ -87,9 +87,7 @@ def register(mcp, section_tool, deps):
         tab = await browser_manager.get_tab(instance_id)
         if not tab:
             raise Exception(f"Instance not found: {instance_id}")
-        return await DebuggerHandler.set_breakpoint(
-            tab, url, line_number, column_number, condition
-        )
+        return await DebuggerHandler.set_breakpoint(tab, url, line_number, column_number, condition)
 
     @section_tool("debugger-management")
     async def remove_breakpoint(instance_id: str, breakpoint_id: str) -> bool:
@@ -224,8 +222,6 @@ def register(mcp, section_tool, deps):
         tab = await browser_manager.get_tab(instance_id)
         if not tab:
             raise Exception(f"Instance not found: {instance_id}")
-        return await DebuggerHandler.evaluate_on_call_frame(
-            tab, call_frame_id, expression
-        )
+        return await DebuggerHandler.evaluate_on_call_frame(tab, call_frame_id, expression)
 
     return {k: v for k, v in locals().items() if callable(v) and not k.startswith("_")}

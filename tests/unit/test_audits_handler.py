@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── enable / disable ──────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_enable_audits_success():
     tab = _make_tab()
@@ -30,6 +31,7 @@ async def test_disable_audits_success():
 
 
 # ── get_encoded_response — encoding validation ────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_encoded_response_invalid_encoding_gif():
@@ -89,6 +91,7 @@ async def test_get_encoded_response_valid_png():
 
 # ── check_contrast ────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_check_contrast_returns_true_when_cdp_returns_none():
     tab = _make_tab()
@@ -105,6 +108,7 @@ async def test_check_contrast_with_report_aaa():
 
 
 # ── error handling ────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_enable_audits_timeout():

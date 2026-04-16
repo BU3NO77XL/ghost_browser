@@ -67,9 +67,7 @@ class WebAuthnHandler:
                 has_user_verification=has_user_verification,
                 is_user_verified=is_user_verified,
             )
-            result = await tab.send(
-                cdp.web_authn.add_virtual_authenticator(options=options)
-            )
+            result = await tab.send(cdp.web_authn.add_virtual_authenticator(options=options))
             authenticator_id = str(result.authenticator_id)
             debug_logger.log_info(
                 "WebAuthnHandler",
@@ -95,9 +93,7 @@ class WebAuthnHandler:
             raise
 
     @staticmethod
-    async def remove_virtual_authenticator(
-        tab: Tab, authenticator_id: str
-    ) -> bool:
+    async def remove_virtual_authenticator(tab: Tab, authenticator_id: str) -> bool:
         """
         Remove a virtual authenticator.
 
@@ -201,9 +197,7 @@ class WebAuthnHandler:
             raise
 
     @staticmethod
-    async def get_credentials(
-        tab: Tab, authenticator_id: str
-    ) -> List[Dict[str, Any]]:
+    async def get_credentials(tab: Tab, authenticator_id: str) -> List[Dict[str, Any]]:
         """
         Get all credentials stored in a virtual authenticator.
 
@@ -227,13 +221,15 @@ class WebAuthnHandler:
             )
             credentials = []
             for cred in (result.credentials if result.credentials else []):
-                credentials.append({
-                    "credential_id": cred.credential_id,
-                    "is_resident_credential": cred.is_resident_credential,
-                    "rp_id": cred.rp_id,
-                    "user_handle": cred.user_handle,
-                    "sign_count": cred.sign_count,
-                })
+                credentials.append(
+                    {
+                        "credential_id": cred.credential_id,
+                        "is_resident_credential": cred.is_resident_credential,
+                        "rp_id": cred.rp_id,
+                        "user_handle": cred.user_handle,
+                        "sign_count": cred.sign_count,
+                    }
+                )
             return credentials
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
@@ -253,9 +249,7 @@ class WebAuthnHandler:
             raise
 
     @staticmethod
-    async def remove_credential(
-        tab: Tab, authenticator_id: str, credential_id: str
-    ) -> bool:
+    async def remove_credential(tab: Tab, authenticator_id: str, credential_id: str) -> bool:
         """
         Remove a credential from a virtual authenticator.
 
@@ -298,9 +292,7 @@ class WebAuthnHandler:
             raise
 
     @staticmethod
-    async def set_user_verified(
-        tab: Tab, authenticator_id: str, is_user_verified: bool
-    ) -> bool:
+    async def set_user_verified(tab: Tab, authenticator_id: str, is_user_verified: bool) -> bool:
         """
         Set the user verified state for a virtual authenticator.
 

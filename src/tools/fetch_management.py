@@ -43,7 +43,9 @@ def register(mcp, section_tool, deps):
         tab = await browser_manager.get_tab(instance_id)
         if not tab:
             raise Exception(f"Instance not found: {instance_id}")
-        return await FetchHandler.enable_fetch(tab, patterns=patterns, handle_auth_requests=handle_auth_requests)
+        return await FetchHandler.enable_fetch(
+            tab, patterns=patterns, handle_auth_requests=handle_auth_requests
+        )
 
     @section_tool("fetch-management")
     async def fetch_disable(instance_id: str) -> bool:
@@ -91,7 +93,9 @@ def register(mcp, section_tool, deps):
         tab = await browser_manager.get_tab(instance_id)
         if not tab:
             raise Exception(f"Instance not found: {instance_id}")
-        return await FetchHandler.fail_request(tab, request_id=request_id, error_reason=error_reason)
+        return await FetchHandler.fail_request(
+            tab, request_id=request_id, error_reason=error_reason
+        )
 
     @section_tool("fetch-management")
     async def fetch_fulfill_request(

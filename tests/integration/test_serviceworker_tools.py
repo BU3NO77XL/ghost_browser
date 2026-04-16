@@ -15,6 +15,7 @@ def _make_deps(tab=None):
 
 def _register():
     from tools.serviceworker_management import register
+
     mcp = MagicMock()
     registered = {}
 
@@ -22,6 +23,7 @@ def _register():
         def decorator(func):
             registered[func.__name__] = func
             return func
+
         return decorator
 
     return register, mcp, section_tool, registered
@@ -81,7 +83,7 @@ async def test_deliver_push_message_tool():
             "inst-1",
             origin="https://example.com",
             registration_id="reg-123",
-            data='{"title": "Test"}'
+            data='{"title": "Test"}',
         )
         assert result is True
 
@@ -94,10 +96,7 @@ async def test_dispatch_sync_event_tool():
     with patch("core.login_guard.check_pending_login_guard", return_value=None):
         register(mcp, section_tool, deps)
         result = await registered["dispatch_sync_event"](
-            "inst-1",
-            origin="https://example.com",
-            registration_id="reg-123",
-            tag="sync-messages"
+            "inst-1", origin="https://example.com", registration_id="reg-123", tag="sync-messages"
         )
         assert result is True
 

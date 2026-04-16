@@ -1,6 +1,6 @@
 """Ghost Browser MCP — ASCII banner and color utilities."""
 
-# Ghost art 
+# Ghost art
 _GHOST_LINES = [
     "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀",
     "⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⠀⣀⣴⣾⣿⣿⣿⣿⣿⣿⣶⣄⠀⠀⠀",
@@ -65,8 +65,8 @@ def print_banner() -> None:
 
     print()
     for i in range(total):
-        left  = _GHOST_LINES[i]  if i < len(_GHOST_LINES)  else ""
-        right = _RIGHT_LINES[i]  if i < len(_RIGHT_LINES)  else ""
+        left = _GHOST_LINES[i] if i < len(_GHOST_LINES) else ""
+        right = _RIGHT_LINES[i] if i < len(_RIGHT_LINES) else ""
 
         padding = ghost_width - _visual_width(left)
         print(left + " " * (padding + gap) + right)

@@ -15,6 +15,7 @@ def _make_deps(tab=None):
 
 def _register():
     from tools.debugger_management import register
+
     mcp = MagicMock()
     registered = {}
 
@@ -22,6 +23,7 @@ def _register():
         def decorator(func):
             registered[func.__name__] = func
             return func
+
         return decorator
 
     return register, mcp, section_tool, registered
@@ -67,9 +69,7 @@ async def test_set_breakpoint_tool():
 
     with patch("core.login_guard.check_pending_login_guard", return_value=None):
         register(mcp, section_tool, deps)
-        result = await registered["set_breakpoint"](
-            "inst-1", url="app.js", line_number=42
-        )
+        result = await registered["set_breakpoint"]("inst-1", url="app.js", line_number=42)
         assert result["breakpoint_id"] == "bp-1"
 
 

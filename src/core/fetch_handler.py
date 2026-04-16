@@ -34,9 +34,7 @@ class FetchHandler:
         try:
             request_patterns = None
             if patterns:
-                request_patterns = [
-                    cdp.fetch.RequestPattern(**pattern) for pattern in patterns
-                ]
+                request_patterns = [cdp.fetch.RequestPattern(**pattern) for pattern in patterns]
             await tab.send(
                 cdp.fetch.enable(
                     patterns=request_patterns,
@@ -226,8 +224,7 @@ class FetchHandler:
             override_headers = None
             if headers:
                 override_headers = [
-                    cdp.fetch.HeaderEntry(name=h["name"], value=h["value"])
-                    for h in headers
+                    cdp.fetch.HeaderEntry(name=h["name"], value=h["value"]) for h in headers
                 ]
             await tab.send(
                 cdp.fetch.continue_request(

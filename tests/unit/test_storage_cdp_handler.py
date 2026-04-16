@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── get_usage_and_quota ───────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_get_usage_and_quota_computes_usage_mb():
     tab = _make_tab()
@@ -62,12 +63,11 @@ async def test_get_usage_and_quota_rounds_to_two_decimals():
 
 # ── clear_data_for_origin ─────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_clear_data_for_origin_success():
     tab = _make_tab()
-    result = await StorageCDPHandler.clear_data_for_origin(
-        tab, "https://example.com", "all"
-    )
+    result = await StorageCDPHandler.clear_data_for_origin(tab, "https://example.com", "all")
     assert result is True
     tab.send.assert_called_once()
 
@@ -93,21 +93,18 @@ async def test_clear_data_for_origin_websocket_error():
 
 # ── track / untrack ───────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_track_cache_storage_for_origin_success():
     tab = _make_tab()
-    result = await StorageCDPHandler.track_cache_storage_for_origin(
-        tab, "https://example.com"
-    )
+    result = await StorageCDPHandler.track_cache_storage_for_origin(tab, "https://example.com")
     assert result is True
 
 
 @pytest.mark.asyncio
 async def test_untrack_cache_storage_for_origin_success():
     tab = _make_tab()
-    result = await StorageCDPHandler.untrack_cache_storage_for_origin(
-        tab, "https://example.com"
-    )
+    result = await StorageCDPHandler.untrack_cache_storage_for_origin(tab, "https://example.com")
     assert result is True
 
 

@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── set_ignore_certificate_errors ─────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_set_ignore_certificate_errors_true():
     tab = _make_tab()
@@ -51,6 +52,7 @@ async def test_set_ignore_certificate_errors_timeout():
 
 
 # ── get_security_state ────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_security_state_https():
@@ -89,6 +91,7 @@ async def test_get_security_state_websocket_error():
 
 
 # ── handle_certificate_error ──────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_handle_certificate_error_continue():

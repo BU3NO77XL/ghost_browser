@@ -56,9 +56,7 @@ def register(mcp, section_tool, deps):
         )
 
     @section_tool("webauthn-management")
-    async def remove_virtual_authenticator(
-        instance_id: str, authenticator_id: str
-    ) -> bool:
+    async def remove_virtual_authenticator(instance_id: str, authenticator_id: str) -> bool:
         """
         Remove a virtual WebAuthn authenticator.
 
@@ -182,8 +180,6 @@ def register(mcp, section_tool, deps):
         tab = await browser_manager.get_tab(instance_id)
         if not tab:
             raise Exception(f"Instance not found: {instance_id}")
-        return await WebAuthnHandler.set_user_verified(
-            tab, authenticator_id, is_user_verified
-        )
+        return await WebAuthnHandler.set_user_verified(tab, authenticator_id, is_user_verified)
 
     return {k: v for k, v in locals().items() if callable(v) and not k.startswith("_")}

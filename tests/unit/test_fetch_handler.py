@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── enable_fetch ──────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_enable_fetch_no_patterns():
     tab = _make_tab()
@@ -51,6 +52,7 @@ async def test_enable_fetch_timeout():
 
 # ── disable_fetch ─────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_disable_fetch_success():
     tab = _make_tab()
@@ -59,6 +61,7 @@ async def test_disable_fetch_success():
 
 
 # ── continue_with_auth ────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_continue_with_auth_converts_dict():
@@ -80,6 +83,7 @@ async def test_continue_with_auth_converts_dict():
 
 
 # ── get_response_body ─────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_response_body_structural_invariant():

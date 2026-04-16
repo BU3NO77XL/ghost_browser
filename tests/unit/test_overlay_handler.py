@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── enable / disable ──────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_enable_overlay_success():
     tab = _make_tab()
@@ -30,6 +31,7 @@ async def test_disable_overlay_success():
 
 
 # ── highlight_node ────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_highlight_node_with_node_id():
@@ -65,6 +67,7 @@ async def test_highlight_node_with_backend_node_id():
 
 # ── hide_highlight ────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_hide_highlight_success():
     tab = _make_tab()
@@ -74,6 +77,7 @@ async def test_hide_highlight_success():
 
 # ── highlight_rect ────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_highlight_rect_success():
     tab = _make_tab()
@@ -82,6 +86,7 @@ async def test_highlight_rect_success():
 
 
 # ── set_show_grid_overlays ────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_set_show_grid_overlays_converts_configs():
@@ -100,6 +105,7 @@ async def test_set_show_grid_overlays_converts_configs():
 
 
 # ── websocket error ───────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_enable_overlay_websocket_error():

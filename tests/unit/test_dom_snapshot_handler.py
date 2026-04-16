@@ -28,6 +28,7 @@ def _make_snapshot_result(node_count=5):
 
 # ── enable / disable ──────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_enable_dom_snapshot_success():
     tab = _make_tab()
@@ -43,6 +44,7 @@ async def test_disable_dom_snapshot_success():
 
 
 # ── capture_snapshot — default computed_styles ────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_capture_snapshot_uses_default_when_none():
@@ -65,6 +67,7 @@ async def test_capture_snapshot_uses_default_when_empty_list():
 
 
 # ── capture_snapshot — node_count ─────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_capture_snapshot_node_count_correct():
@@ -100,6 +103,7 @@ async def test_capture_snapshot_always_has_node_count_key():
 
 
 # ── error handling ────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_capture_snapshot_timeout():

@@ -122,7 +122,9 @@ class TestMCPNavigation:
     @pytest.mark.asyncio
     async def test_navigate_basic(self):
         iid = await _spawn()
-        result = await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
+        result = await navigate(
+            iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000
+        )
         assert result["success"] is True
         assert "httpbin.org" in result["url"]
         assert result["login_required"] is False
@@ -142,7 +144,9 @@ class TestMCPNavigation:
         """Navigate to a real login page and verify login_required=True."""
         iid = await _spawn()
         # Use a URL that has 'login' in it and a password field
-        result = await navigate(iid, "https://httpbin.org/forms/post", inject_cookies=False, timeout=10000)
+        result = await navigate(
+            iid, "https://httpbin.org/forms/post", inject_cookies=False, timeout=10000
+        )
         # httpbin forms page has a password field — may or may not trigger
         # depending on DOM detection. Just verify the response shape is correct.
         assert "login_required" in result
@@ -153,7 +157,9 @@ class TestMCPNavigation:
     @pytest.mark.asyncio
     async def test_navigate_no_login_on_plain_page(self):
         iid = await _spawn()
-        result = await navigate(iid, "https://httpbin.org/json", inject_cookies=False, timeout=10000)
+        result = await navigate(
+            iid, "https://httpbin.org/json", inject_cookies=False, timeout=10000
+        )
         assert result["login_required"] is False
         await _close(iid)
 

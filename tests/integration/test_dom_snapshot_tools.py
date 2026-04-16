@@ -26,6 +26,7 @@ def _make_deps(tab=None):
 
 def _register():
     from tools.dom_snapshot_management import register
+
     mcp = MagicMock()
     registered = {}
 
@@ -33,6 +34,7 @@ def _register():
         def decorator(func):
             registered[func.__name__] = func
             return func
+
         return decorator
 
     return register, mcp, section_tool, registered
@@ -44,10 +46,12 @@ async def test_dom_snapshot_capture_twice_same_node_count():
     register, mcp, section_tool, registered = _register()
 
     tab = AsyncMock()
-    tab.send = AsyncMock(side_effect=[
-        _make_snapshot_result(10),
-        _make_snapshot_result(10),
-    ])
+    tab.send = AsyncMock(
+        side_effect=[
+            _make_snapshot_result(10),
+            _make_snapshot_result(10),
+        ]
+    )
     deps, _ = _make_deps(tab)
 
     with patch("core.login_guard.check_pending_login_guard", return_value=None):

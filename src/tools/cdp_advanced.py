@@ -156,32 +156,61 @@ def register(mcp, section_tool, deps):
             return {"error": f"Instance not found: {instance_id}"}
 
         presets = {
-            "iPhone 14":   {"width": 390,  "height": 844,  "dsf": 3.0, "mobile": True,  "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15"},
-            "Pixel 7":     {"width": 412,  "height": 915,  "dsf": 2.625,"mobile": True, "ua": "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36"},
-            "iPad":        {"width": 820,  "height": 1180, "dsf": 2.0, "mobile": True,  "ua": "Mozilla/5.0 (iPad; CPU OS 16_0 like Mac OS X) AppleWebKit/605.1.15"},
-            "Galaxy S23":  {"width": 360,  "height": 780,  "dsf": 3.0, "mobile": True,  "ua": "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36"},
-            "desktop":     {"width": 1920, "height": 1080, "dsf": 1.0, "mobile": False, "ua": None},
+            "iPhone 14": {
+                "width": 390,
+                "height": 844,
+                "dsf": 3.0,
+                "mobile": True,
+                "ua": "Mozilla/5.0 (iPhone; CPU iPhone OS 16_0 like Mac OS X) AppleWebKit/605.1.15",
+            },
+            "Pixel 7": {
+                "width": 412,
+                "height": 915,
+                "dsf": 2.625,
+                "mobile": True,
+                "ua": "Mozilla/5.0 (Linux; Android 13; Pixel 7) AppleWebKit/537.36",
+            },
+            "iPad": {
+                "width": 820,
+                "height": 1180,
+                "dsf": 2.0,
+                "mobile": True,
+                "ua": "Mozilla/5.0 (iPad; CPU OS 16_0 like Mac OS X) AppleWebKit/605.1.15",
+            },
+            "Galaxy S23": {
+                "width": 360,
+                "height": 780,
+                "dsf": 3.0,
+                "mobile": True,
+                "ua": "Mozilla/5.0 (Linux; Android 13; SM-S911B) AppleWebKit/537.36",
+            },
+            "desktop": {"width": 1920, "height": 1080, "dsf": 1.0, "mobile": False, "ua": None},
         }
 
         preset = presets.get(device, presets["desktop"])
-        w   = width  or preset["width"]
-        h   = height or preset["height"]
+        w = width or preset["width"]
+        h = height or preset["height"]
         dsf = device_scale_factor or preset["dsf"]
         mob = mobile if mobile is not None else preset["mobile"]
-        ua  = user_agent or preset["ua"]
+        ua = user_agent or preset["ua"]
 
         try:
-            await tab.send(tab.browser.connection.send(
-                "Emulation.setDeviceMetricsOverride",
-                width=w, height=h,
-                deviceScaleFactor=dsf,
-                mobile=mob,
-            ))
+            await tab.send(
+                tab.browser.connection.send(
+                    "Emulation.setDeviceMetricsOverride",
+                    width=w,
+                    height=h,
+                    deviceScaleFactor=dsf,
+                    mobile=mob,
+                )
+            )
             if ua:
-                await tab.send(tab.browser.connection.send(
-                    "Emulation.setUserAgentOverride",
-                    userAgent=ua,
-                ))
+                await tab.send(
+                    tab.browser.connection.send(
+                        "Emulation.setUserAgentOverride",
+                        userAgent=ua,
+                    )
+                )
             return {
                 "success": True,
                 "device": device,
@@ -219,13 +248,20 @@ def register(mcp, section_tool, deps):
         if not tab:
             return {"error": f"Instance not found: {instance_id}"}
         try:
-            await tab.send(tab.browser.connection.send(
-                "Emulation.setGeolocationOverride",
-                latitude=latitude,
-                longitude=longitude,
-                accuracy=accuracy,
-            ))
-            return {"success": True, "latitude": latitude, "longitude": longitude, "accuracy": accuracy}
+            await tab.send(
+                tab.browser.connection.send(
+                    "Emulation.setGeolocationOverride",
+                    latitude=latitude,
+                    longitude=longitude,
+                    accuracy=accuracy,
+                )
+            )
+            return {
+                "success": True,
+                "latitude": latitude,
+                "longitude": longitude,
+                "accuracy": accuracy,
+            }
         except Exception as e:
             return {"error": str(e)}
 
@@ -251,10 +287,12 @@ def register(mcp, section_tool, deps):
         if not tab:
             return {"error": f"Instance not found: {instance_id}"}
         try:
-            await tab.send(tab.browser.connection.send(
-                "Emulation.setEmulatedMedia",
-                features=[{"name": "prefers-color-scheme", "value": scheme}],
-            ))
+            await tab.send(
+                tab.browser.connection.send(
+                    "Emulation.setEmulatedMedia",
+                    features=[{"name": "prefers-color-scheme", "value": scheme}],
+                )
+            )
             return {"success": True, "scheme": scheme}
         except Exception as e:
             return {"error": str(e)}
@@ -290,27 +328,29 @@ def register(mcp, section_tool, deps):
 
         # bytes/s values
         presets = {
-            "offline": {"dl": 0,       "ul": 0,      "lat": 0,   "offline": True},
-            "2G":      {"dl": 50000,   "ul": 20000,  "lat": 300, "offline": False},
-            "3G":      {"dl": 375000,  "ul": 125000, "lat": 100, "offline": False},
-            "fast3G":  {"dl": 1500000, "ul": 750000, "lat": 40,  "offline": False},
-            "4G":      {"dl": 4000000, "ul": 3000000,"lat": 20,  "offline": False},
-            "wifi":    {"dl": 30000000,"ul": 15000000,"lat": 2,  "offline": False},
-            "none":    {"dl": -1,      "ul": -1,     "lat": 0,   "offline": False},
+            "offline": {"dl": 0, "ul": 0, "lat": 0, "offline": True},
+            "2G": {"dl": 50000, "ul": 20000, "lat": 300, "offline": False},
+            "3G": {"dl": 375000, "ul": 125000, "lat": 100, "offline": False},
+            "fast3G": {"dl": 1500000, "ul": 750000, "lat": 40, "offline": False},
+            "4G": {"dl": 4000000, "ul": 3000000, "lat": 20, "offline": False},
+            "wifi": {"dl": 30000000, "ul": 15000000, "lat": 2, "offline": False},
+            "none": {"dl": -1, "ul": -1, "lat": 0, "offline": False},
         }
         p = presets.get(preset, presets["3G"])
-        dl  = download_throughput  if download_throughput  is not None else p["dl"]
-        ul  = upload_throughput    if upload_throughput    is not None else p["ul"]
-        lat = latency              if latency              is not None else p["lat"]
+        dl = download_throughput if download_throughput is not None else p["dl"]
+        ul = upload_throughput if upload_throughput is not None else p["ul"]
+        lat = latency if latency is not None else p["lat"]
 
         try:
-            await tab.send(tab.browser.connection.send(
-                "Network.emulateNetworkConditions",
-                offline=p.get("offline", False),
-                downloadThroughput=dl,
-                uploadThroughput=ul,
-                latency=lat,
-            ))
+            await tab.send(
+                tab.browser.connection.send(
+                    "Network.emulateNetworkConditions",
+                    offline=p.get("offline", False),
+                    downloadThroughput=dl,
+                    uploadThroughput=ul,
+                    latency=lat,
+                )
+            )
             return {
                 "success": True,
                 "preset": preset,
@@ -354,23 +394,29 @@ def register(mcp, section_tool, deps):
                 # Get node ID for selector first
                 doc = await tab.send(tab.browser.connection.send("DOM.getDocument", depth=0))
                 root_id = doc.get("root", {}).get("nodeId", 1)
-                node = await tab.send(tab.browser.connection.send(
-                    "DOM.querySelector", nodeId=root_id, selector=selector
-                ))
+                node = await tab.send(
+                    tab.browser.connection.send(
+                        "DOM.querySelector", nodeId=root_id, selector=selector
+                    )
+                )
                 node_id = node.get("nodeId")
                 if node_id:
-                    result = await tab.send(tab.browser.connection.send(
-                        "Accessibility.getPartialAXTree",
-                        nodeId=node_id,
-                        fetchRelatives=True,
-                    ))
+                    result = await tab.send(
+                        tab.browser.connection.send(
+                            "Accessibility.getPartialAXTree",
+                            nodeId=node_id,
+                            fetchRelatives=True,
+                        )
+                    )
                 else:
                     return {"error": f"Selector not found: {selector}"}
             else:
-                result = await tab.send(tab.browser.connection.send(
-                    "Accessibility.getFullAXTree",
-                    depth=depth,
-                ))
+                result = await tab.send(
+                    tab.browser.connection.send(
+                        "Accessibility.getFullAXTree",
+                        depth=depth,
+                    )
+                )
 
             nodes = result.get("nodes", [])
 
@@ -496,7 +542,10 @@ def register(mcp, section_tool, deps):
                     });
                 })()
             """)
-            return {"success": True, "message": "Console capture injected. Use get_console_logs() to retrieve."}
+            return {
+                "success": True,
+                "message": "Console capture injected. Use get_console_logs() to retrieve.",
+            }
         except Exception as e:
             return {"error": str(e)}
 
@@ -615,18 +664,20 @@ def register(mcp, section_tool, deps):
             import base64
             from pathlib import Path
 
-            result = await tab.send(tab.browser.connection.send(
-                "Page.printToPDF",
-                landscape=landscape,
-                printBackground=print_background,
-                scale=scale,
-                paperWidth=paper_width,
-                paperHeight=paper_height,
-                marginTop=0.4,
-                marginBottom=0.4,
-                marginLeft=0.4,
-                marginRight=0.4,
-            ))
+            result = await tab.send(
+                tab.browser.connection.send(
+                    "Page.printToPDF",
+                    landscape=landscape,
+                    printBackground=print_background,
+                    scale=scale,
+                    paperWidth=paper_width,
+                    paperHeight=paper_height,
+                    marginTop=0.4,
+                    marginBottom=0.4,
+                    marginLeft=0.4,
+                    marginRight=0.4,
+                )
+            )
             data = result.get("data", "")
             pdf_bytes = base64.b64decode(data)
             Path(output_path).write_bytes(pdf_bytes)
@@ -673,13 +724,16 @@ def register(mcp, section_tool, deps):
         if not tab:
             return {"error": f"Instance not found: {instance_id}"}
         try:
-            await tab.send(tab.browser.connection.send(
-                "Input.dispatchMouseEvent",
-                type=event_type,
-                x=x, y=y,
-                button=button,
-                clickCount=click_count,
-            ))
+            await tab.send(
+                tab.browser.connection.send(
+                    "Input.dispatchMouseEvent",
+                    type=event_type,
+                    x=x,
+                    y=y,
+                    button=button,
+                    clickCount=click_count,
+                )
+            )
             return {"success": True, "event": event_type, "x": x, "y": y}
         except Exception as e:
             return {"error": str(e)}
@@ -716,12 +770,15 @@ def register(mcp, section_tool, deps):
             """)
             if not rect:
                 return {"error": f"Selector not found: {selector}"}
-            await tab.send(tab.browser.connection.send(
-                "Input.dispatchMouseEvent",
-                type="mouseMoved",
-                x=rect["x"], y=rect["y"],
-                button="none",
-            ))
+            await tab.send(
+                tab.browser.connection.send(
+                    "Input.dispatchMouseEvent",
+                    type="mouseMoved",
+                    x=rect["x"],
+                    y=rect["y"],
+                    button="none",
+                )
+            )
             return {"success": True, "selector": selector, "x": rect["x"], "y": rect["y"]}
         except Exception as e:
             return {"error": str(e)}

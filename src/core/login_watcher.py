@@ -157,7 +157,9 @@ class LoginWatcher:
             if bool(has_pw):
                 return False
         except Exception as e:
-            debug_logger.log_warning("login_watcher", "_left_login_page", f"Password field check failed: {e}")
+            debug_logger.log_warning(
+                "login_watcher", "_left_login_page", f"Password field check failed: {e}"
+            )
 
         return True
 

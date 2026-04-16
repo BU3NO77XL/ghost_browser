@@ -48,9 +48,7 @@ class SecurityHandler:
             f"Setting ignore certificate errors: {ignore}",
         )
         try:
-            await tab.send(
-                cdp.security.set_ignore_certificate_errors(ignore=ignore)
-            )
+            await tab.send(cdp.security.set_ignore_certificate_errors(ignore=ignore))
             return True
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
@@ -84,9 +82,7 @@ class SecurityHandler:
             Dict[str, Any]: Security state with security_state, certificate_id,
                             scheme_is_cryptographic, and explanations.
         """
-        debug_logger.log_info(
-            "SecurityHandler", "get_security_state", "Getting security state"
-        )
+        debug_logger.log_info("SecurityHandler", "get_security_state", "Getting security state")
         try:
             await SecurityHandler.enable_security_domain(tab)
             # Use JS to get security info since CDP Security domain uses events
@@ -103,6 +99,7 @@ class SecurityHandler:
                 )
             )
             import json
+
             state = {}
             if result and result.result and result.result.value:
                 try:
@@ -128,9 +125,7 @@ class SecurityHandler:
             raise
 
     @staticmethod
-    async def handle_certificate_error(
-        tab: Tab, event_id: int, action: str
-    ) -> bool:
+    async def handle_certificate_error(tab: Tab, event_id: int, action: str) -> bool:
         """
         Handle a certificate error event.
 

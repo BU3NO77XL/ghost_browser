@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── start_observing ───────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_start_observing_valid_service():
     tab = _make_tab()
@@ -61,6 +62,7 @@ async def test_start_observing_timeout():
 
 # ── stop_observing ────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_stop_observing_success():
     tab = _make_tab()
@@ -76,6 +78,7 @@ async def test_stop_observing_invalid_service():
 
 
 # ── get_events ────────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_events_empty():
@@ -106,6 +109,7 @@ async def test_get_events_filters_by_service():
 
 
 # ── clear_events ──────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_clear_events_success():

@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── enable_profiler ───────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_enable_profiler_success():
     tab = _make_tab()
@@ -31,6 +32,7 @@ async def test_enable_profiler_already_enabled():
 
 
 # ── start_profiling ───────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_start_profiling_success():
@@ -61,6 +63,7 @@ async def test_start_profiling_timeout():
 
 
 # ── stop_profiling ────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_stop_profiling_success():
@@ -149,6 +152,7 @@ async def test_stop_profiling_no_profile():
 
 # ── start_precise_coverage ────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_start_precise_coverage_default():
     tab = _make_tab()
@@ -175,6 +179,7 @@ async def test_start_precise_coverage_websocket_error():
 
 # ── stop_precise_coverage ─────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_stop_precise_coverage_success():
     tab = _make_tab()
@@ -183,6 +188,7 @@ async def test_stop_precise_coverage_success():
 
 
 # ── take_precise_coverage ─────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_take_precise_coverage_success():

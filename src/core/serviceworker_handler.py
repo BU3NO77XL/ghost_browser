@@ -74,9 +74,7 @@ class ServiceWorkerHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "ServiceWorkerHandler", "list_service_workers", e, {}
-            )
+            debug_logger.log_error("ServiceWorkerHandler", "list_service_workers", e, {})
             raise
 
     @staticmethod
@@ -156,9 +154,7 @@ class ServiceWorkerHandler:
             raise
 
     @staticmethod
-    async def deliver_push_message(
-        tab: Tab, origin: str, registration_id: str, data: str
-    ) -> bool:
+    async def deliver_push_message(tab: Tab, origin: str, registration_id: str, data: str) -> bool:
         """
         Deliver a push message to a service worker.
 

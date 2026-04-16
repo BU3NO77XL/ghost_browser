@@ -244,9 +244,13 @@ class BrowserManager:
                             try:
                                 await tab.close()
                             except Exception as e:
-                                debug_logger.log_warning("browser_manager", "close_instance", f"Failed to close tab: {e}")
+                                debug_logger.log_warning(
+                                    "browser_manager", "close_instance", f"Failed to close tab: {e}"
+                                )
                 except Exception as e:
-                    debug_logger.log_warning("browser_manager", "close_instance", f"Tab closing block failed: {e}")
+                    debug_logger.log_warning(
+                        "browser_manager", "close_instance", f"Tab closing block failed: {e}"
+                    )
 
                 try:
                     if hasattr(browser, "connection") and browser.connection:
@@ -275,12 +279,16 @@ class BrowserManager:
                     if hasattr(browser, "connection") and browser.connection:
                         await browser.connection.send(cdp_browser.close())
                 except Exception as e:
-                    debug_logger.log_warning("browser_manager", "close_instance", f"Failed to send CDP close: {e}")
+                    debug_logger.log_warning(
+                        "browser_manager", "close_instance", f"Failed to send CDP close: {e}"
+                    )
 
                 try:
                     await browser.stop()
                 except Exception as e:
-                    debug_logger.log_warning("browser_manager", "close_instance", f"Failed to stop browser: {e}")
+                    debug_logger.log_warning(
+                        "browser_manager", "close_instance", f"Failed to stop browser: {e}"
+                    )
 
                 if (
                     hasattr(browser, "_process")
@@ -331,7 +339,9 @@ class BrowserManager:
                     try:
                         await asyncio.wait_for(browser._process.wait(), timeout=3.0)
                     except Exception as e:
-                        debug_logger.log_warning("browser_manager", "close_instance", f"Process wait failed: {e}")
+                        debug_logger.log_warning(
+                            "browser_manager", "close_instance", f"Process wait failed: {e}"
+                        )
 
                 try:
                     if hasattr(browser, "_process"):
@@ -341,7 +351,9 @@ class BrowserManager:
 
                     instance.state = BrowserState.CLOSED
                 except Exception as e:
-                    debug_logger.log_warning("browser_manager", "close_instance", f"Failed to cleanup browser state: {e}")
+                    debug_logger.log_warning(
+                        "browser_manager", "close_instance", f"Failed to cleanup browser state: {e}"
+                    )
 
                 del self._instances[instance_id]
 
@@ -349,15 +361,22 @@ class BrowserManager:
                 try:
                     process_cleanup.untrack_browser_process(instance_id)
                 except Exception as e:
-                    debug_logger.log_warning("browser_manager", "close_instance", f"Failed to untrack process: {e}")
+                    debug_logger.log_warning(
+                        "browser_manager", "close_instance", f"Failed to untrack process: {e}"
+                    )
 
                 # Schedule deferred deletion of all temp files associated with
                 # this instance (files are deleted after a grace period, not immediately).
                 try:
                     from core.temp_file_manager import temp_file_manager
+
                     temp_file_manager.schedule_instance_cleanup(instance_id)
                 except Exception as e:
-                    debug_logger.log_warning("browser_manager", "close_instance", f"Failed to schedule instance temp file cleanup: {e}")
+                    debug_logger.log_warning(
+                        "browser_manager",
+                        "close_instance",
+                        f"Failed to schedule instance temp file cleanup: {e}",
+                    )
 
                 return True
 
@@ -377,7 +396,9 @@ class BrowserManager:
                         del self._instances[instance_id]
                         persistent_storage.remove_instance(instance_id)
             except Exception as e:
-                debug_logger.log_warning("browser_manager", "close_instance", f"Forced cleanup failed: {e}")
+                debug_logger.log_warning(
+                    "browser_manager", "close_instance", f"Forced cleanup failed: {e}"
+                )
             return True
         except Exception as e:
             debug_logger.log_error("browser_manager", "close_instance", e)
@@ -591,6 +612,7 @@ class BrowserManager:
 
             # Parse the JSON string to dict
             import json
+
             if isinstance(result_json, str):
                 result = json.loads(result_json)
             else:
@@ -601,7 +623,7 @@ class BrowserManager:
                 debug_logger.log_info(
                     "browser_manager",
                     "get_page_state",
-                    f"JS returned {type(result)}, returning minimal state"
+                    f"JS returned {type(result)}, returning minimal state",
                 )
                 # When JS returns unexpected type, skip fallback to avoid blocking
                 # Use minimal state - the important fields are url and title
@@ -617,7 +639,9 @@ class BrowserManager:
                 ready_state = result.get("ready_state", "complete")
                 local_storage = result.get("local_storage", {})
                 session_storage = result.get("session_storage", {})
-                viewport = result.get("viewport", {"width": 1920, "height": 1080, "devicePixelRatio": 1})
+                viewport = result.get(
+                    "viewport", {"width": 1920, "height": 1080, "devicePixelRatio": 1}
+                )
 
             if not isinstance(viewport, dict):
                 viewport = {"width": 1920, "height": 1080, "devicePixelRatio": 1}

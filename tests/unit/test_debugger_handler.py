@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── enable_debugger ───────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_enable_debugger_success():
     tab = _make_tab()
@@ -36,6 +37,7 @@ async def test_enable_debugger_already_enabled():
 
 # ── disable_debugger ──────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_disable_debugger_success():
     tab = _make_tab()
@@ -52,6 +54,7 @@ async def test_disable_debugger_not_enabled():
 
 
 # ── set_breakpoint ────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_set_breakpoint_success():
@@ -80,9 +83,7 @@ async def test_set_breakpoint_with_condition():
     mock_result.locations = []
     tab.send = AsyncMock(side_effect=[None, mock_result])
 
-    result = await DebuggerHandler.set_breakpoint(
-        tab, "app.js", 10, condition="x > 5"
-    )
+    result = await DebuggerHandler.set_breakpoint(tab, "app.js", 10, condition="x > 5")
     assert result["breakpoint_id"] == "bp-cond"
 
 
@@ -108,6 +109,7 @@ async def test_set_breakpoint_timeout():
 
 # ── remove_breakpoint ─────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_remove_breakpoint_success():
     tab = _make_tab()
@@ -131,6 +133,7 @@ async def test_remove_breakpoint_websocket_error():
 
 # ── resume_execution ──────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_resume_execution_success():
     tab = _make_tab()
@@ -149,6 +152,7 @@ async def test_resume_execution_websocket_error():
 
 
 # ── step_over / step_into ─────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_step_over_success():
@@ -176,6 +180,7 @@ async def test_step_over_timeout():
 
 # ── get_call_stack ────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_get_call_stack_returns_list():
     tab = _make_tab()
@@ -199,6 +204,7 @@ async def test_get_call_stack_websocket_error():
 
 
 # ── evaluate_on_call_frame ────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_evaluate_on_call_frame_success():

@@ -81,9 +81,7 @@ def register(mcp, section_tool, deps):
         return await AnimationHandler.play_animation(tab, animation_id)
 
     @section_tool("animation-management")
-    async def set_animation_playback_rate(
-        instance_id: str, playback_rate: float
-    ) -> bool:
+    async def set_animation_playback_rate(instance_id: str, playback_rate: float) -> bool:
         """
         Set the global playback rate for all animations on the page.
 
@@ -141,9 +139,7 @@ def register(mcp, section_tool, deps):
         return await AnimationHandler.seek_animation(tab, animation_ids, current_time)
 
     @section_tool("animation-management")
-    async def get_animation_timing(
-        instance_id: str, animation_id: str
-    ) -> Optional[Dict[str, Any]]:
+    async def get_animation_timing(instance_id: str, animation_id: str) -> Optional[Dict[str, Any]]:
         """
         Get the current timing information for a specific animation.
 

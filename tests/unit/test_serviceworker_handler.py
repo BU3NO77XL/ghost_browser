@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── list_service_workers ──────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_list_service_workers_empty():
     tab = _make_tab()
@@ -49,6 +50,7 @@ async def test_list_service_workers_timeout():
 
 # ── unregister_service_worker ─────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_unregister_service_worker_success():
     tab = _make_tab()
@@ -69,6 +71,7 @@ async def test_unregister_service_worker_websocket_error():
 
 # ── force_update_service_worker ───────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_force_update_service_worker_success():
     tab = _make_tab()
@@ -87,6 +90,7 @@ async def test_force_update_service_worker_timeout():
 
 
 # ── deliver_push_message ──────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_deliver_push_message_success():
@@ -111,6 +115,7 @@ async def test_deliver_push_message_websocket_error():
 
 # ── dispatch_sync_event ───────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_dispatch_sync_event_success():
     tab = _make_tab()
@@ -131,6 +136,7 @@ async def test_dispatch_sync_event_last_chance():
 
 # ── skip_waiting ──────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_skip_waiting_success():
     tab = _make_tab()
@@ -139,6 +145,7 @@ async def test_skip_waiting_success():
 
 
 # ── set_force_update_on_page_load ─────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_set_force_update_on_page_load_true():

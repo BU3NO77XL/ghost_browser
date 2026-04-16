@@ -43,17 +43,13 @@ class CSSHandler:
             Exception: If the selector matches no element.
         """
         doc = await tab.send(cdp.dom.get_document())
-        node_id = await tab.send(
-            cdp.dom.query_selector(node_id=doc.node_id, selector=selector)
-        )
+        node_id = await tab.send(cdp.dom.query_selector(node_id=doc.node_id, selector=selector))
         if not node_id:
             raise Exception(f"No element found for selector: {selector}")
         return node_id
 
     @staticmethod
-    async def get_matched_styles(
-        tab: Tab, selector: str
-    ) -> Dict[str, Any]:
+    async def get_matched_styles(tab: Tab, selector: str) -> Dict[str, Any]:
         """
         Get all matched CSS styles for an element.
 
@@ -70,27 +66,23 @@ class CSSHandler:
         try:
             await CSSHandler.enable_css_domain(tab)
             node_id = await CSSHandler._get_node_id_from_selector(tab, selector)
-            result = await tab.send(
-                cdp.css.get_matched_styles_for_node(node_id=node_id)
-            )
+            result = await tab.send(cdp.css.get_matched_styles_for_node(node_id=node_id))
             matched = []
             if result.matched_css_rules:
                 for rule_match in result.matched_css_rules:
                     rule = rule_match.rule
-                    matched.append({
-                        "selector": rule.selector_list.text if rule.selector_list else "",
-                        "properties": [
-                            {"name": p.name, "value": p.value, "important": p.important}
-                            for p in (rule.style.css_properties if rule.style else [])
-                        ],
-                    })
+                    matched.append(
+                        {
+                            "selector": rule.selector_list.text if rule.selector_list else "",
+                            "properties": [
+                                {"name": p.name, "value": p.value, "important": p.important}
+                                for p in (rule.style.css_properties if rule.style else [])
+                            ],
+                        }
+                    )
             inline = {}
             if result.inline_style and result.inline_style.css_properties:
-                inline = {
-                    p.name: p.value
-                    for p in result.inline_style.css_properties
-                    if p.value
-                }
+                inline = {p.name: p.value for p in result.inline_style.css_properties if p.value}
             return {"matched_rules": matched, "inline_style": inline}
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
@@ -101,9 +93,7 @@ class CSSHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "CSSHandler", "get_matched_styles", e, {"selector": selector}
-            )
+            debug_logger.log_error("CSSHandler", "get_matched_styles", e, {"selector": selector})
             raise
 
     @staticmethod
@@ -124,15 +114,11 @@ class CSSHandler:
         try:
             await CSSHandler.enable_css_domain(tab)
             node_id = await CSSHandler._get_node_id_from_selector(tab, selector)
-            result = await tab.send(
-                cdp.css.get_inline_styles_for_node(node_id=node_id)
-            )
+            result = await tab.send(cdp.css.get_inline_styles_for_node(node_id=node_id))
             if not result.inline_style or not result.inline_style.css_properties:
                 return {}
             return {
-                p.name: p.value
-                for p in result.inline_style.css_properties
-                if p.value is not None
+                p.name: p.value for p in result.inline_style.css_properties if p.value is not None
             }
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
@@ -143,9 +129,7 @@ class CSSHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "CSSHandler", "get_inline_styles", e, {"selector": selector}
-            )
+            debug_logger.log_error("CSSHandler", "get_inline_styles", e, {"selector": selector})
             raise
 
     @staticmethod
@@ -166,9 +150,7 @@ class CSSHandler:
         try:
             await CSSHandler.enable_css_domain(tab)
             node_id = await CSSHandler._get_node_id_from_selector(tab, selector)
-            result = await tab.send(
-                cdp.css.get_computed_style_for_node(node_id=node_id)
-            )
+            result = await tab.send(cdp.css.get_computed_style_for_node(node_id=node_id))
             if not result.computed_style:
                 return {}
             return {p.name: p.value for p in result.computed_style}
@@ -181,15 +163,11 @@ class CSSHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "CSSHandler", "get_computed_style", e, {"selector": selector}
-            )
+            debug_logger.log_error("CSSHandler", "get_computed_style", e, {"selector": selector})
             raise
 
     @staticmethod
-    async def get_stylesheet_text(
-        tab: Tab, stylesheet_id: str
-    ) -> str:
+    async def get_stylesheet_text(tab: Tab, stylesheet_id: str) -> str:
         """
         Get the text content of a stylesheet.
 
@@ -206,9 +184,7 @@ class CSSHandler:
         try:
             await CSSHandler.enable_css_domain(tab)
             result = await tab.send(
-                cdp.css.get_style_sheet_text(
-                    style_sheet_id=cdp.css.StyleSheetId(stylesheet_id)
-                )
+                cdp.css.get_style_sheet_text(style_sheet_id=cdp.css.StyleSheetId(stylesheet_id))
             )
             return result.text if result.text else ""
         except asyncio.TimeoutError:
@@ -226,9 +202,7 @@ class CSSHandler:
             raise
 
     @staticmethod
-    async def set_stylesheet_text(
-        tab: Tab, stylesheet_id: str, text: str
-    ) -> bool:
+    async def set_stylesheet_text(tab: Tab, stylesheet_id: str, text: str) -> bool:
         """
         Set the text content of a stylesheet.
 
@@ -277,9 +251,7 @@ class CSSHandler:
         Returns:
             List[Dict[str, Any]]: List of media query objects with text and expressions.
         """
-        debug_logger.log_info(
-            "CSSHandler", "get_media_queries", "Getting all media queries"
-        )
+        debug_logger.log_info("CSSHandler", "get_media_queries", "Getting all media queries")
         try:
             await CSSHandler.enable_css_domain(tab)
             result = await tab.send(cdp.css.get_media_queries())
@@ -288,16 +260,20 @@ class CSSHandler:
                 expressions = []
                 if media.media_list:
                     for expr in media.media_list:
-                        expressions.append({
-                            "value": expr.value,
-                            "unit": expr.unit,
-                            "feature": expr.feature,
-                        })
-                medias.append({
-                    "text": media.text,
-                    "source": media.source,
-                    "expressions": expressions,
-                })
+                        expressions.append(
+                            {
+                                "value": expr.value,
+                                "unit": expr.unit,
+                                "feature": expr.feature,
+                            }
+                        )
+                medias.append(
+                    {
+                        "text": media.text,
+                        "source": media.source,
+                        "expressions": expressions,
+                    }
+                )
             return medias
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")

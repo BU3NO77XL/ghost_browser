@@ -135,7 +135,9 @@ class NetworkInterceptor:
                     self._requests.pop(oldest_id, None)
                     self._responses.pop(oldest_id, None)
         except Exception as e:
-            debug_logger.log_warning("network_interceptor", "_on_request", f"Error processing request event: {e}")
+            debug_logger.log_warning(
+                "network_interceptor", "_on_request", f"Error processing request event: {e}"
+            )
 
     async def _on_response(self, event, instance_id: str):
         """
@@ -156,7 +158,9 @@ class NetworkInterceptor:
             async with self._lock:
                 self._responses[request_id] = network_response
         except Exception as e:
-            debug_logger.log_warning("network_interceptor", "_on_response", f"Error processing response event: {e}")
+            debug_logger.log_warning(
+                "network_interceptor", "_on_response", f"Error processing response event: {e}"
+            )
 
     async def list_requests(
         self, instance_id: str, filter_type: Optional[str] = None
@@ -223,7 +227,9 @@ class NetworkInterceptor:
                 else:
                     return body.encode("utf-8")
         except Exception as e:
-            debug_logger.log_warning("network_interceptor", "get_response_body", f"Failed to get response body: {e}")
+            debug_logger.log_warning(
+                "network_interceptor", "get_response_body", f"Failed to get response body: {e}"
+            )
         return None
 
     async def modify_headers(self, tab: Tab, headers: Dict[str, str]):
@@ -309,7 +315,9 @@ class NetworkInterceptor:
                     timeout=3.0,
                 )
             except Exception as e:
-                debug_logger.log_warning("network_interceptor", "clear_cookies", f"JS cookie clear failed: {e}")
+                debug_logger.log_warning(
+                    "network_interceptor", "clear_cookies", f"JS cookie clear failed: {e}"
+                )
 
             # Also clear via CDP storage (best effort, don't let it corrupt WebSocket)
             try:

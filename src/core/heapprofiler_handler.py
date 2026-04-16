@@ -35,9 +35,7 @@ class HeapProfilerHandler:
             raise
 
     @staticmethod
-    async def take_heap_snapshot(
-        tab: Tab, report_progress: bool = False
-    ) -> Dict[str, Any]:
+    async def take_heap_snapshot(tab: Tab, report_progress: bool = False) -> Dict[str, Any]:
         """
         Take a heap snapshot of the current JavaScript heap.
 
@@ -52,9 +50,7 @@ class HeapProfilerHandler:
         Returns:
             Dict[str, Any]: Snapshot metadata with truncated flag and size info.
         """
-        debug_logger.log_info(
-            "HeapProfilerHandler", "take_heap_snapshot", "Taking heap snapshot"
-        )
+        debug_logger.log_info("HeapProfilerHandler", "take_heap_snapshot", "Taking heap snapshot")
         try:
             await HeapProfilerHandler.enable_heap_profiler(tab)
             # Collect snapshot chunks via CDP events
@@ -65,11 +61,7 @@ class HeapProfilerHandler:
                     snapshot_chunks.append(event.chunk)
 
             # Take snapshot - chunks are delivered via addHeapSnapshotChunk events
-            await tab.send(
-                cdp.heap_profiler.take_heap_snapshot(
-                    report_progress=report_progress
-                )
-            )
+            await tab.send(cdp.heap_profiler.take_heap_snapshot(report_progress=report_progress))
             # Give a moment for chunks to arrive
             await asyncio.sleep(0.5)
 
@@ -85,9 +77,13 @@ class HeapProfilerHandler:
                 "truncated": truncated,
                 "chunks_received": len(snapshot_chunks),
                 "note": (
-                    "Heap snapshot data is very large. Use browser DevTools for "
-                    "full analysis. This response contains a preview only."
-                ) if truncated else "Heap snapshot captured.",
+                    (
+                        "Heap snapshot data is very large. Use browser DevTools for "
+                        "full analysis. This response contains a preview only."
+                    )
+                    if truncated
+                    else "Heap snapshot captured."
+                ),
             }
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
@@ -98,15 +94,11 @@ class HeapProfilerHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "HeapProfilerHandler", "take_heap_snapshot", e, {}
-            )
+            debug_logger.log_error("HeapProfilerHandler", "take_heap_snapshot", e, {})
             raise
 
     @staticmethod
-    async def start_sampling(
-        tab: Tab, sampling_interval: int = 32768
-    ) -> bool:
+    async def start_sampling(tab: Tab, sampling_interval: int = 32768) -> bool:
         """
         Start heap sampling profiler.
 
@@ -127,11 +119,7 @@ class HeapProfilerHandler:
         )
         try:
             await HeapProfilerHandler.enable_heap_profiler(tab)
-            await tab.send(
-                cdp.heap_profiler.start_sampling(
-                    sampling_interval=sampling_interval
-                )
-            )
+            await tab.send(cdp.heap_profiler.start_sampling(sampling_interval=sampling_interval))
             return True
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
@@ -142,9 +130,7 @@ class HeapProfilerHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "HeapProfilerHandler", "start_sampling", e, {}
-            )
+            debug_logger.log_error("HeapProfilerHandler", "start_sampling", e, {})
             raise
 
     @staticmethod
@@ -158,9 +144,7 @@ class HeapProfilerHandler:
         Returns:
             Dict[str, Any]: Sampling profile with head node and total size.
         """
-        debug_logger.log_info(
-            "HeapProfilerHandler", "stop_sampling", "Stopping heap sampling"
-        )
+        debug_logger.log_info("HeapProfilerHandler", "stop_sampling", "Stopping heap sampling")
         try:
             result = await tab.send(cdp.heap_profiler.stop_sampling())
             if not result or not result.profile:
@@ -198,15 +182,11 @@ class HeapProfilerHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "HeapProfilerHandler", "stop_sampling", e, {}
-            )
+            debug_logger.log_error("HeapProfilerHandler", "stop_sampling", e, {})
             raise
 
     @staticmethod
-    async def start_tracking_heap_objects(
-        tab: Tab, track_allocations: bool = False
-    ) -> bool:
+    async def start_tracking_heap_objects(tab: Tab, track_allocations: bool = False) -> bool:
         """
         Start tracking heap object allocations over time.
 
@@ -225,9 +205,7 @@ class HeapProfilerHandler:
         try:
             await HeapProfilerHandler.enable_heap_profiler(tab)
             await tab.send(
-                cdp.heap_profiler.start_tracking_heap_objects(
-                    track_allocations=track_allocations
-                )
+                cdp.heap_profiler.start_tracking_heap_objects(track_allocations=track_allocations)
             )
             return True
         except asyncio.TimeoutError:
@@ -239,9 +217,7 @@ class HeapProfilerHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "HeapProfilerHandler", "start_tracking_heap_objects", e, {}
-            )
+            debug_logger.log_error("HeapProfilerHandler", "start_tracking_heap_objects", e, {})
             raise
 
     @staticmethod
@@ -261,11 +237,7 @@ class HeapProfilerHandler:
             "Stopping heap object tracking",
         )
         try:
-            await tab.send(
-                cdp.heap_profiler.stop_tracking_heap_objects(
-                    report_progress=False
-                )
-            )
+            await tab.send(cdp.heap_profiler.stop_tracking_heap_objects(report_progress=False))
             return True
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
@@ -276,9 +248,7 @@ class HeapProfilerHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "HeapProfilerHandler", "stop_tracking_heap_objects", e, {}
-            )
+            debug_logger.log_error("HeapProfilerHandler", "stop_tracking_heap_objects", e, {})
             raise
 
     @staticmethod
@@ -335,9 +305,7 @@ class HeapProfilerHandler:
         try:
             result = await tab.send(
                 cdp.heap_profiler.get_object_by_heap_object_id(
-                    object_id=cdp.heap_profiler.HeapSnapshotObjectId(
-                        heap_snapshot_object_id
-                    )
+                    object_id=cdp.heap_profiler.HeapSnapshotObjectId(heap_snapshot_object_id)
                 )
             )
             if not result or not result.result:

@@ -34,9 +34,7 @@ def register(mcp, section_tool, deps):
         return await StorageHandler.get_local_storage(tab, origin)
 
     @section_tool("storage-management")
-    async def set_local_storage_item(
-        instance_id: str, origin: str, key: str, value: str
-    ) -> bool:
+    async def set_local_storage_item(instance_id: str, origin: str, key: str, value: str) -> bool:
         """
         Set a LocalStorage item for a given origin.
 
@@ -58,9 +56,7 @@ def register(mcp, section_tool, deps):
         return await StorageHandler.set_local_storage_item(tab, origin, key, value)
 
     @section_tool("storage-management")
-    async def remove_local_storage_item(
-        instance_id: str, origin: str, key: str
-    ) -> bool:
+    async def remove_local_storage_item(instance_id: str, origin: str, key: str) -> bool:
         """
         Remove a LocalStorage item for a given origin.
 
@@ -125,9 +121,7 @@ def register(mcp, section_tool, deps):
         return await StorageHandler.get_session_storage(tab, origin)
 
     @section_tool("storage-management")
-    async def set_session_storage_item(
-        instance_id: str, origin: str, key: str, value: str
-    ) -> bool:
+    async def set_session_storage_item(instance_id: str, origin: str, key: str, value: str) -> bool:
         """
         Set a SessionStorage item for a given origin.
 
@@ -149,9 +143,7 @@ def register(mcp, section_tool, deps):
         return await StorageHandler.set_session_storage_item(tab, origin, key, value)
 
     @section_tool("storage-management")
-    async def remove_session_storage_item(
-        instance_id: str, origin: str, key: str
-    ) -> bool:
+    async def remove_session_storage_item(instance_id: str, origin: str, key: str) -> bool:
         """
         Remove a SessionStorage item for a given origin.
 
@@ -274,9 +266,7 @@ def register(mcp, section_tool, deps):
         )
 
     @section_tool("storage-management")
-    async def delete_indexed_database(
-        instance_id: str, origin: str, database_name: str
-    ) -> bool:
+    async def delete_indexed_database(instance_id: str, origin: str, database_name: str) -> bool:
         """
         Delete an IndexedDB database.
 
@@ -350,9 +340,7 @@ def register(mcp, section_tool, deps):
         )
 
     @section_tool("storage-management")
-    async def delete_cache(
-        instance_id: str, security_origin: str, cache_name: str
-    ) -> bool:
+    async def delete_cache(instance_id: str, security_origin: str, cache_name: str) -> bool:
         """
         Delete a Cache Storage cache by name.
 

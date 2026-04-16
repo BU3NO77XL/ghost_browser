@@ -108,7 +108,9 @@ class DOMHandler:
                             if not is_visible:
                                 continue
                         except Exception as e:
-                            debug_logger.log_warning("DOMHandler", "query_elements", f"Visibility check failed: {e}")
+                            debug_logger.log_warning(
+                                "DOMHandler", "query_elements", f"Visibility check failed: {e}"
+                            )
 
                     bbox = None
                     try:
@@ -121,7 +123,9 @@ class DOMHandler:
                                 "height": position.height,
                             }
                     except Exception as e:
-                        debug_logger.log_warning("DOMHandler", "query_elements", f"Failed to get position: {e}")
+                        debug_logger.log_warning(
+                            "DOMHandler", "query_elements", f"Failed to get position: {e}"
+                        )
 
                     is_clickable = False
 
@@ -131,7 +135,9 @@ class DOMHandler:
                             children = elem.children
                             children_count = len(children) if children else 0
                     except Exception as e:
-                        debug_logger.log_warning("DOMHandler", "query_elements", f"Failed to get children count: {e}")
+                        debug_logger.log_warning(
+                            "DOMHandler", "query_elements", f"Failed to get children count: {e}"
+                        )
 
                     element_info = ElementInfo(
                         selector=selector,
@@ -526,7 +532,9 @@ class DOMHandler:
                                 continue
                         except Exception as e:
                             # If visibility check fails, continue waiting
-                            debug_logger.log_warning("DOMHandler", "wait_for_element", f"Visibility check failed: {e}")
+                            debug_logger.log_warning(
+                                "DOMHandler", "wait_for_element", f"Visibility check failed: {e}"
+                            )
 
                     if text_content:
                         text = element.text_all
@@ -537,7 +545,9 @@ class DOMHandler:
                     return True
 
             except Exception as e:
-                debug_logger.log_warning("DOMHandler", "wait_for_element", f"Element wait check failed: {e}")
+                debug_logger.log_warning(
+                    "DOMHandler", "wait_for_element", f"Element wait check failed: {e}"
+                )
 
             await asyncio.sleep(0.5)
 

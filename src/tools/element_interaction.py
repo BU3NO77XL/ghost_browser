@@ -301,9 +301,7 @@ def register(mcp, section_tool, deps):
             return {"success": False, "result": None, "error": str(e)}
 
     @section_tool("element-interaction")
-    async def get_page_content(
-        instance_id: str, include_frames: bool = False
-    ) -> Dict[str, Any]:
+    async def get_page_content(instance_id: str, include_frames: bool = False) -> Dict[str, Any]:
         """
         Get page HTML and text content.
 
@@ -384,7 +382,8 @@ def register(mcp, section_tool, deps):
         html = await tab.evaluate(js)
         if html is None:
             raise Exception(
-                f"Element not found for selector: {selector}" if selector
+                f"Element not found for selector: {selector}"
+                if selector
                 else "Failed to serialize page HTML"
             )
 

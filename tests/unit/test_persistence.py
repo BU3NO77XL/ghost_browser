@@ -277,7 +277,6 @@ class TestStorageCleanup:
         print(f"\n[CLEANUP] Removed {len(stale_ids)} stale instances")
 
 
-
 # ─────────────────────────────────────────────────────────────────────────────
 # Instance Recovery Tests (from test_instance_recovery.py)
 # ─────────────────────────────────────────────────────────────────────────────

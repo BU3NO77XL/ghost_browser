@@ -36,9 +36,7 @@ def register(mcp, section_tool, deps):
         return await StorageCDPHandler.clear_data_for_origin(tab, origin, storage_types)
 
     @section_tool("storage-cdp-management")
-    async def storage_get_usage_and_quota(
-        instance_id: str, origin: str
-    ) -> dict:
+    async def storage_get_usage_and_quota(instance_id: str, origin: str) -> dict:
         """
         Get storage usage and quota for a given origin.
 
@@ -62,9 +60,7 @@ def register(mcp, section_tool, deps):
         return await StorageCDPHandler.get_usage_and_quota(tab, origin)
 
     @section_tool("storage-cdp-management")
-    async def storage_track_cache_storage_for_origin(
-        instance_id: str, origin: str
-    ) -> bool:
+    async def storage_track_cache_storage_for_origin(instance_id: str, origin: str) -> bool:
         """
         Start tracking cache storage for a given origin.
 
@@ -87,9 +83,7 @@ def register(mcp, section_tool, deps):
         return await StorageCDPHandler.track_cache_storage_for_origin(tab, origin)
 
     @section_tool("storage-cdp-management")
-    async def storage_untrack_cache_storage_for_origin(
-        instance_id: str, origin: str
-    ) -> bool:
+    async def storage_untrack_cache_storage_for_origin(instance_id: str, origin: str) -> bool:
         """
         Stop tracking cache storage for a given origin.
 

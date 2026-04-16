@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── get_info ──────────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_get_info_returns_required_keys():
     """Property 7: get_info always returns gpu, model_name, command_line."""
@@ -53,6 +54,7 @@ async def test_get_info_websocket_error():
 
 # ── get_feature_state ─────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_get_feature_state_returns_feature_enabled_true():
     tab = _make_tab()
@@ -76,6 +78,7 @@ async def test_get_feature_state_returns_feature_enabled_false():
 
 
 # ── get_process_info ──────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_process_info_converts_to_plain_dicts():

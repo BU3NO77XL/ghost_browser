@@ -12,9 +12,7 @@ class StorageCDPHandler:
     """Handles browser storage CDP operations via CDP Storage domain."""
 
     @staticmethod
-    async def clear_data_for_origin(
-        tab: Tab, origin: str, storage_types: str
-    ) -> bool:
+    async def clear_data_for_origin(tab: Tab, origin: str, storage_types: str) -> bool:
         """
         Clear storage data for a given origin.
 
@@ -34,9 +32,7 @@ class StorageCDPHandler:
         )
         try:
             await tab.send(
-                cdp.storage.clear_data_for_origin(
-                    origin=origin, storage_types=storage_types
-                )
+                cdp.storage.clear_data_for_origin(origin=origin, storage_types=storage_types)
             )
             return True
         except asyncio.TimeoutError:
@@ -75,9 +71,7 @@ class StorageCDPHandler:
             f"Getting usage and quota for origin: {origin}",
         )
         try:
-            result = await tab.send(
-                cdp.storage.get_usage_and_quota(origin=origin)
-            )
+            result = await tab.send(cdp.storage.get_usage_and_quota(origin=origin))
             usage = result.usage
             quota = result.quota
             override_active = result.override_active
@@ -138,9 +132,7 @@ class StorageCDPHandler:
             f"Tracking cache storage for origin: {origin}",
         )
         try:
-            await tab.send(
-                cdp.storage.track_cache_storage_for_origin(origin=origin)
-            )
+            await tab.send(cdp.storage.track_cache_storage_for_origin(origin=origin))
             return True
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
@@ -177,9 +169,7 @@ class StorageCDPHandler:
             f"Untracking cache storage for origin: {origin}",
         )
         try:
-            await tab.send(
-                cdp.storage.untrack_cache_storage_for_origin(origin=origin)
-            )
+            await tab.send(cdp.storage.untrack_cache_storage_for_origin(origin=origin))
             return True
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")

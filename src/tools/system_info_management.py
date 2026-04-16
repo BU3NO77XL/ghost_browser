@@ -61,9 +61,7 @@ def register(mcp, section_tool, deps):
         return await SystemInfoHandler.get_info(tab)
 
     @section_tool("system-info-management")
-    async def system_info_get_feature_state(
-        instance_id: str, feature_flag: str
-    ) -> Dict[str, bool]:
+    async def system_info_get_feature_state(instance_id: str, feature_flag: str) -> Dict[str, bool]:
         """
         Return the state of a browser feature flag for a browser instance.
 

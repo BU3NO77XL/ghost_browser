@@ -121,7 +121,6 @@ class TestBrowserHealth:
         assert "Tab not found" in health["reason"]
 
 
-
 # ─────────────────────────────────────────────────────────────────────────────
 # JavaScript Execution (from test_javascript.py)
 # ─────────────────────────────────────────────────────────────────────────────

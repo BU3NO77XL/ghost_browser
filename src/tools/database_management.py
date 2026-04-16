@@ -36,9 +36,7 @@ def register(mcp, section_tool, deps):
         return await DatabaseHandler.list_databases(tab)
 
     @section_tool("database-management")
-    async def get_websql_table_names(
-        instance_id: str, database_id: str
-    ) -> List[str]:
+    async def get_websql_table_names(instance_id: str, database_id: str) -> List[str]:
         """
         Get all table names in a WebSQL database.
 

@@ -37,9 +37,7 @@ def register(mcp, section_tool, deps):
         return await SecurityHandler.get_security_state(tab)
 
     @section_tool("security-management")
-    async def set_ignore_certificate_errors(
-        instance_id: str, ignore: bool
-    ) -> bool:
+    async def set_ignore_certificate_errors(instance_id: str, ignore: bool) -> bool:
         """
         Set whether SSL/TLS certificate errors should be ignored.
 
@@ -63,9 +61,7 @@ def register(mcp, section_tool, deps):
         return await SecurityHandler.set_ignore_certificate_errors(tab, ignore)
 
     @section_tool("security-management")
-    async def handle_certificate_error(
-        instance_id: str, event_id: int, action: str
-    ) -> bool:
+    async def handle_certificate_error(instance_id: str, event_id: int, action: str) -> bool:
         """
         Handle a certificate error event by continuing or cancelling the request.
 

@@ -95,9 +95,7 @@ class OverlayHandler:
             cdp_highlight_config = cdp.overlay.HighlightConfig(**highlight_config)
             cdp_node_id = cdp.dom.NodeId(node_id) if node_id is not None else None
             cdp_backend_node_id = (
-                cdp.dom.BackendNodeId(backend_node_id)
-                if backend_node_id is not None
-                else None
+                cdp.dom.BackendNodeId(backend_node_id) if backend_node_id is not None else None
             )
             await tab.send(
                 cdp.overlay.highlight_node(
@@ -152,9 +150,7 @@ class OverlayHandler:
             raise
 
     @staticmethod
-    async def highlight_rect(
-        tab: Tab, x: int, y: int, width: int, height: int
-    ) -> bool:
+    async def highlight_rect(tab: Tab, x: int, y: int, width: int, height: int) -> bool:
         """
         Highlight a rectangular area on the page.
 
@@ -174,9 +170,7 @@ class OverlayHandler:
             f"Highlighting rect at ({x}, {y}) size {width}x{height}",
         )
         try:
-            await tab.send(
-                cdp.overlay.highlight_rect(x=x, y=y, width=width, height=height)
-            )
+            await tab.send(cdp.overlay.highlight_rect(x=x, y=y, width=width, height=height))
             return True
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
@@ -196,9 +190,7 @@ class OverlayHandler:
             raise
 
     @staticmethod
-    async def set_show_grid_overlays(
-        tab: Tab, configs: List[Dict[str, Any]]
-    ) -> bool:
+    async def set_show_grid_overlays(tab: Tab, configs: List[Dict[str, Any]]) -> bool:
         """
         Show CSS grid overlays for the specified nodes.
 
@@ -229,7 +221,9 @@ class OverlayHandler:
                         ),
                     )
                 )
-            await tab.send(cdp.overlay.set_show_grid_overlays(grid_node_highlight_configs=cdp_configs))
+            await tab.send(
+                cdp.overlay.set_show_grid_overlays(grid_node_highlight_configs=cdp_configs)
+            )
             return True
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
@@ -246,9 +240,7 @@ class OverlayHandler:
             raise
 
     @staticmethod
-    async def set_show_flex_overlays(
-        tab: Tab, configs: List[Dict[str, Any]]
-    ) -> bool:
+    async def set_show_flex_overlays(tab: Tab, configs: List[Dict[str, Any]]) -> bool:
         """
         Show CSS flexbox overlays for the specified nodes.
 
@@ -279,7 +271,9 @@ class OverlayHandler:
                         ),
                     )
                 )
-            await tab.send(cdp.overlay.set_show_flex_overlays(flex_node_highlight_configs=cdp_configs))
+            await tab.send(
+                cdp.overlay.set_show_flex_overlays(flex_node_highlight_configs=cdp_configs)
+            )
             return True
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
@@ -296,9 +290,7 @@ class OverlayHandler:
             raise
 
     @staticmethod
-    async def set_show_scroll_snap_overlays(
-        tab: Tab, configs: List[Dict[str, Any]]
-    ) -> bool:
+    async def set_show_scroll_snap_overlays(tab: Tab, configs: List[Dict[str, Any]]) -> bool:
         """
         Show scroll snap overlays for the specified nodes.
 
@@ -329,7 +321,9 @@ class OverlayHandler:
                         ),
                     )
                 )
-            await tab.send(cdp.overlay.set_show_scroll_snap_overlays(scroll_snap_highlight_configs=cdp_configs))
+            await tab.send(
+                cdp.overlay.set_show_scroll_snap_overlays(scroll_snap_highlight_configs=cdp_configs)
+            )
             return True
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")

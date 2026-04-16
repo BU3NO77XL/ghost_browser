@@ -15,6 +15,7 @@ def _make_deps(tab=None):
 
 def _register():
     from tools.heapprofiler_management import register
+
     mcp = MagicMock()
     registered = {}
 
@@ -22,6 +23,7 @@ def _register():
         def decorator(func):
             registered[func.__name__] = func
             return func
+
         return decorator
 
     return register, mcp, section_tool, registered
@@ -99,9 +101,7 @@ async def test_start_tracking_heap_objects_with_allocations_tool():
 
     with patch("core.login_guard.check_pending_login_guard", return_value=None):
         register(mcp, section_tool, deps)
-        result = await registered["start_tracking_heap_objects"](
-            "inst-1", track_allocations=True
-        )
+        result = await registered["start_tracking_heap_objects"]("inst-1", track_allocations=True)
         assert result is True
 
 

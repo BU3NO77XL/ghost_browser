@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── enable_log ────────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_enable_log_success():
     tab = _make_tab()
@@ -43,6 +44,7 @@ async def test_enable_log_websocket_error():
 
 # ── disable_log ───────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_disable_log_success():
     tab = _make_tab()
@@ -52,6 +54,7 @@ async def test_disable_log_success():
 
 # ── clear_log ─────────────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_clear_log_success():
     tab = _make_tab()
@@ -60,6 +63,7 @@ async def test_clear_log_success():
 
 
 # ── start_violations_report ───────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_start_violations_report_converts_dicts():
@@ -74,9 +78,7 @@ async def test_start_violations_report_converts_dicts():
 
         result = await LogHandler.start_violations_report(tab, settings)
         assert result is True
-        mock_cdp.log.ViolationSetting.assert_called_once_with(
-            name="longTask", threshold=200.0
-        )
+        mock_cdp.log.ViolationSetting.assert_called_once_with(name="longTask", threshold=200.0)
 
 
 @pytest.mark.asyncio
@@ -100,6 +102,7 @@ async def test_start_violations_report_timeout():
 
 
 # ── stop_violations_report ────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_stop_violations_report_success():

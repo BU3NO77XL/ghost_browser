@@ -48,9 +48,7 @@ class ProfilerHandler:
         Returns:
             bool: True if profiling started successfully.
         """
-        debug_logger.log_info(
-            "ProfilerHandler", "start_profiling", "Starting CPU profiling"
-        )
+        debug_logger.log_info("ProfilerHandler", "start_profiling", "Starting CPU profiling")
         try:
             await ProfilerHandler.enable_profiler(tab)
             await tab.send(cdp.profiler.start())
@@ -81,9 +79,7 @@ class ProfilerHandler:
         Returns:
             Dict[str, Any]: CPU profile with nodes, start_time, end_time, and samples.
         """
-        debug_logger.log_info(
-            "ProfilerHandler", "stop_profiling", "Stopping CPU profiling"
-        )
+        debug_logger.log_info("ProfilerHandler", "stop_profiling", "Stopping CPU profiling")
         try:
             result = await tab.send(cdp.profiler.stop())
             if not result or not result.profile:
@@ -101,12 +97,14 @@ class ProfilerHandler:
                             "line_number": node.call_frame.line_number,
                             "column_number": node.call_frame.column_number,
                         }
-                    nodes.append({
-                        "id": node.id_,
-                        "call_frame": call_frame,
-                        "hit_count": node.hit_count,
-                        "children": node.children or [],
-                    })
+                    nodes.append(
+                        {
+                            "id": node.id_,
+                            "call_frame": call_frame,
+                            "hit_count": node.hit_count,
+                            "children": node.children or [],
+                        }
+                    )
             truncated = len(profile.nodes or []) > MAX_PROFILE_NODES
             return {
                 "nodes": nodes,
@@ -152,9 +150,7 @@ class ProfilerHandler:
         try:
             await ProfilerHandler.enable_profiler(tab)
             await tab.send(
-                cdp.profiler.start_precise_coverage(
-                    call_count=call_count, detailed=detailed
-                )
+                cdp.profiler.start_precise_coverage(call_count=call_count, detailed=detailed)
             )
             return True
         except asyncio.TimeoutError:
@@ -166,9 +162,7 @@ class ProfilerHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "ProfilerHandler", "start_precise_coverage", e, {}
-            )
+            debug_logger.log_error("ProfilerHandler", "start_precise_coverage", e, {})
             raise
 
     @staticmethod
@@ -197,15 +191,11 @@ class ProfilerHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "ProfilerHandler", "stop_precise_coverage", e, {}
-            )
+            debug_logger.log_error("ProfilerHandler", "stop_precise_coverage", e, {})
             raise
 
     @staticmethod
-    async def take_precise_coverage(
-        tab: Tab, url_filter: Optional[str] = None
-    ) -> Dict[str, Any]:
+    async def take_precise_coverage(tab: Tab, url_filter: Optional[str] = None) -> Dict[str, Any]:
         """
         Take a snapshot of the current precise code coverage data.
 
@@ -230,24 +220,30 @@ class ProfilerHandler:
                     if url_filter and url_filter not in url:
                         continue
                     functions = []
-                    for func in (script.functions or []):
+                    for func in script.functions or []:
                         ranges = []
-                        for r in (func.ranges or []):
-                            ranges.append({
-                                "start_offset": r.start_offset,
-                                "end_offset": r.end_offset,
-                                "count": r.count,
-                            })
-                        functions.append({
-                            "function_name": func.function_name,
-                            "is_block_coverage": func.is_block_coverage,
-                            "ranges": ranges,
-                        })
-                    scripts.append({
-                        "script_id": str(script.script_id),
-                        "url": url,
-                        "functions": functions,
-                    })
+                        for r in func.ranges or []:
+                            ranges.append(
+                                {
+                                    "start_offset": r.start_offset,
+                                    "end_offset": r.end_offset,
+                                    "count": r.count,
+                                }
+                            )
+                        functions.append(
+                            {
+                                "function_name": func.function_name,
+                                "is_block_coverage": func.is_block_coverage,
+                                "ranges": ranges,
+                            }
+                        )
+                    scripts.append(
+                        {
+                            "script_id": str(script.script_id),
+                            "url": url,
+                            "functions": functions,
+                        }
+                    )
             return {
                 "scripts": scripts,
                 "timestamp": result.timestamp if result else 0,
@@ -262,7 +258,5 @@ class ProfilerHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "ProfilerHandler", "take_precise_coverage", e, {}
-            )
+            debug_logger.log_error("ProfilerHandler", "take_precise_coverage", e, {})
             raise

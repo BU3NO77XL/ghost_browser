@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── set_download_behavior — validation ───────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_set_download_behavior_allow_requires_path():
     tab = _make_tab()
@@ -54,6 +55,7 @@ async def test_set_download_behavior_allow_with_path_ok():
 
 # ── get_window_bounds ─────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_get_window_bounds_returns_required_keys():
     tab = _make_tab()
@@ -76,6 +78,7 @@ async def test_get_window_bounds_returns_required_keys():
 
 # ── grant_permissions ─────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_grant_permissions_success():
     tab = _make_tab()
@@ -85,6 +88,7 @@ async def test_grant_permissions_success():
 
 # ── reset_permissions ─────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_reset_permissions_success():
     tab = _make_tab()
@@ -93,6 +97,7 @@ async def test_reset_permissions_success():
 
 
 # ── error handling ────────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_window_bounds_timeout():

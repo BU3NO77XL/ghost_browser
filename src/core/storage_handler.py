@@ -32,14 +32,14 @@ class StorageHandler:
         try:
             storage_id = {"securityOrigin": origin, "isLocalStorage": True}
             result = await tab.send(cdp.dom_storage.get_dom_storage_items(storage_id))
-            
+
             # Convert list of [key, value] pairs to dictionary
             items = {}
             if result and "entries" in result:
                 for entry in result["entries"]:
                     if len(entry) >= 2:
                         items[entry[0]] = entry[1]
-            
+
             debug_logger.log_info(
                 "StorageHandler",
                 "get_local_storage",
@@ -67,15 +67,11 @@ class StorageHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "StorageHandler", "get_local_storage", e, {"origin": origin}
-            )
+            debug_logger.log_error("StorageHandler", "get_local_storage", e, {"origin": origin})
             raise
 
     @staticmethod
-    async def set_local_storage_item(
-        tab: Tab, origin: str, key: str, value: str
-    ) -> bool:
+    async def set_local_storage_item(tab: Tab, origin: str, key: str, value: str) -> bool:
         """
         Set a localStorage item.
 
@@ -95,9 +91,7 @@ class StorageHandler:
         )
         try:
             storage_id = {"securityOrigin": origin, "isLocalStorage": True}
-            await tab.send(
-                cdp.dom_storage.set_dom_storage_item(storage_id, key, value)
-            )
+            await tab.send(cdp.dom_storage.set_dom_storage_item(storage_id, key, value))
             debug_logger.log_info(
                 "StorageHandler",
                 "set_local_storage_item",
@@ -236,9 +230,7 @@ class StorageHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "StorageHandler", "clear_local_storage", e, {"origin": origin}
-            )
+            debug_logger.log_error("StorageHandler", "clear_local_storage", e, {"origin": origin})
             raise
 
     @staticmethod
@@ -261,14 +253,14 @@ class StorageHandler:
         try:
             storage_id = {"securityOrigin": origin, "isLocalStorage": False}
             result = await tab.send(cdp.dom_storage.get_dom_storage_items(storage_id))
-            
+
             # Convert list of [key, value] pairs to dictionary
             items = {}
             if result and "entries" in result:
                 for entry in result["entries"]:
                     if len(entry) >= 2:
                         items[entry[0]] = entry[1]
-            
+
             debug_logger.log_info(
                 "StorageHandler",
                 "get_session_storage",
@@ -296,15 +288,11 @@ class StorageHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "StorageHandler", "get_session_storage", e, {"origin": origin}
-            )
+            debug_logger.log_error("StorageHandler", "get_session_storage", e, {"origin": origin})
             raise
 
     @staticmethod
-    async def set_session_storage_item(
-        tab: Tab, origin: str, key: str, value: str
-    ) -> bool:
+    async def set_session_storage_item(tab: Tab, origin: str, key: str, value: str) -> bool:
         """
         Set a sessionStorage item.
 
@@ -324,9 +312,7 @@ class StorageHandler:
         )
         try:
             storage_id = {"securityOrigin": origin, "isLocalStorage": False}
-            await tab.send(
-                cdp.dom_storage.set_dom_storage_item(storage_id, key, value)
-            )
+            await tab.send(cdp.dom_storage.set_dom_storage_item(storage_id, key, value))
             debug_logger.log_info(
                 "StorageHandler",
                 "set_session_storage_item",
@@ -465,9 +451,7 @@ class StorageHandler:
                     "WebSocket connection lost. Check instance health with "
                     "check_instance_health and recreate if needed."
                 )
-            debug_logger.log_error(
-                "StorageHandler", "clear_session_storage", e, {"origin": origin}
-            )
+            debug_logger.log_error("StorageHandler", "clear_session_storage", e, {"origin": origin})
             raise
 
     # IndexedDB Methods
@@ -488,9 +472,7 @@ class StorageHandler:
                 "IndexedDB domain enabled",
             )
         except Exception as e:
-            debug_logger.log_error(
-                "StorageHandler", "_enable_indexed_db", e, {}
-            )
+            debug_logger.log_error("StorageHandler", "_enable_indexed_db", e, {})
             # Don't raise - domain might already be enabled
 
     @staticmethod
@@ -513,20 +495,18 @@ class StorageHandler:
         try:
             # Enable IndexedDB domain first
             await StorageHandler._enable_indexed_db(tab)
-            
+
             # Request database names
-            result = await tab.send(
-                cdp.indexed_db.request_database_names(security_origin=origin)
-            )
-            
+            result = await tab.send(cdp.indexed_db.request_database_names(security_origin=origin))
+
             # Handle both dict and object responses
-            if hasattr(result, 'database_names'):
+            if hasattr(result, "database_names"):
                 database_names = result.database_names or []
             elif isinstance(result, dict):
                 database_names = result.get("databaseNames", [])
             else:
                 database_names = []
-            
+
             debug_logger.log_info(
                 "StorageHandler",
                 "list_indexed_databases",
@@ -560,9 +540,7 @@ class StorageHandler:
             raise
 
     @staticmethod
-    async def get_database_schema(
-        tab: Tab, origin: str, database_name: str
-    ) -> Dict[str, Any]:
+    async def get_database_schema(tab: Tab, origin: str, database_name: str) -> Dict[str, Any]:
         """
         Get IndexedDB database schema including object stores and indexes.
 
@@ -582,16 +560,14 @@ class StorageHandler:
         try:
             # Enable IndexedDB domain first
             await StorageHandler._enable_indexed_db(tab)
-            
+
             # Request database schema
             result = await tab.send(
-                cdp.indexed_db.request_database(
-                    security_origin=origin, database_name=database_name
-                )
+                cdp.indexed_db.request_database(security_origin=origin, database_name=database_name)
             )
-            
+
             database_info = result.get("databaseWithObjectStores", {}) if result else {}
-            
+
             debug_logger.log_info(
                 "StorageHandler",
                 "get_database_schema",
@@ -658,7 +634,7 @@ class StorageHandler:
         try:
             # Enable IndexedDB domain first
             await StorageHandler._enable_indexed_db(tab)
-            
+
             # Request object store data
             result = await tab.send(
                 cdp.indexed_db.request_data(
@@ -670,10 +646,10 @@ class StorageHandler:
                     page_size=page_size,
                 )
             )
-            
+
             # Extract data entries
             object_store_data = result if result else {}
-            
+
             # Handle large responses
             if object_store_data:
                 handled_response = response_handler.handle_response(
@@ -687,14 +663,14 @@ class StorageHandler:
                         "page_size": page_size,
                     },
                 )
-                
+
                 debug_logger.log_info(
                     "StorageHandler",
                     "get_object_store_data",
                     f"Retrieved data from object store: {object_store_name}",
                 )
                 return handled_response
-            
+
             return object_store_data
         except asyncio.TimeoutError:
             debug_logger.log_error(
@@ -739,9 +715,7 @@ class StorageHandler:
             raise
 
     @staticmethod
-    async def delete_indexed_database(
-        tab: Tab, origin: str, database_name: str
-    ) -> bool:
+    async def delete_indexed_database(tab: Tab, origin: str, database_name: str) -> bool:
         """
         Delete an IndexedDB database.
 
@@ -761,14 +735,12 @@ class StorageHandler:
         try:
             # Enable IndexedDB domain first
             await StorageHandler._enable_indexed_db(tab)
-            
+
             # Delete database
             await tab.send(
-                cdp.indexed_db.delete_database(
-                    security_origin=origin, database_name=database_name
-                )
+                cdp.indexed_db.delete_database(security_origin=origin, database_name=database_name)
             )
-            
+
             debug_logger.log_info(
                 "StorageHandler",
                 "delete_indexed_database",
@@ -881,9 +853,7 @@ class StorageHandler:
         try:
             result = await tab.send(
                 cdp.cache_storage.request_cached_response(
-                    cache_id=cdp.cache_storage.CacheId(
-                        f"{security_origin}|{cache_name}"
-                    ),
+                    cache_id=cdp.cache_storage.CacheId(f"{security_origin}|{cache_name}"),
                     request_url=request_url,
                     request_headers=[],
                 )
@@ -913,14 +883,16 @@ class StorageHandler:
                 "StorageHandler",
                 "get_cached_response",
                 e,
-                {"security_origin": security_origin, "cache_name": cache_name, "request_url": request_url},
+                {
+                    "security_origin": security_origin,
+                    "cache_name": cache_name,
+                    "request_url": request_url,
+                },
             )
             raise
 
     @staticmethod
-    async def delete_cache(
-        tab: Tab, security_origin: str, cache_name: str
-    ) -> bool:
+    async def delete_cache(tab: Tab, security_origin: str, cache_name: str) -> bool:
         """
         Delete a Cache Storage cache by name.
 
@@ -940,9 +912,7 @@ class StorageHandler:
         try:
             await tab.send(
                 cdp.cache_storage.delete_cache(
-                    cache_id=cdp.cache_storage.CacheId(
-                        f"{security_origin}|{cache_name}"
-                    )
+                    cache_id=cdp.cache_storage.CacheId(f"{security_origin}|{cache_name}")
                 )
             )
             debug_logger.log_info(

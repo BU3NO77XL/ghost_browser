@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── add_virtual_authenticator ─────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_add_virtual_authenticator_ctap2():
     tab = _make_tab()
@@ -22,9 +23,7 @@ async def test_add_virtual_authenticator_ctap2():
     mock_result.authenticator_id = "auth-123"
     tab.send = AsyncMock(side_effect=[None, mock_result])
 
-    result = await WebAuthnHandler.add_virtual_authenticator(
-        tab, protocol="ctap2", transport="usb"
-    )
+    result = await WebAuthnHandler.add_virtual_authenticator(tab, protocol="ctap2", transport="usb")
     assert isinstance(result, str)
     assert len(result) > 0
 
@@ -36,9 +35,7 @@ async def test_add_virtual_authenticator_u2f():
     mock_result.authenticator_id = "auth-u2f"
     tab.send = AsyncMock(side_effect=[None, mock_result])
 
-    result = await WebAuthnHandler.add_virtual_authenticator(
-        tab, protocol="u2f", transport="nfc"
-    )
+    result = await WebAuthnHandler.add_virtual_authenticator(tab, protocol="u2f", transport="nfc")
     assert isinstance(result, str)
 
 
@@ -50,8 +47,12 @@ async def test_add_virtual_authenticator_internal_transport():
     tab.send = AsyncMock(side_effect=[None, mock_result])
 
     result = await WebAuthnHandler.add_virtual_authenticator(
-        tab, protocol="ctap2", transport="internal",
-        has_resident_key=True, has_user_verification=True, is_user_verified=True
+        tab,
+        protocol="ctap2",
+        transport="internal",
+        has_resident_key=True,
+        has_user_verification=True,
+        is_user_verified=True,
     )
     assert isinstance(result, str)
 
@@ -78,6 +79,7 @@ async def test_add_virtual_authenticator_timeout():
 
 # ── remove_virtual_authenticator ─────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_remove_virtual_authenticator_success():
     tab = _make_tab()
@@ -97,6 +99,7 @@ async def test_remove_virtual_authenticator_websocket_error():
 
 
 # ── get_credentials ───────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_credentials_empty():
@@ -132,6 +135,7 @@ async def test_get_credentials_with_data():
 
 # ── remove_credential ─────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_remove_credential_success():
     tab = _make_tab()
@@ -150,6 +154,7 @@ async def test_remove_credential_websocket_error():
 
 
 # ── set_user_verified ─────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_set_user_verified_true():

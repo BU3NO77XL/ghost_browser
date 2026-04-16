@@ -15,6 +15,7 @@ def _make_deps(tab=None):
 
 def _register():
     from tools.overlay_management import register
+
     mcp = MagicMock()
     registered = {}
 
@@ -22,6 +23,7 @@ def _register():
         def decorator(func):
             registered[func.__name__] = func
             return func
+
         return decorator
 
     return register, mcp, section_tool, registered

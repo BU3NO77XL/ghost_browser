@@ -15,6 +15,7 @@ def _make_deps(tab=None):
 
 def _register():
     from tools.storage_cdp_management import register
+
     mcp = MagicMock()
     registered = {}
 
@@ -22,6 +23,7 @@ def _register():
         def decorator(func):
             registered[func.__name__] = func
             return func
+
         return decorator
 
     return register, mcp, section_tool, registered
@@ -54,9 +56,7 @@ async def test_storage_clear_data_for_origin_success():
 
     with patch("core.login_guard.check_pending_login_guard", return_value=None):
         register(mcp, section_tool, deps)
-        result = await registered["storage_clear_data_for_origin"](
-            "inst-1", "https://example.com"
-        )
+        result = await registered["storage_clear_data_for_origin"]("inst-1", "https://example.com")
         assert result is True
 
 

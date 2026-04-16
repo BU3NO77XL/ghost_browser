@@ -15,6 +15,7 @@ def _make_tab():
 
 # ── enable_css_domain ─────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_enable_css_domain_success():
     tab = _make_tab()
@@ -31,6 +32,7 @@ async def test_enable_css_domain_already_enabled():
 
 
 # ── _get_node_id_from_selector ────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_node_id_from_selector_success():
@@ -56,6 +58,7 @@ async def test_get_node_id_from_selector_not_found():
 
 
 # ── get_computed_style ────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_computed_style_success():
@@ -117,6 +120,7 @@ async def test_get_computed_style_timeout():
 
 # ── get_inline_styles ─────────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_get_inline_styles_success():
     tab = _make_tab()
@@ -157,6 +161,7 @@ async def test_get_inline_styles_no_inline():
 
 # ── get_stylesheet_text ───────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_get_stylesheet_text_success():
     tab = _make_tab()
@@ -181,6 +186,7 @@ async def test_get_stylesheet_text_empty():
 
 # ── set_stylesheet_text ───────────────────────────────────────────────────────
 
+
 @pytest.mark.asyncio
 async def test_set_stylesheet_text_success():
     tab = _make_tab()
@@ -201,6 +207,7 @@ async def test_set_stylesheet_text_websocket_error():
 
 
 # ── get_media_queries ─────────────────────────────────────────────────────────
+
 
 @pytest.mark.asyncio
 async def test_get_media_queries_success():

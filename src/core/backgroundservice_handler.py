@@ -41,8 +41,7 @@ class BackgroundServiceHandler:
         """
         if service not in VALID_SERVICE_TYPES:
             raise ValueError(
-                f"Invalid service type: '{service}'. "
-                f"Valid types: {sorted(VALID_SERVICE_TYPES)}"
+                f"Invalid service type: '{service}'. " f"Valid types: {sorted(VALID_SERVICE_TYPES)}"
             )
         debug_logger.log_info(
             "BackgroundServiceHandler",
@@ -51,7 +50,9 @@ class BackgroundServiceHandler:
         )
         try:
             await tab.send(
-                cdp.background_service.start_observing(service=cdp.background_service.ServiceName(service))
+                cdp.background_service.start_observing(
+                    service=cdp.background_service.ServiceName(service)
+                )
             )
             tab_key = str(id(tab))
             if tab_key not in BackgroundServiceHandler._events:
@@ -88,8 +89,7 @@ class BackgroundServiceHandler:
         """
         if service not in VALID_SERVICE_TYPES:
             raise ValueError(
-                f"Invalid service type: '{service}'. "
-                f"Valid types: {sorted(VALID_SERVICE_TYPES)}"
+                f"Invalid service type: '{service}'. " f"Valid types: {sorted(VALID_SERVICE_TYPES)}"
             )
         debug_logger.log_info(
             "BackgroundServiceHandler",
@@ -98,7 +98,9 @@ class BackgroundServiceHandler:
         )
         try:
             await tab.send(
-                cdp.background_service.stop_observing(service=cdp.background_service.ServiceName(service))
+                cdp.background_service.stop_observing(
+                    service=cdp.background_service.ServiceName(service)
+                )
             )
             return True
         except asyncio.TimeoutError:
@@ -158,8 +160,7 @@ class BackgroundServiceHandler:
         """
         if service not in VALID_SERVICE_TYPES:
             raise ValueError(
-                f"Invalid service type: '{service}'. "
-                f"Valid types: {sorted(VALID_SERVICE_TYPES)}"
+                f"Invalid service type: '{service}'. " f"Valid types: {sorted(VALID_SERVICE_TYPES)}"
             )
         debug_logger.log_info(
             "BackgroundServiceHandler",
@@ -168,12 +169,15 @@ class BackgroundServiceHandler:
         )
         try:
             await tab.send(
-                cdp.background_service.clear_events(service=cdp.background_service.ServiceName(service))
+                cdp.background_service.clear_events(
+                    service=cdp.background_service.ServiceName(service)
+                )
             )
             tab_key = str(id(tab))
             if tab_key in BackgroundServiceHandler._events:
                 BackgroundServiceHandler._events[tab_key] = [
-                    e for e in BackgroundServiceHandler._events[tab_key]
+                    e
+                    for e in BackgroundServiceHandler._events[tab_key]
                     if e.get("service") != service
                 ]
             return True

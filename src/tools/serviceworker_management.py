@@ -102,9 +102,7 @@ def register(mcp, section_tool, deps):
         tab = await browser_manager.get_tab(instance_id)
         if not tab:
             raise Exception(f"Instance not found: {instance_id}")
-        return await ServiceWorkerHandler.deliver_push_message(
-            tab, origin, registration_id, data
-        )
+        return await ServiceWorkerHandler.deliver_push_message(tab, origin, registration_id, data)
 
     @section_tool("serviceworker-management")
     async def dispatch_sync_event(
@@ -164,9 +162,7 @@ def register(mcp, section_tool, deps):
         return await ServiceWorkerHandler.skip_waiting(tab, scope_url)
 
     @section_tool("serviceworker-management")
-    async def set_service_worker_force_update(
-        instance_id: str, force_update: bool
-    ) -> bool:
+    async def set_service_worker_force_update(instance_id: str, force_update: bool) -> bool:
         """
         Set whether service workers should be force-updated on every page load.
 
@@ -186,8 +182,6 @@ def register(mcp, section_tool, deps):
         tab = await browser_manager.get_tab(instance_id)
         if not tab:
             raise Exception(f"Instance not found: {instance_id}")
-        return await ServiceWorkerHandler.set_force_update_on_page_load(
-            tab, force_update
-        )
+        return await ServiceWorkerHandler.set_force_update_on_page_load(tab, force_update)
 
     return {k: v for k, v in locals().items() if callable(v) and not k.startswith("_")}

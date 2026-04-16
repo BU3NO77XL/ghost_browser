@@ -40,9 +40,7 @@ def register(mcp, section_tool, deps):
         return await HeapProfilerHandler.take_heap_snapshot(tab)
 
     @section_tool("heapprofiler-management")
-    async def start_heap_sampling(
-        instance_id: str, sampling_interval: int = 32768
-    ) -> bool:
+    async def start_heap_sampling(instance_id: str, sampling_interval: int = 32768) -> bool:
         """
         Start heap sampling profiler (low-overhead memory profiling).
 
@@ -111,9 +109,7 @@ def register(mcp, section_tool, deps):
         tab = await browser_manager.get_tab(instance_id)
         if not tab:
             raise Exception(f"Instance not found: {instance_id}")
-        return await HeapProfilerHandler.start_tracking_heap_objects(
-            tab, track_allocations
-        )
+        return await HeapProfilerHandler.start_tracking_heap_objects(tab, track_allocations)
 
     @section_tool("heapprofiler-management")
     async def stop_tracking_heap_objects(instance_id: str) -> bool:
@@ -178,8 +174,6 @@ def register(mcp, section_tool, deps):
         tab = await browser_manager.get_tab(instance_id)
         if not tab:
             raise Exception(f"Instance not found: {instance_id}")
-        return await HeapProfilerHandler.get_object_by_heap_id(
-            tab, heap_snapshot_object_id
-        )
+        return await HeapProfilerHandler.get_object_by_heap_id(tab, heap_snapshot_object_id)
 
     return {k: v for k, v in locals().items() if callable(v) and not k.startswith("_")}

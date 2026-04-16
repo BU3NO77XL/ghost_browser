@@ -106,9 +106,7 @@ def register(mcp, section_tool, deps):
         return await CSSHandler.get_stylesheet_text(tab, stylesheet_id)
 
     @section_tool("css-management")
-    async def set_stylesheet_text(
-        instance_id: str, stylesheet_id: str, text: str
-    ) -> bool:
+    async def set_stylesheet_text(instance_id: str, stylesheet_id: str, text: str) -> bool:
         """
         Replace the full text content of a stylesheet.
 

@@ -15,6 +15,7 @@ def _make_deps(tab=None):
 
 def _register():
     from tools.browser_cdp_management import register
+
     mcp = MagicMock()
     registered = {}
 
@@ -22,6 +23,7 @@ def _register():
         def decorator(func):
             registered[func.__name__] = func
             return func
+
         return decorator
 
     return register, mcp, section_tool, registered
@@ -41,11 +43,13 @@ async def test_browser_get_window_for_target_then_set_then_get():
     mock_bounds.window_state = "normal"
 
     # get_window_for_target returns (window_id, bounds)
-    tab.send = AsyncMock(side_effect=[
-        (1, mock_bounds),   # get_window_for_target
-        None,               # set_window_bounds
-        mock_bounds,        # get_window_bounds
-    ])
+    tab.send = AsyncMock(
+        side_effect=[
+            (1, mock_bounds),  # get_window_for_target
+            None,  # set_window_bounds
+            mock_bounds,  # get_window_bounds
+        ]
+    )
     deps, _ = _make_deps(tab)
 
     with patch("core.login_guard.check_pending_login_guard", return_value=None):

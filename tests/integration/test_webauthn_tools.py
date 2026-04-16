@@ -15,6 +15,7 @@ def _make_deps(tab=None):
 
 def _register():
     from tools.webauthn_management import register
+
     mcp = MagicMock()
     registered = {}
 
@@ -22,6 +23,7 @@ def _register():
         def decorator(func):
             registered[func.__name__] = func
             return func
+
         return decorator
 
     return register, mcp, section_tool, registered
@@ -52,7 +54,9 @@ async def test_remove_virtual_authenticator_tool():
 
     with patch("core.login_guard.check_pending_login_guard", return_value=None):
         register(mcp, section_tool, deps)
-        result = await registered["remove_virtual_authenticator"]("inst-1", authenticator_id="auth-123")
+        result = await registered["remove_virtual_authenticator"](
+            "inst-1", authenticator_id="auth-123"
+        )
         assert result is True
 
 

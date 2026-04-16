@@ -40,9 +40,7 @@ class AnimationHandler:
         Returns:
             List[Dict[str, Any]]: List of animation objects with id, name, type, and timing.
         """
-        debug_logger.log_info(
-            "AnimationHandler", "list_animations", "Listing active animations"
-        )
+        debug_logger.log_info("AnimationHandler", "list_animations", "Listing active animations")
         try:
             await AnimationHandler.enable_animation_domain(tab)
             # Use JS to enumerate animations since CDP Animation domain uses events
@@ -66,6 +64,7 @@ class AnimationHandler:
                 )
             )
             import json
+
             if result and result.result and result.result.value:
                 try:
                     return json.loads(result.result.value)
@@ -101,11 +100,7 @@ class AnimationHandler:
         )
         try:
             await AnimationHandler.enable_animation_domain(tab)
-            await tab.send(
-                cdp.animation.set_paused(
-                    animations=[animation_id], paused=True
-                )
-            )
+            await tab.send(cdp.animation.set_paused(animations=[animation_id], paused=True))
             return True
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
@@ -138,11 +133,7 @@ class AnimationHandler:
         )
         try:
             await AnimationHandler.enable_animation_domain(tab)
-            await tab.send(
-                cdp.animation.set_paused(
-                    animations=[animation_id], paused=False
-                )
-            )
+            await tab.send(cdp.animation.set_paused(animations=[animation_id], paused=False))
             return True
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
@@ -178,9 +169,7 @@ class AnimationHandler:
         )
         try:
             await AnimationHandler.enable_animation_domain(tab)
-            await tab.send(
-                cdp.animation.set_playback_rate(playback_rate=playback_rate)
-            )
+            await tab.send(cdp.animation.set_playback_rate(playback_rate=playback_rate))
             return True
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
@@ -200,9 +189,7 @@ class AnimationHandler:
             raise
 
     @staticmethod
-    async def seek_animation(
-        tab: Tab, animation_ids: List[str], current_time: float
-    ) -> bool:
+    async def seek_animation(tab: Tab, animation_ids: List[str], current_time: float) -> bool:
         """
         Seek one or more animations to a specific time position.
 
@@ -222,9 +209,7 @@ class AnimationHandler:
         try:
             await AnimationHandler.enable_animation_domain(tab)
             await tab.send(
-                cdp.animation.seek_animations(
-                    animations=animation_ids, current_time=current_time
-                )
+                cdp.animation.seek_animations(animations=animation_ids, current_time=current_time)
             )
             return True
         except asyncio.TimeoutError:
@@ -245,9 +230,7 @@ class AnimationHandler:
             raise
 
     @staticmethod
-    async def get_animation_timing(
-        tab: Tab, animation_id: str
-    ) -> Optional[Dict[str, Any]]:
+    async def get_animation_timing(tab: Tab, animation_id: str) -> Optional[Dict[str, Any]]:
         """
         Get the current timing information for an animation.
 
@@ -265,9 +248,7 @@ class AnimationHandler:
         )
         try:
             await AnimationHandler.enable_animation_domain(tab)
-            result = await tab.send(
-                cdp.animation.get_current_time(id_=animation_id)
-            )
+            result = await tab.send(cdp.animation.get_current_time(id_=animation_id))
             return {
                 "animation_id": animation_id,
                 "current_time": result.current_time if result else None,

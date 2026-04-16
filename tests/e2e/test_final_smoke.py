@@ -84,7 +84,9 @@ class TestFinalSmoke:
 
             # ── STEP 2: Navigate ──────────────────────────────────────────────
             print("[2/14] Navigating to httpbin.org/html...")
-            nav = await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=15000)
+            nav = await navigate(
+                iid, "https://httpbin.org/html", inject_cookies=False, timeout=15000
+            )
             assert nav["success"] is True
             assert nav["login_required"] is False
             assert "httpbin.org" in nav["url"]
@@ -253,7 +255,9 @@ class TestFinalSmoke:
             health2 = await check_instance_health(iid2)
             assert health2["healthy"] is True
 
-            nav2 = await navigate(iid2, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
+            nav2 = await navigate(
+                iid2, "https://httpbin.org/html", inject_cookies=False, timeout=10000
+            )
             assert nav2["success"] is True
 
             await close_instance(iid2)

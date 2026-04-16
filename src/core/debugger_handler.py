@@ -94,11 +94,13 @@ class DebuggerHandler:
             locations = []
             if result.locations:
                 for loc in result.locations:
-                    locations.append({
-                        "script_id": str(loc.script_id),
-                        "line_number": loc.line_number,
-                        "column_number": loc.column_number,
-                    })
+                    locations.append(
+                        {
+                            "script_id": str(loc.script_id),
+                            "line_number": loc.line_number,
+                            "column_number": loc.column_number,
+                        }
+                    )
             DebuggerHandler._breakpoints[breakpoint_id] = f"{url}:{line_number}"
             return {
                 "breakpoint_id": breakpoint_id,
@@ -174,9 +176,7 @@ class DebuggerHandler:
         Returns:
             bool: True if successful.
         """
-        debug_logger.log_info(
-            "DebuggerHandler", "resume_execution", "Resuming execution"
-        )
+        debug_logger.log_info("DebuggerHandler", "resume_execution", "Resuming execution")
         try:
             await tab.send(cdp.debugger.resume())
             return True
@@ -257,9 +257,7 @@ class DebuggerHandler:
         Returns:
             List[Dict[str, Any]]: List of call frames with function name, URL, and line.
         """
-        debug_logger.log_info(
-            "DebuggerHandler", "get_call_stack", "Getting call stack"
-        )
+        debug_logger.log_info("DebuggerHandler", "get_call_stack", "Getting call stack")
         try:
             # Use Runtime.evaluate to get stack trace info
             result = await tab.send(

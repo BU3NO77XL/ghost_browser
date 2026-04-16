@@ -76,9 +76,11 @@ class ResponseHandler:
                     },
                 },
                 "for_structured_data": {
-                    "tool": f"extract_{fallback_filename_prefix}_to_file"
-                    if not fallback_filename_prefix.startswith("page")
-                    else "clone_element_to_file",
+                    "tool": (
+                        f"extract_{fallback_filename_prefix}_to_file"
+                        if not fallback_filename_prefix.startswith("page")
+                        else "clone_element_to_file"
+                    ),
                     "args": {
                         "instance_id": instance_id,
                         "output_path": f"<absolute_path_in_your_workspace>/{fallback_filename_prefix}.json",
