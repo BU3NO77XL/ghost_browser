@@ -1,12 +1,12 @@
 [project]
-name = "stealth-browser-mcp"
-version = "0.2.5"
+name = "ghost-browser-mcp"
+version = "0.5.0"
 description = "Ultimate undetectable browser automation MCP server with CDP-level access"
 readme = "README.md"
 requires-python = ">=3.10"
 license = {text = "MIT"}
 authors = [
-    {name = "Vibhek Soni", email = "vibheksoni@engineer.com"},
+    {name = "bu3n077xl", email = ""},
 ]
 
 # Runtime dependencies
@@ -15,7 +15,7 @@ dependencies = [
     "nodriver==0.48.1",
     "pydantic==2.12.5",
     "python-dotenv==1.2.2",
-    "requests>=2.33.0",
+    "httpx>=0.28.0",
     "py2js @ git+https://github.com/am230/py2js.git@31a83c7c25a51ab0cc3255f484a2279d26278ec3",
     "jsbeautifier==1.15.4",
     "strinpy==0.0.4",
@@ -37,10 +37,10 @@ dev = [
 
 # Repository metadata
 [project.urls]
-Homepage = "https://github.com/vibheksoni/stealth-browser-mcp"
-Documentation = "https://github.com/vibheksoni/stealth-browser-mcp#readme"
-Repository = "https://github.com/vibheksoni/stealth-browser-mcp.git"
-Issues = "https://github.com/vibheksoni/stealth-browser-mcp/issues"
+Homepage = "https://github.com/bu3n0roots3ven/ghost-browser-mcp"
+Documentation = "https://github.com/bu3n0roots3ven/ghost-browser-mcp#readme"
+Repository = "https://github.com/bu3n0roots3ven/ghost-browser-mcp.git"
+Issues = "https://github.com/bu3n0roots3ven/ghost-browser-mcp/issues"
 
 # Code formatting
 [tool.black]
@@ -60,7 +60,16 @@ warn_unused_configs = true
 asyncio_mode = "auto"
 testpaths = ["tests"]
 pythonpath = ["src"]
-timeout = 120
+norecursedirs = ["reports"]
+timeout = 45
+filterwarnings = [
+    "ignore::pytest.PytestUnraisableExceptionWarning",
+    "ignore::ResourceWarning",
+]
+markers = [
+    "slow: marks tests as slow (deselect with '-m \"not slow\"')",
+    "browser: marks tests that require browser",
+]
 
 [dependency-groups]
 dev = [

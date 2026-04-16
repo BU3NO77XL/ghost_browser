@@ -54,6 +54,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+.pytest-tmp/
 cover/
 
 # Translations
@@ -238,7 +239,6 @@ $RECYCLE.BIN/
 
 oldstuff/
 old_network_hook_system/
-element_clones/
 testing/
 .claude
 requirements_frozen.txt
@@ -246,11 +246,38 @@ ignore/
 .oclaude/
 CLAUDE.md
 AGENTS.md
+arquivo.md
+CDP_PERFORMANCE.md
+CDP_USAGE_EXAMPLES.md
+CDP_ANALYSIS.md
 .mcp.json
 Checklist.md
+
+# ── Runtime-generated files (never commit) ───────────────────────────────────
+
+# Storage / persistence
 src/.storage/
-src/.tmp_stealth_storage_*.json
+src/core/.storage/
+**/.storage/
+**/.tmp_stealth_storage_*.json
+
+# Element clones & screenshots saved by the MCP server
+element_clones/
+src/element_clones/
+src/core/element_clones/
+
+# PID tracking file written to home dir by process_cleanup
+~/.stealth_browser_pids.json
 
 # Test reports (generated locally, uploaded as CI artifacts)
+tests/reports/
 reports/*
 !reports/.gitkeep
+
+# Temp progress files from test runner
+ghost_progress_*.json
+
+# Markdown docs generated during dev
+PROGRESS_BAR_FIX.md
+RESUMO_CORRECOES.md
+CORRECOES_TESTES_UNITARIOS.md
