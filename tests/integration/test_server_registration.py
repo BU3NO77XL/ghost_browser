@@ -1,7 +1,8 @@
 """Integration tests verifying all nine new CDP domain tool modules register correctly."""
 
-import pytest
 from unittest.mock import MagicMock
+
+import pytest
 
 EXPECTED_TOOLS = [
     # Log

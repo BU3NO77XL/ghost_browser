@@ -1,7 +1,8 @@
 """Integration tests for target_management tools module."""
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 def _make_target(target_id="t-1", type_="page"):

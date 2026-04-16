@@ -1,8 +1,9 @@
 """Unit tests for BrowserCDPHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from core.browser_cdp_handler import BrowserCDPHandler
 

@@ -2,7 +2,7 @@
 
 from typing import Any, Dict, List
 
-from core.backgroundservice_handler import BackgroundServiceHandler, VALID_SERVICE_TYPES
+from core.backgroundservice_handler import VALID_SERVICE_TYPES, BackgroundServiceHandler
 from core.login_guard import check_pending_login_guard
 
 

@@ -1,8 +1,9 @@
 """Unit tests for LogHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from core.log_handler import LogHandler
 

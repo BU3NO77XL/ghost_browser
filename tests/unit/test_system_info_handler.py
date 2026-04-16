@@ -1,8 +1,9 @@
 """Unit tests for SystemInfoHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from core.system_info_handler import SystemInfoHandler
 

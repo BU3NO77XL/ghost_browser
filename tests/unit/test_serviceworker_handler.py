@@ -1,8 +1,9 @@
 """Unit tests for ServiceWorkerHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from core.serviceworker_handler import ServiceWorkerHandler
 

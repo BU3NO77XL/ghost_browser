@@ -1,8 +1,9 @@
 """Unit tests for DebuggerHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from core.debugger_handler import DebuggerHandler
 

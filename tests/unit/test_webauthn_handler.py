@@ -1,8 +1,9 @@
 """Unit tests for WebAuthnHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from core.webauthn_handler import WebAuthnHandler
 

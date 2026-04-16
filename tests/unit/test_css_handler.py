@@ -1,8 +1,9 @@
 """Unit tests for CSSHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from core.css_handler import CSSHandler
 

@@ -1,7 +1,8 @@
 """Integration tests for storage_cdp_management tools module."""
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 def _make_deps(tab=None):

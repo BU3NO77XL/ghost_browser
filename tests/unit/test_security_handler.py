@@ -1,8 +1,9 @@
 """Unit tests for SecurityHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from core.security_handler import SecurityHandler
 

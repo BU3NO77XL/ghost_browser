@@ -2,9 +2,10 @@
 """Ghost Browser MCP — Visual Demo Completo com Efeitos Visuais"""
 
 import asyncio
-import pytest
 import sys
 from pathlib import Path
+
+import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 import server as _srv

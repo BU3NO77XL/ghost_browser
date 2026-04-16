@@ -1,10 +1,11 @@
 """Unit tests for BackgroundServiceHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from core.backgroundservice_handler import BackgroundServiceHandler, VALID_SERVICE_TYPES
+import pytest
+
+from core.backgroundservice_handler import VALID_SERVICE_TYPES, BackgroundServiceHandler
 
 
 def _make_tab():

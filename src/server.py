@@ -9,7 +9,9 @@ from typing import Any, Dict, List, Optional
 from fastmcp import FastMCP
 
 from core.animation_handler import AnimationHandler
+from core.audits_handler import AuditsHandler
 from core.backgroundservice_handler import BackgroundServiceHandler
+from core.browser_cdp_handler import BrowserCDPHandler
 from core.browser_manager import BrowserManager
 from core.cdp_function_executor import CDPFunctionExecutor
 from core.comprehensive_element_cloner import comprehensive_element_cloner
@@ -18,13 +20,17 @@ from core.database_handler import DatabaseHandler
 from core.debug_logger import debug_logger
 from core.debugger_handler import DebuggerHandler
 from core.dom_handler import DOMHandler
+from core.dom_snapshot_handler import DOMSnapshotHandler
 from core.dynamic_hook_ai_interface import dynamic_hook_ai
 from core.element_cloner import element_cloner
+from core.fetch_handler import FetchHandler
 from core.file_based_element_cloner import file_based_element_cloner
 from core.heapprofiler_handler import HeapProfilerHandler
+from core.log_handler import LogHandler
 from core.login_guard import check_pending_login_guard
 from core.manual_login_handler import manual_login_handler
 from core.network_interceptor import NetworkInterceptor
+from core.overlay_handler import OverlayHandler
 from core.persistent_storage import persistent_storage
 from core.process_cleanup import process_cleanup
 from core.profiler_handler import ProfilerHandler
@@ -32,18 +38,12 @@ from core.progressive_element_cloner import progressive_element_cloner
 from core.response_handler import response_handler
 from core.security_handler import SecurityHandler
 from core.serviceworker_handler import ServiceWorkerHandler
-from core.storage_handler import StorageHandler
-from core.webauthn_handler import WebAuthnHandler
-from core.log_handler import LogHandler
 from core.storage_cdp_handler import StorageCDPHandler
+from core.storage_handler import StorageHandler
 from core.system_info_handler import SystemInfoHandler
-from core.fetch_handler import FetchHandler
-from core.overlay_handler import OverlayHandler
-from core.audits_handler import AuditsHandler
 from core.target_handler import TargetHandler
-from core.browser_cdp_handler import BrowserCDPHandler
-from core.dom_snapshot_handler import DOMSnapshotHandler
 from core.temp_file_manager import temp_file_manager
+from core.webauthn_handler import WebAuthnHandler
 
 _MINIMAL_DISABLED_SECTIONS = {
     "element-extraction",
@@ -301,7 +301,9 @@ _deps = {
 # Register all tool sections and expose functions in module namespace
 from tools import (
     animation_management,
+    audits_management,
     backgroundservice_management,
+    browser_cdp_management,
     browser_management,
     cdp_advanced,
     cdp_functions,
@@ -310,28 +312,26 @@ from tools import (
     database_management,
     debugger_management,
     debugging,
+    dom_snapshot_management,
     dynamic_hooks,
     element_extraction,
     element_interaction,
+    fetch_management,
     file_extraction,
     heapprofiler_management,
+    log_management,
     network_debugging,
+    overlay_management,
     profiler_management,
     progressive_cloning,
     security_management,
     serviceworker_management,
-    storage_management,
-    tabs,
-    webauthn_management,
-    log_management,
     storage_cdp_management,
+    storage_management,
     system_info_management,
-    fetch_management,
-    overlay_management,
-    audits_management,
+    tabs,
     target_management,
-    browser_cdp_management,
-    dom_snapshot_management,
+    webauthn_management,
 )
 
 _tool_modules = [

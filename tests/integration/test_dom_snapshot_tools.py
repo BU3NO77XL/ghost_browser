@@ -1,7 +1,8 @@
 """Integration tests for dom_snapshot_management tools module."""
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 def _make_snapshot_result(node_count=5):

@@ -1,8 +1,9 @@
 """Unit tests for StorageCDPHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from core.storage_cdp_handler import StorageCDPHandler
 

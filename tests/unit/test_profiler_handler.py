@@ -1,10 +1,11 @@
 """Unit tests for ProfilerHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from core.profiler_handler import ProfilerHandler, MAX_PROFILE_NODES
+import pytest
+
+from core.profiler_handler import MAX_PROFILE_NODES, ProfilerHandler
 
 
 def _make_tab():

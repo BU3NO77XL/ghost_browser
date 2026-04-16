@@ -1,7 +1,8 @@
 """Integration tests for storage_management tools module."""
 
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 
 def _make_deps(tab=None):
@@ -143,8 +144,8 @@ async def test_set_session_storage_item_tool():
 
 @pytest.mark.asyncio
 async def test_list_indexed_databases_tool():
-    from tools.storage_management import register
     from core.storage_handler import StorageHandler
+    from tools.storage_management import register
 
     mcp, section_tool, registered = _make_mcp_and_section_tool()
 

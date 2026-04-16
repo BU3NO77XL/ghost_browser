@@ -1,8 +1,9 @@
 """Unit tests for FetchHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from core.fetch_handler import FetchHandler
 

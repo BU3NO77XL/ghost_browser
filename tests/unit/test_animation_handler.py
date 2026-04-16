@@ -1,8 +1,9 @@
 """Unit tests for AnimationHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from core.animation_handler import AnimationHandler
 

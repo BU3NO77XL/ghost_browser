@@ -1,8 +1,9 @@
 """Unit tests for AuditsHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from core.audits_handler import AuditsHandler
 

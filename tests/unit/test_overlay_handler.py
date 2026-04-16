@@ -1,8 +1,9 @@
 """Unit tests for OverlayHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock, patch
+
+import pytest
 
 from core.overlay_handler import OverlayHandler
 

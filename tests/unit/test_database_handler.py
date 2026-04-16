@@ -2,9 +2,9 @@
 
 import asyncio
 import json
+from unittest.mock import AsyncMock, MagicMock, patch
+
 import pytest
-from unittest.mock import AsyncMock, MagicMock
-from unittest.mock import patch
 
 from core.database_handler import DatabaseHandler
 

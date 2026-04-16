@@ -1,10 +1,11 @@
 """Unit tests for DOMSnapshotHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
 
-from core.dom_snapshot_handler import DOMSnapshotHandler, DEFAULT_COMPUTED_STYLES
+import pytest
+
+from core.dom_snapshot_handler import DEFAULT_COMPUTED_STYLES, DOMSnapshotHandler
 
 
 def _make_tab():

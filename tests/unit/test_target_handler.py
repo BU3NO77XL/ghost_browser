@@ -1,8 +1,9 @@
 """Unit tests for TargetHandler."""
 
 import asyncio
-import pytest
 from unittest.mock import AsyncMock, MagicMock
+
+import pytest
 
 from core.target_handler import TargetHandler
 
