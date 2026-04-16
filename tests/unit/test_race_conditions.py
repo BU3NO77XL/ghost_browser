@@ -4,8 +4,8 @@ import asyncio
 
 import pytest
 
-from login_watcher import login_watcher
-from manual_login_handler import manual_login_handler
+from core.login_watcher import login_watcher
+from core.manual_login_handler import manual_login_handler
 
 
 class TestConcurrentAccess:

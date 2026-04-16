@@ -21,9 +21,9 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 IS_CI = os.getenv("CI") == "true"
 
-from browser_manager import BrowserManager
-from models import BrowserOptions
-from persistent_storage import InMemoryStorage, persistent_storage
+from core.browser_manager import BrowserManager
+from core.models import BrowserOptions
+from core.persistent_storage import InMemoryStorage, persistent_storage
 
 
 class TestStoragePersistence:
@@ -275,3 +275,137 @@ class TestStorageCleanup:
             assert persistent_storage.get_instance(stale_id) is None
 
         print(f"\n[CLEANUP] Removed {len(stale_ids)} stale instances")
+
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# Instance Recovery Tests (from test_instance_recovery.py)
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class TestInstanceReuse:
+    """Test reusing an existing active instance across multiple operations."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.skipif(IS_CI, reason="Requires real browser (not available in CI)")
+    async def test_instance_survives_multiple_navigations(self, browser_manager):
+        """Same instance should work across multiple navigate calls."""
+        options = BrowserOptions(headless=True, viewport_width=1280, viewport_height=720)
+        instance = await browser_manager.spawn_browser(options)
+        tab = await browser_manager.get_tab(instance.instance_id)
+
+        # Navigate multiple times on same instance
+        await tab.get("https://httpbin.org/html")
+        await asyncio.sleep(0.3)
+        url1 = await tab.evaluate("window.location.href")
+        assert "httpbin.org" in url1
+
+        await tab.get("https://httpbin.org/json")
+        await asyncio.sleep(0.3)
+        url2 = await tab.evaluate("window.location.href")
+        assert "json" in url2
+
+        # Instance should still be healthy
+        health = await browser_manager.check_instance_health(instance.instance_id)
+        assert health["healthy"] is True
+
+        await browser_manager.close_instance(instance.instance_id)
+
+    @pytest.mark.asyncio
+    @pytest.mark.skipif(IS_CI, reason="Requires real browser (not available in CI)")
+    async def test_instance_id_stable_across_operations(self, browser_manager):
+        """Instance ID must not change during normal operations."""
+        options = BrowserOptions(headless=True, viewport_width=1280, viewport_height=720)
+        instance = await browser_manager.spawn_browser(options)
+        original_id = instance.instance_id
+
+        tab = await browser_manager.get_tab(original_id)
+        await tab.get("https://httpbin.org/html")
+        await asyncio.sleep(0.3)
+
+        # Get instance again — should be same object
+        instances = await browser_manager.list_instances()
+        found = next((i for i in instances if i.instance_id == original_id), None)
+        assert found is not None
+        assert found.instance_id == original_id
+
+        await browser_manager.close_instance(original_id)
+
+
+class TestDeadInstanceBehavior:
+    """Test what happens when you try to use a dead/stale instance."""
+
+    @pytest.mark.asyncio
+    @pytest.mark.skipif(IS_CI, reason="Requires real browser (not available in CI)")
+    async def test_dead_instance_get_tab_returns_none(self, browser_manager):
+        """After closing, get_tab should return None."""
+        options = BrowserOptions(headless=True, viewport_width=1280, viewport_height=720)
+        instance = await browser_manager.spawn_browser(options)
+        instance_id = instance.instance_id
+
+        await browser_manager.close_instance(instance_id)
+
+        tab = await browser_manager.get_tab(instance_id)
+        assert tab is None
+
+    @pytest.mark.asyncio
+    async def test_stored_only_instance_cannot_be_used(self, browser_manager):
+        """
+        CRITICAL: A stored-but-dead instance cannot be recovered.
+        There is NO reconnect mechanism — must spawn new browser.
+        """
+        # Inject a fake "stored" instance
+        fake_id = "fake-stored-instance-xyz"
+        persistent_storage.store_instance(
+            fake_id,
+            {
+                "state": "ready",
+                "created_at": "2026-01-01T00:00:00",
+                "current_url": "https://instagram.com",
+                "title": "Instagram",
+            },
+        )
+
+        # Verify it's in storage but not in memory
+        tab = await browser_manager.get_tab(fake_id)
+        assert tab is None
+
+        health = await browser_manager.check_instance_health(fake_id)
+        assert health["healthy"] is False
+        assert health["can_recover"] is False
+        assert health["reason"] == "Tab not found"
+
+        # Cleanup
+        persistent_storage.remove_instance(fake_id)
+
+
+class TestNoRecoveryMechanism:
+    """Document the absence of a reconnect/recovery mechanism."""
+
+    @pytest.mark.asyncio
+    async def test_no_reconnect_api_exists(self, browser_manager):
+        """Verify there is no reconnect method — use spawn_browser instead."""
+        assert not hasattr(browser_manager, "reconnect")
+        assert not hasattr(browser_manager, "recover_instance")
+
+    @pytest.mark.asyncio
+    @pytest.mark.skipif(IS_CI, reason="Requires real browser (not available in CI)")
+    async def test_spawn_new_after_dead_works(self, browser_manager):
+        """The correct recovery flow: detect dead → spawn new → continue."""
+        options = BrowserOptions(headless=True, viewport_width=1280, viewport_height=720)
+
+        # Spawn and kill first instance
+        inst1 = await browser_manager.spawn_browser(options)
+        await browser_manager.close_instance(inst1.instance_id)
+
+        # Spawn new instance (recovery)
+        inst2 = await browser_manager.spawn_browser(options)
+        assert inst2.instance_id != inst1.instance_id
+
+        tab = await browser_manager.get_tab(inst2.instance_id)
+        assert tab is not None
+
+        health = await browser_manager.check_instance_health(inst2.instance_id)
+        assert health["healthy"] is True
+
+        await browser_manager.close_instance(inst2.instance_id)

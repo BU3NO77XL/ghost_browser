@@ -52,7 +52,7 @@ reload_page = _server.reload_page
 
 async def _spawn() -> str:
     """Spawn a browser and return instance_id."""
-    result = await spawn_browser(headless=False, viewport_width=1280, viewport_height=720)
+    result = await spawn_browser(headless=True, viewport_width=1280, viewport_height=720)
     return result["instance_id"]
 
 
@@ -72,7 +72,7 @@ class TestMCPBrowserLifecycle:
 
     @pytest.mark.asyncio
     async def test_spawn_returns_instance_id(self):
-        result = await spawn_browser(headless=False, viewport_width=1280, viewport_height=720)
+        result = await spawn_browser(headless=True, viewport_width=1280, viewport_height=720)
         assert "instance_id" in result
         assert result["instance_id"]
         assert result["state"] is not None
@@ -122,7 +122,7 @@ class TestMCPNavigation:
     @pytest.mark.asyncio
     async def test_navigate_basic(self):
         iid = await _spawn()
-        result = await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        result = await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
         assert result["success"] is True
         assert "httpbin.org" in result["url"]
         assert result["login_required"] is False
@@ -131,7 +131,7 @@ class TestMCPNavigation:
     @pytest.mark.asyncio
     async def test_navigate_updates_instance_state(self):
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
         instances = await list_instances()
         inst = next(i for i in instances if i["instance_id"] == iid)
         assert "httpbin.org" in (inst.get("current_url") or "")
@@ -142,7 +142,7 @@ class TestMCPNavigation:
         """Navigate to a real login page and verify login_required=True."""
         iid = await _spawn()
         # Use a URL that has 'login' in it and a password field
-        result = await navigate(iid, "https://httpbin.org/forms/post", inject_cookies=False)
+        result = await navigate(iid, "https://httpbin.org/forms/post", inject_cookies=False, timeout=10000)
         # httpbin forms page has a password field — may or may not trigger
         # depending on DOM detection. Just verify the response shape is correct.
         assert "login_required" in result
@@ -153,15 +153,15 @@ class TestMCPNavigation:
     @pytest.mark.asyncio
     async def test_navigate_no_login_on_plain_page(self):
         iid = await _spawn()
-        result = await navigate(iid, "https://httpbin.org/json", inject_cookies=False)
+        result = await navigate(iid, "https://httpbin.org/json", inject_cookies=False, timeout=10000)
         assert result["login_required"] is False
         await _close(iid)
 
     @pytest.mark.asyncio
     async def test_go_back_after_navigation(self):
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
-        await navigate(iid, "https://httpbin.org/json", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
+        await navigate(iid, "https://httpbin.org/json", inject_cookies=False, timeout=10000)
         result = await go_back(iid)
         assert result is True
         await _close(iid)
@@ -169,7 +169,7 @@ class TestMCPNavigation:
     @pytest.mark.asyncio
     async def test_reload_page(self):
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
         result = await reload_page(iid)
         assert result is True
         await _close(iid)
@@ -185,7 +185,7 @@ class TestMCPInstanceState:
     @pytest.mark.asyncio
     async def test_get_instance_state_after_navigate(self):
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
         state = await get_instance_state(iid)
         assert state is not None
         assert "httpbin.org" in state["url"]
@@ -210,7 +210,7 @@ class TestMCPExecuteScript:
     @pytest.mark.asyncio
     async def test_execute_script_simple(self):
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
         result = await execute_script(iid, "2 + 2")
         assert result["success"] is True
         assert result["result"] == 4
@@ -219,7 +219,7 @@ class TestMCPExecuteScript:
     @pytest.mark.asyncio
     async def test_execute_script_dom(self):
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
         result = await execute_script(iid, "document.title")
         assert result["success"] is True
         assert isinstance(result["result"], str)
@@ -228,7 +228,7 @@ class TestMCPExecuteScript:
     @pytest.mark.asyncio
     async def test_execute_script_error_handling(self):
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
         result = await execute_script(iid, "throw new Error('test error')")
         # Should not raise — should return error in result
         assert isinstance(result, dict)
@@ -245,7 +245,7 @@ class TestMCPPageContent:
     @pytest.mark.asyncio
     async def test_get_page_content(self):
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
         content = await get_page_content(iid)
         assert content is not None
         assert "html" in str(content).lower() or "text" in str(content).lower()
@@ -262,7 +262,7 @@ class TestMCPDOMInteraction:
     @pytest.mark.asyncio
     async def test_query_elements_finds_body(self):
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
         elements = await query_elements(iid, "body")
         assert isinstance(elements, list)
         assert len(elements) >= 1
@@ -271,7 +271,7 @@ class TestMCPDOMInteraction:
     @pytest.mark.asyncio
     async def test_query_elements_empty_for_nonexistent(self):
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
         elements = await query_elements(iid, "#this-element-does-not-exist-xyz")
         assert isinstance(elements, list)
         assert len(elements) == 0
@@ -280,7 +280,7 @@ class TestMCPDOMInteraction:
     @pytest.mark.asyncio
     async def test_type_text_in_form(self):
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/forms/post", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/forms/post", inject_cookies=False, timeout=10000)
         # Type in the custname field
         result = await _server.type_text(iid, "input[name='custname']", "Test User")
         assert result is True
@@ -297,7 +297,7 @@ class TestMCPCookies:
     @pytest.mark.asyncio
     async def test_set_and_get_cookie(self):
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
 
         await set_cookie(
             iid, name="mcp_test_cookie", value="mcp_test_value", domain="httpbin.org", path="/"
@@ -311,7 +311,7 @@ class TestMCPCookies:
     @pytest.mark.asyncio
     async def test_clear_cookies(self):
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
         result = await clear_cookies(iid)
         assert result is True
         await _close(iid)
@@ -319,7 +319,7 @@ class TestMCPCookies:
     @pytest.mark.asyncio
     async def test_get_cookies_returns_list(self):
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
         cookies = await get_cookies(iid)
         assert isinstance(cookies, list)
         await _close(iid)
@@ -336,7 +336,7 @@ class TestMCPLoginFlow:
     async def test_check_login_status_not_pending(self):
         """check_login_status on a normal instance returns not pending."""
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
         status = await check_login_status(iid)
         assert status["pending_manual_login"] is False
         assert status["is_authenticated"] is True
@@ -346,13 +346,14 @@ class TestMCPLoginFlow:
     async def test_confirm_login_on_non_pending_instance(self):
         """confirm_manual_login on a non-pending instance should succeed."""
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
         result = await confirm_manual_login(iid)
         assert result["success"] is True
         assert "current_url" in result
         await _close(iid)
 
     @pytest.mark.asyncio
+    @pytest.mark.timeout(60)
     async def test_full_login_flow_simulation(self):
         """
         Simulate the full login flow:
@@ -362,14 +363,14 @@ class TestMCPLoginFlow:
         4. confirm_manual_login() succeeds
         5. Instance is usable again
         """
-        from login_watcher import login_watcher
-        from manual_login_handler import manual_login_handler
+        from core.login_watcher import login_watcher
+        from core.manual_login_handler import manual_login_handler
 
         iid = await _spawn()
 
         # Step 1: Navigate to a page and manually register as pending
         # (simulating what navigate() does when it detects a login page)
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
 
         tab = await _server.browser_manager.get_tab(iid)
         await manual_login_handler.register_pending_login(iid, tab, "https://httpbin.org/html")
@@ -394,7 +395,7 @@ class TestMCPLoginFlow:
         assert status_after["is_authenticated"] is True
 
         # Step 6: Can still navigate normally
-        nav = await navigate(iid, "https://httpbin.org/json", inject_cookies=False)
+        nav = await navigate(iid, "https://httpbin.org/json", inject_cookies=False, timeout=10000)
         assert nav["success"] is True
         assert nav["login_required"] is False
 
@@ -406,11 +407,11 @@ class TestMCPLoginFlow:
         If confirm_manual_login fails (still on login page),
         the watcher should be restarted automatically.
         """
-        from login_watcher import login_watcher
-        from manual_login_handler import manual_login_handler
+        from core.login_watcher import login_watcher
+        from core.manual_login_handler import manual_login_handler
 
         iid = await _spawn()
-        await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
 
         tab = await _server.browser_manager.get_tab(iid)
 

@@ -26,7 +26,7 @@ sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 class TestModels:
 
     def test_browser_instance_defaults(self):
-        from models import BrowserInstance, BrowserState
+        from core.models import BrowserInstance, BrowserState
 
         inst = BrowserInstance(instance_id="test-123")
         assert inst.instance_id == "test-123"
@@ -36,7 +36,7 @@ class TestModels:
         assert inst.current_url is None
 
     def test_browser_instance_update_activity(self):
-        from models import BrowserInstance
+        from core.models import BrowserInstance
 
         inst = BrowserInstance(instance_id="test-456")
         before = inst.last_activity
@@ -45,7 +45,7 @@ class TestModels:
         assert inst.last_activity >= before
 
     def test_browser_state_enum_values(self):
-        from models import BrowserState
+        from core.models import BrowserState
 
         assert BrowserState.STARTING == "starting"
         assert BrowserState.READY == "ready"
@@ -53,7 +53,7 @@ class TestModels:
         assert BrowserState.ERROR == "error"
 
     def test_browser_options_defaults(self):
-        from models import BrowserOptions
+        from core.models import BrowserOptions
 
         opts = BrowserOptions()
         assert opts.headless is False
@@ -64,7 +64,7 @@ class TestModels:
         assert opts.extra_headers == {}
 
     def test_browser_options_custom(self):
-        from models import BrowserOptions
+        from core.models import BrowserOptions
 
         opts = BrowserOptions(
             headless=True,
@@ -79,7 +79,7 @@ class TestModels:
         assert opts.sandbox is False
 
     def test_page_state_model(self):
-        from models import PageState
+        from core.models import PageState
 
         state = PageState(
             instance_id="test-id",
@@ -95,7 +95,7 @@ class TestModels:
 
     def test_page_state_model_dump(self):
         """model_dump() must work (not deprecated dict())."""
-        from models import PageState
+        from core.models import PageState
 
         state = PageState(
             instance_id="test-id",
@@ -110,7 +110,7 @@ class TestModels:
         assert "timestamp" in d
 
     def test_network_request_model(self):
-        from models import NetworkRequest
+        from core.models import NetworkRequest
 
         req = NetworkRequest(
             request_id="req-1", instance_id="inst-1", url="https://example.com/api", method="GET"
@@ -121,14 +121,14 @@ class TestModels:
         assert req.post_data is None
 
     def test_network_response_model(self):
-        from models import NetworkResponse
+        from core.models import NetworkResponse
 
         resp = NetworkResponse(request_id="req-1", status=200)
         assert resp.status == 200
         assert resp.headers == {}
 
     def test_element_info_model(self):
-        from models import ElementInfo
+        from core.models import ElementInfo
 
         el = ElementInfo(selector="body", tag_name="BODY")
         assert el.is_visible is True
@@ -137,14 +137,14 @@ class TestModels:
         assert el.bounding_box is None
 
     def test_hook_enums(self):
-        from models import HookAction, HookStage, HookStatus
+        from core.models import HookAction, HookStage, HookStatus
 
         assert HookAction.BLOCK == "block"
         assert HookStage.REQUEST == "request"
         assert HookStatus.ACTIVE == "active"
 
     def test_network_hook_model(self):
-        from models import HookAction, HookStage, NetworkHook
+        from core.models import HookAction, HookStage, NetworkHook
 
         hook = NetworkHook(
             hook_id="h-1",
@@ -158,7 +158,7 @@ class TestModels:
         assert hook.last_triggered is None
 
     def test_script_result_model(self):
-        from models import ScriptResult
+        from core.models import ScriptResult
 
         r = ScriptResult(success=True, result=42, execution_time=1.5)
         assert r.success is True
@@ -172,19 +172,19 @@ class TestModels:
 class TestPlatformUtils:
 
     def test_is_running_as_root_returns_bool(self):
-        from platform_utils import is_running_as_root
+        from core.platform_utils import is_running_as_root
 
         result = is_running_as_root()
         assert isinstance(result, bool)
 
     def test_is_running_in_container_returns_bool(self):
-        from platform_utils import is_running_in_container
+        from core.platform_utils import is_running_in_container
 
         result = is_running_in_container()
         assert isinstance(result, bool)
 
     def test_get_platform_info_has_required_keys(self):
-        from platform_utils import get_platform_info
+        from core.platform_utils import get_platform_info
 
         info = get_platform_info()
         required = [
@@ -200,7 +200,7 @@ class TestPlatformUtils:
             assert key in info, f"Missing key: {key}"
 
     def test_get_platform_info_types(self):
-        from platform_utils import get_platform_info
+        from core.platform_utils import get_platform_info
 
         info = get_platform_info()
         assert isinstance(info["system"], str)
@@ -209,7 +209,7 @@ class TestPlatformUtils:
         assert isinstance(info["required_sandbox_args"], list)
 
     def test_check_browser_executable_finds_browser(self):
-        from platform_utils import check_browser_executable
+        from core.platform_utils import check_browser_executable
 
         path = check_browser_executable()
         # On CI might be None, but on dev machine should find Chrome/Edge
@@ -218,14 +218,14 @@ class TestPlatformUtils:
             assert Path(path).exists()
 
     def test_merge_browser_args_no_duplicates(self):
-        from platform_utils import merge_browser_args
+        from core.platform_utils import merge_browser_args
 
         args = merge_browser_args(["--headless", "--no-sandbox"])
         # No duplicates
         assert len(args) == len(set(args))
 
     def test_merge_browser_args_preserves_user_args(self):
-        from platform_utils import merge_browser_args
+        from core.platform_utils import merge_browser_args
 
         user_args = ["--custom-flag", "--another-flag"]
         result = merge_browser_args(user_args)
@@ -233,13 +233,13 @@ class TestPlatformUtils:
             assert arg in result
 
     def test_merge_browser_args_empty(self):
-        from platform_utils import merge_browser_args
+        from core.platform_utils import merge_browser_args
 
         result = merge_browser_args()
         assert isinstance(result, list)
 
     def test_validate_browser_environment_structure(self):
-        from platform_utils import validate_browser_environment
+        from core.platform_utils import validate_browser_environment
 
         result = validate_browser_environment()
         assert "is_ready" in result
@@ -250,7 +250,7 @@ class TestPlatformUtils:
         assert isinstance(result["issues"], list)
 
     def test_get_required_sandbox_args_returns_list(self):
-        from platform_utils import get_required_sandbox_args
+        from core.platform_utils import get_required_sandbox_args
 
         args = get_required_sandbox_args()
         assert isinstance(args, list)
@@ -265,30 +265,30 @@ class TestPlatformUtils:
 class TestProcessCleanup:
 
     def test_singleton_exists(self):
-        from process_cleanup import ProcessCleanup, process_cleanup
+        from core.process_cleanup import ProcessCleanup, process_cleanup
 
         assert isinstance(process_cleanup, ProcessCleanup)
 
     def test_get_tracked_processes_returns_dict(self):
-        from process_cleanup import process_cleanup
+        from core.process_cleanup import process_cleanup
 
         result = process_cleanup.get_tracked_processes()
         assert isinstance(result, dict)
 
     def test_is_process_alive_nonexistent(self):
-        from process_cleanup import process_cleanup
+        from core.process_cleanup import process_cleanup
 
         result = process_cleanup.is_process_alive("nonexistent-instance")
         assert result is False
 
     def test_untrack_nonexistent_is_safe(self):
-        from process_cleanup import process_cleanup
+        from core.process_cleanup import process_cleanup
 
         result = process_cleanup.untrack_browser_process("nonexistent-xyz")
         assert result is False
 
     def test_kill_nonexistent_is_safe(self):
-        from process_cleanup import process_cleanup
+        from core.process_cleanup import process_cleanup
 
         result = process_cleanup.kill_browser_process("nonexistent-xyz")
         assert result is False
@@ -296,7 +296,7 @@ class TestProcessCleanup:
     def test_track_and_untrack_mock_process(self):
         import os
 
-        from process_cleanup import process_cleanup
+        from core.process_cleanup import process_cleanup
 
         class MockProcess:
             pid = os.getpid()  # Use current process PID (safe, won't kill it)
@@ -313,7 +313,7 @@ class TestProcessCleanup:
         assert instance_id not in process_cleanup.get_tracked_processes()
 
     def test_track_process_without_pid(self):
-        from process_cleanup import process_cleanup
+        from core.process_cleanup import process_cleanup
 
         class MockProcessNoPid:
             pid = None
@@ -325,7 +325,7 @@ class TestProcessCleanup:
         """Current process should be alive."""
         import os
 
-        from process_cleanup import process_cleanup
+        from core.process_cleanup import process_cleanup
 
         class MockProcess:
             pid = os.getpid()
@@ -342,12 +342,12 @@ class TestProcessCleanup:
 class TestResponseHandler:
 
     def test_singleton_exists(self):
-        from response_handler import ResponseHandler, response_handler
+        from core.response_handler import ResponseHandler, response_handler
 
         assert isinstance(response_handler, ResponseHandler)
 
     def test_estimate_tokens_dict(self):
-        from response_handler import ResponseHandler
+        from core.response_handler import ResponseHandler
 
         rh = ResponseHandler()
         data = {"key": "value", "number": 42}
@@ -356,21 +356,21 @@ class TestResponseHandler:
         assert tokens > 0
 
     def test_estimate_tokens_string(self):
-        from response_handler import ResponseHandler
+        from core.response_handler import ResponseHandler
 
         rh = ResponseHandler()
         tokens = rh.estimate_tokens("hello world")
         assert tokens > 0
 
     def test_estimate_tokens_list(self):
-        from response_handler import ResponseHandler
+        from core.response_handler import ResponseHandler
 
         rh = ResponseHandler()
         tokens = rh.estimate_tokens([1, 2, 3, "test"])
         assert tokens > 0
 
     def test_small_response_returned_as_is(self):
-        from response_handler import ResponseHandler
+        from core.response_handler import ResponseHandler
 
         rh = ResponseHandler(max_tokens=10000)
         small_data = {"key": "value"}
@@ -378,49 +378,49 @@ class TestResponseHandler:
         # Small data should be returned as-is (same object)
         assert result == small_data
 
-    def test_large_response_saved_to_file(self, tmp_path):
-        from response_handler import ResponseHandler
+    def test_large_response_returns_remediation_error(self):
+        from core.response_handler import ResponseHandler
 
-        rh = ResponseHandler(max_tokens=10, clone_dir=str(tmp_path))
+        rh = ResponseHandler(max_tokens=10)
         # Create data that exceeds 10 tokens
         large_data = {"data": "x" * 1000}
         result = rh.handle_response(large_data, "test_large")
         assert isinstance(result, dict)
-        assert "file_path" in result
-        assert "filename" in result
-        assert "file_size_kb" in result
-        assert Path(result["file_path"]).exists()
+        assert result["error"] == "response_too_large"
+        assert result["estimated_tokens"] > rh.max_tokens
+        assert result["max_tokens"] == rh.max_tokens
+        assert result["remediation"]["for_structured_data"]["args"]["output_path"].endswith(
+            "/test_large.json"
+        )
 
-    def test_large_response_file_contains_data(self, tmp_path):
-        from response_handler import ResponseHandler
+    def test_large_response_does_not_persist_data_to_disk(self):
+        from core.response_handler import ResponseHandler
 
-        rh = ResponseHandler(max_tokens=10, clone_dir=str(tmp_path))
+        rh = ResponseHandler(max_tokens=10)
         large_data = {"content": "y" * 500}
         result = rh.handle_response(large_data, "test_content")
-        file_path = result["file_path"]
-        with open(file_path, "r") as f:
-            saved = json.load(f)
-        assert "data" in saved
-        assert saved["data"] == large_data
+        assert result["error"] == "response_too_large"
+        assert "file_path" not in result
+        assert "filename" not in result
+        assert "data" not in result
 
-    def test_handle_response_with_metadata(self, tmp_path):
-        from response_handler import ResponseHandler
+    def test_handle_response_with_metadata(self):
+        from core.response_handler import ResponseHandler
 
-        rh = ResponseHandler(max_tokens=10, clone_dir=str(tmp_path))
+        rh = ResponseHandler(max_tokens=10)
         large_data = {"x": "z" * 500}
         meta = {"instance_id": "test-123", "selector": "body"}
         result = rh.handle_response(large_data, "meta_test", metadata=meta)
-        assert result["metadata"] == meta
+        assert result["remediation"]["for_html"]["args"]["instance_id"] == "test-123"
 
-    def test_clone_dir_created_automatically(self, tmp_path):
-        from response_handler import ResponseHandler
+    def test_clone_dir_is_noop_compatibility_attribute(self):
+        from core.response_handler import ResponseHandler
 
-        new_dir = tmp_path / "new_clones"
-        rh = ResponseHandler(clone_dir=str(new_dir))
-        assert new_dir.exists()
+        rh = ResponseHandler()
+        assert rh.clone_dir is None
 
     def test_estimate_tokens_large_vs_small(self):
-        from response_handler import ResponseHandler
+        from core.response_handler import ResponseHandler
 
         rh = ResponseHandler()
         small = rh.estimate_tokens("hi")
@@ -434,12 +434,12 @@ class TestResponseHandler:
 class TestHookLearningSystem:
 
     def test_singleton_exists(self):
-        from hook_learning_system import HookLearningSystem, hook_learning_system
+        from core.hook_learning_system import HookLearningSystem, hook_learning_system
 
         assert isinstance(hook_learning_system, HookLearningSystem)
 
     def test_get_request_object_documentation(self):
-        from hook_learning_system import hook_learning_system
+        from core.hook_learning_system import hook_learning_system
 
         doc = hook_learning_system.get_request_object_documentation()
         assert "request_object" in doc
@@ -449,7 +449,7 @@ class TestHookLearningSystem:
             assert key in fields
 
     def test_get_hook_examples_returns_list(self):
-        from hook_learning_system import hook_learning_system
+        from core.hook_learning_system import hook_learning_system
 
         examples = hook_learning_system.get_hook_examples()
         assert isinstance(examples, list)
@@ -460,7 +460,7 @@ class TestHookLearningSystem:
             assert "requirements" in ex
 
     def test_get_requirements_documentation(self):
-        from hook_learning_system import hook_learning_system
+        from core.hook_learning_system import hook_learning_system
 
         doc = hook_learning_system.get_requirements_documentation()
         assert "requirements" in doc
@@ -470,7 +470,7 @@ class TestHookLearningSystem:
         assert "method" in fields
 
     def test_get_common_patterns(self):
-        from hook_learning_system import hook_learning_system
+        from core.hook_learning_system import hook_learning_system
 
         patterns = hook_learning_system.get_common_patterns()
         assert isinstance(patterns, list)
@@ -480,7 +480,7 @@ class TestHookLearningSystem:
             assert "action" in p
 
     def test_validate_valid_hook(self):
-        from hook_learning_system import hook_learning_system
+        from core.hook_learning_system import hook_learning_system
 
         code = """
 def process_request(request):
@@ -491,7 +491,7 @@ def process_request(request):
         assert result["issues"] == []
 
     def test_validate_missing_function(self):
-        from hook_learning_system import hook_learning_system
+        from core.hook_learning_system import hook_learning_system
 
         code = """
 def wrong_name(request):
@@ -502,7 +502,7 @@ def wrong_name(request):
         assert any("process_request" in i for i in result["issues"])
 
     def test_validate_syntax_error(self):
-        from hook_learning_system import hook_learning_system
+        from core.hook_learning_system import hook_learning_system
 
         code = "def process_request(request: INVALID SYNTAX"
         result = hook_learning_system.validate_hook_function(code)
@@ -510,7 +510,7 @@ def wrong_name(request):
         assert len(result["issues"]) > 0
 
     def test_validate_banned_import(self):
-        from hook_learning_system import hook_learning_system
+        from core.hook_learning_system import hook_learning_system
 
         code = """
 import os
@@ -522,7 +522,7 @@ def process_request(request):
         assert any("Import" in i for i in result["issues"])
 
     def test_validate_banned_eval(self):
-        from hook_learning_system import hook_learning_system
+        from core.hook_learning_system import hook_learning_system
 
         code = """
 def process_request(request):
@@ -534,7 +534,7 @@ def process_request(request):
         assert any("eval" in i for i in result["issues"])
 
     def test_validate_wrong_param_count(self):
-        from hook_learning_system import hook_learning_system
+        from core.hook_learning_system import hook_learning_system
 
         code = """
 def process_request(request, extra):
@@ -544,7 +544,7 @@ def process_request(request, extra):
         assert result["valid"] is False
 
     def test_validate_block_hook(self):
-        from hook_learning_system import hook_learning_system
+        from core.hook_learning_system import hook_learning_system
 
         code = """
 def process_request(request):
@@ -554,7 +554,7 @@ def process_request(request):
         assert result["valid"] is True
 
     def test_validate_complex_valid_hook(self):
-        from hook_learning_system import hook_learning_system
+        from core.hook_learning_system import hook_learning_system
 
         code = """
 def process_request(request):
@@ -574,19 +574,19 @@ def process_request(request):
 class TestDynamicHookAIInterface:
 
     def test_singleton_exists(self):
-        from dynamic_hook_ai_interface import DynamicHookAIInterface, dynamic_hook_ai
+        from core.dynamic_hook_ai_interface import DynamicHookAIInterface, dynamic_hook_ai
 
         assert isinstance(dynamic_hook_ai, DynamicHookAIInterface)
 
     def test_get_request_documentation(self):
-        from dynamic_hook_ai_interface import dynamic_hook_ai
+        from core.dynamic_hook_ai_interface import dynamic_hook_ai
 
         result = dynamic_hook_ai.get_request_documentation()
         assert result["success"] is True
         assert "documentation" in result
 
     def test_get_hook_examples(self):
-        from dynamic_hook_ai_interface import dynamic_hook_ai
+        from core.dynamic_hook_ai_interface import dynamic_hook_ai
 
         result = dynamic_hook_ai.get_hook_examples()
         assert result["success"] is True
@@ -594,21 +594,21 @@ class TestDynamicHookAIInterface:
         assert len(result["examples"]) > 0
 
     def test_get_requirements_documentation(self):
-        from dynamic_hook_ai_interface import dynamic_hook_ai
+        from core.dynamic_hook_ai_interface import dynamic_hook_ai
 
         result = dynamic_hook_ai.get_requirements_documentation()
         assert result["success"] is True
         assert "documentation" in result
 
     def test_get_common_patterns(self):
-        from dynamic_hook_ai_interface import dynamic_hook_ai
+        from core.dynamic_hook_ai_interface import dynamic_hook_ai
 
         result = dynamic_hook_ai.get_common_patterns()
         assert result["success"] is True
         assert "patterns" in result
 
     def test_validate_valid_hook(self):
-        from dynamic_hook_ai_interface import dynamic_hook_ai
+        from core.dynamic_hook_ai_interface import dynamic_hook_ai
 
         code = """
 def process_request(request):
@@ -619,7 +619,7 @@ def process_request(request):
         assert result["validation"]["valid"] is True
 
     def test_validate_invalid_hook(self):
-        from dynamic_hook_ai_interface import dynamic_hook_ai
+        from core.dynamic_hook_ai_interface import dynamic_hook_ai
 
         code = """
 import os
@@ -632,7 +632,7 @@ def process_request(request):
 
     @pytest.mark.asyncio
     async def test_list_hooks_empty(self):
-        from dynamic_hook_ai_interface import dynamic_hook_ai
+        from core.dynamic_hook_ai_interface import dynamic_hook_ai
 
         result = await dynamic_hook_ai.list_dynamic_hooks()
         assert result["success"] is True
@@ -641,7 +641,7 @@ def process_request(request):
 
     @pytest.mark.asyncio
     async def test_create_and_remove_hook(self):
-        from dynamic_hook_ai_interface import dynamic_hook_ai
+        from core.dynamic_hook_ai_interface import dynamic_hook_ai
 
         code = """
 def process_request(request):
@@ -673,7 +673,7 @@ def process_request(request):
 
     @pytest.mark.asyncio
     async def test_create_simple_block_hook(self):
-        from dynamic_hook_ai_interface import dynamic_hook_ai
+        from core.dynamic_hook_ai_interface import dynamic_hook_ai
 
         result = await dynamic_hook_ai.create_simple_hook(
             name="Simple Block", url_pattern="*ads*", action="block"
@@ -684,7 +684,7 @@ def process_request(request):
 
     @pytest.mark.asyncio
     async def test_create_simple_redirect_hook(self):
-        from dynamic_hook_ai_interface import dynamic_hook_ai
+        from core.dynamic_hook_ai_interface import dynamic_hook_ai
 
         result = await dynamic_hook_ai.create_simple_hook(
             name="Simple Redirect",
@@ -698,7 +698,7 @@ def process_request(request):
 
     @pytest.mark.asyncio
     async def test_create_simple_redirect_without_url_fails(self):
-        from dynamic_hook_ai_interface import dynamic_hook_ai
+        from core.dynamic_hook_ai_interface import dynamic_hook_ai
 
         result = await dynamic_hook_ai.create_simple_hook(
             name="Bad Redirect",
@@ -710,7 +710,7 @@ def process_request(request):
 
     @pytest.mark.asyncio
     async def test_create_hook_with_invalid_code_fails(self):
-        from dynamic_hook_ai_interface import dynamic_hook_ai
+        from core.dynamic_hook_ai_interface import dynamic_hook_ai
 
         code = """
 import os
@@ -725,14 +725,14 @@ def process_request(request):
 
     @pytest.mark.asyncio
     async def test_get_hook_details_nonexistent(self):
-        from dynamic_hook_ai_interface import dynamic_hook_ai
+        from core.dynamic_hook_ai_interface import dynamic_hook_ai
 
         result = await dynamic_hook_ai.get_hook_details("nonexistent-hook-id")
         assert result["success"] is False
 
     @pytest.mark.asyncio
     async def test_remove_nonexistent_hook(self):
-        from dynamic_hook_ai_interface import dynamic_hook_ai
+        from core.dynamic_hook_ai_interface import dynamic_hook_ai
 
         result = await dynamic_hook_ai.remove_dynamic_hook("nonexistent-hook-id")
         assert result["success"] is False
@@ -744,12 +744,15 @@ def process_request(request):
 class TestProgressiveElementCloner:
 
     def test_singleton_exists(self):
-        from progressive_element_cloner import ProgressiveElementCloner, progressive_element_cloner
+        from core.progressive_element_cloner import (
+            ProgressiveElementCloner,
+            progressive_element_cloner,
+        )
 
         assert isinstance(progressive_element_cloner, ProgressiveElementCloner)
 
     def test_list_stored_elements_empty(self):
-        from progressive_element_cloner import progressive_element_cloner
+        from core.progressive_element_cloner import progressive_element_cloner
 
         result = progressive_element_cloner.list_stored_elements()
         # Key is 'stored_elements' or 'elements' depending on implementation
@@ -758,49 +761,49 @@ class TestProgressiveElementCloner:
         assert isinstance(result[key], list)
 
     def test_clear_nonexistent_element(self):
-        from progressive_element_cloner import progressive_element_cloner
+        from core.progressive_element_cloner import progressive_element_cloner
 
         result = progressive_element_cloner.clear_stored_element("nonexistent-id")
         assert "error" in result or "message" in result
 
     def test_clear_all_elements(self):
-        from progressive_element_cloner import progressive_element_cloner
+        from core.progressive_element_cloner import progressive_element_cloner
 
         result = progressive_element_cloner.clear_all_elements()
         assert "message" in result or "cleared" in str(result).lower()
 
     def test_expand_styles_nonexistent(self):
-        from progressive_element_cloner import progressive_element_cloner
+        from core.progressive_element_cloner import progressive_element_cloner
 
         result = progressive_element_cloner.expand_styles("nonexistent-element-id")
         assert "error" in result
 
     def test_expand_events_nonexistent(self):
-        from progressive_element_cloner import progressive_element_cloner
+        from core.progressive_element_cloner import progressive_element_cloner
 
         result = progressive_element_cloner.expand_events("nonexistent-element-id")
         assert "error" in result
 
     def test_expand_children_nonexistent(self):
-        from progressive_element_cloner import progressive_element_cloner
+        from core.progressive_element_cloner import progressive_element_cloner
 
         result = progressive_element_cloner.expand_children("nonexistent-element-id")
         assert "error" in result
 
     def test_expand_css_rules_nonexistent(self):
-        from progressive_element_cloner import progressive_element_cloner
+        from core.progressive_element_cloner import progressive_element_cloner
 
         result = progressive_element_cloner.expand_css_rules("nonexistent-element-id")
         assert "error" in result
 
     def test_expand_pseudo_elements_nonexistent(self):
-        from progressive_element_cloner import progressive_element_cloner
+        from core.progressive_element_cloner import progressive_element_cloner
 
         result = progressive_element_cloner.expand_pseudo_elements("nonexistent-element-id")
         assert "error" in result
 
     def test_expand_animations_nonexistent(self):
-        from progressive_element_cloner import progressive_element_cloner
+        from core.progressive_element_cloner import progressive_element_cloner
 
         result = progressive_element_cloner.expand_animations("nonexistent-element-id")
         assert "error" in result

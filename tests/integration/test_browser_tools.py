@@ -1,10 +1,18 @@
-"""Tests for browser management functionality."""
+"""
+Tests for browser_management.py tools layer.
+
+Verifies:
+- spawn_browser orchestrates browser_manager + persistent_storage
+- navigate orchestrates browser_manager + cookie_manager + login_handler
+- JavaScript execution via execute_script
+- Health checks and instance lifecycle
+"""
 
 import asyncio
 
 import pytest
 
-from models import BrowserOptions, BrowserState
+from core.models import BrowserOptions, BrowserState
 
 
 class TestBrowserSpawn:
@@ -111,3 +119,74 @@ class TestBrowserHealth:
         assert health is not None
         assert health["healthy"] is False
         assert "Tab not found" in health["reason"]
+
+
+
+# ─────────────────────────────────────────────────────────────────────────────
+# JavaScript Execution (from test_javascript.py)
+# ─────────────────────────────────────────────────────────────────────────────
+
+
+class TestJavaScriptExecution:
+    """Test JavaScript execution capabilities."""
+
+    @pytest.mark.asyncio
+    async def test_simple_expression(self, browser_tab):
+        """Test evaluating simple expression."""
+        result = await browser_tab.evaluate("2 + 2")
+        assert result == 4
+
+    @pytest.mark.asyncio
+    async def test_string_expression(self, browser_tab):
+        """Test evaluating string expression."""
+        result = await browser_tab.evaluate("'Hello' + ' ' + 'World'")
+        assert result == "Hello World"
+
+    @pytest.mark.asyncio
+    async def test_dom_access(self, navigated_tab):
+        """Test accessing DOM."""
+        title = await navigated_tab.evaluate("document.title")
+        assert title is not None
+
+        url = await navigated_tab.evaluate("window.location.href")
+        assert "httpbin.org" in url
+
+    @pytest.mark.asyncio
+    async def test_set_and_get_variable(self, browser_tab):
+        """Test setting and getting JavaScript variable."""
+        await browser_tab.evaluate("window.testVar = 'test_value'")
+        result = await browser_tab.evaluate("window.testVar")
+        assert result == "test_value"
+
+
+class TestDOMManipulation:
+    """Test DOM manipulation."""
+
+    @pytest.mark.asyncio
+    async def test_query_selector(self, navigated_tab):
+        """Test querySelector."""
+        has_body = await navigated_tab.evaluate("!!document.querySelector('body')")
+        assert has_body is True
+
+    @pytest.mark.asyncio
+    async def test_create_element(self, navigated_tab):
+        """Test creating DOM element."""
+        result = await navigated_tab.evaluate("""
+            (function() {
+                const div = document.createElement('div');
+                div.id = 'test-div';
+                div.textContent = 'Test Content';
+                document.body.appendChild(div);
+                return document.getElementById('test-div').textContent;
+            })()
+        """)
+        assert result == "Test Content"
+
+    @pytest.mark.asyncio
+    async def test_get_element_properties(self, navigated_tab):
+        """Test getting element properties."""
+        tag_name = await navigated_tab.evaluate("document.body.tagName")
+        child_count = await navigated_tab.evaluate("document.body.children.length")
+
+        assert tag_name == "BODY"
+        assert isinstance(child_count, int)

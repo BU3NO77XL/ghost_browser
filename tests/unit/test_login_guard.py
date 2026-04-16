@@ -16,8 +16,8 @@ import pytest
 
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from login_watcher import login_watcher
-from manual_login_handler import manual_login_handler
+from core.login_watcher import login_watcher
+from core.manual_login_handler import manual_login_handler
 
 
 # Simulate the guard function from server.py (same logic, no server import needed)

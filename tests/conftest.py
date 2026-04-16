@@ -11,12 +11,12 @@ import pytest_asyncio
 # Add src to path
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
-from browser_manager import BrowserManager
-from debug_logger import debug_logger
-from login_watcher import login_watcher
-from manual_login_handler import manual_login_handler
-from models import BrowserOptions
-from network_interceptor import NetworkInterceptor
+from core.browser_manager import BrowserManager
+from core.debug_logger import debug_logger
+from core.login_watcher import login_watcher
+from core.manual_login_handler import manual_login_handler
+from core.models import BrowserOptions
+from core.network_interceptor import NetworkInterceptor
 
 # Detect CI environment - browser tests need no_sandbox in containers
 IS_CI = os.getenv("CI") == "true"
@@ -57,7 +57,8 @@ async def browser_instance(browser_manager):
     """Create a browser instance for testing."""
     if IS_CI:
         pytest.skip("Skipping browser spawn test in CI (no display)")
-    options = BrowserOptions(headless=False, viewport_width=1280, viewport_height=720)
+    # Use headless=True for faster tests
+    options = BrowserOptions(headless=True, viewport_width=1280, viewport_height=720)
     instance = await browser_manager.spawn_browser(options)
     yield instance
     # Cleanup is handled by browser_manager fixture
@@ -88,5 +89,5 @@ async def navigated_tab(browser_manager, browser_instance):
     """Get a tab that's already navigated to a test page."""
     tab = await browser_manager.get_tab(browser_instance.instance_id)
     await tab.get("https://httpbin.org/html")
-    await asyncio.sleep(1)
+    await asyncio.sleep(0.3)  # Reduced from 1s
     yield tab

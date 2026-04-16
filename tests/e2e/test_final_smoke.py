@@ -30,9 +30,9 @@ import pytest
 sys.path.insert(0, str(Path(__file__).parent.parent / "src"))
 
 import server as _srv
-from login_watcher import login_watcher
-from manual_login_handler import manual_login_handler
-from persistent_storage import persistent_storage
+from core.login_watcher import login_watcher
+from core.manual_login_handler import manual_login_handler
+from core.persistent_storage import persistent_storage
 
 # ── MCP tool shortcuts ────────────────────────────────────────────────────────
 spawn_browser = _srv.spawn_browser
@@ -65,12 +65,13 @@ class TestFinalSmoke:
     """Single sequential test that walks through the entire AI workflow."""
 
     @pytest.mark.asyncio
+    @pytest.mark.timeout(90)
     async def test_full_ai_session(self):
         iid = None
         try:
             # ── STEP 1: Spawn ─────────────────────────────────────────────────
             print("\n[1/14] Spawning browser...")
-            result = await spawn_browser(headless=False, viewport_width=1280, viewport_height=720)
+            result = await spawn_browser(headless=True, viewport_width=1280, viewport_height=720)
             iid = result["instance_id"]
             assert iid, "No instance_id returned"
             assert result["viewport"]["width"] == 1280
@@ -83,7 +84,7 @@ class TestFinalSmoke:
 
             # ── STEP 2: Navigate ──────────────────────────────────────────────
             print("[2/14] Navigating to httpbin.org/html...")
-            nav = await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+            nav = await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=15000)
             assert nav["success"] is True
             assert nav["login_required"] is False
             assert "httpbin.org" in nav["url"]
@@ -96,7 +97,7 @@ class TestFinalSmoke:
 
             assert await scroll_page(iid, direction="down", amount=200) is True
             assert await scroll_page(iid, direction="top") is True
-            assert await wait_for_element(iid, "body", timeout=3000) is True
+            assert await wait_for_element(iid, "body", timeout=2000) is True
             assert await wait_for_element(iid, "#nonexistent-xyz", timeout=1000) is False
             print("    OK")
 
@@ -152,7 +153,7 @@ class TestFinalSmoke:
                 "https://httpbin.org/html",
             ]
             for url in pages:
-                r = await navigate(iid, url, inject_cookies=False)
+                r = await navigate(iid, url, inject_cookies=False, timeout=10000)
                 assert r["success"] is True, f"Failed: {url}"
             print("    OK — same instance_id used throughout")
 
@@ -222,8 +223,8 @@ class TestFinalSmoke:
 
             # ── STEP 12: Network capture ──────────────────────────────────────
             print("[12/14] Network requests capture...")
-            await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
-            await asyncio.sleep(0.5)
+            await navigate(iid, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
+            await asyncio.sleep(0.3)  # Reduced from 0.5s
             reqs = await list_network_requests(iid)
             assert isinstance(reqs, list)
             assert len(reqs) > 0
@@ -245,14 +246,14 @@ class TestFinalSmoke:
 
             # ── STEP 14: Spawn new after close (recovery) ─────────────────────
             print("[14/14] Spawn new instance after close (recovery flow)...")
-            result2 = await spawn_browser(headless=False, viewport_width=1280, viewport_height=720)
+            result2 = await spawn_browser(headless=True, viewport_width=1280, viewport_height=720)
             iid2 = result2["instance_id"]
             assert iid2 != iid, "New instance must have different ID"
 
             health2 = await check_instance_health(iid2)
             assert health2["healthy"] is True
 
-            nav2 = await navigate(iid2, "https://httpbin.org/html", inject_cookies=False)
+            nav2 = await navigate(iid2, "https://httpbin.org/html", inject_cookies=False, timeout=10000)
             assert nav2["success"] is True
 
             await close_instance(iid2)

@@ -58,7 +58,7 @@ reload_page = _srv.reload_page
 
 
 async def _spawn() -> str:
-    r = await spawn_browser(headless=False, viewport_width=1280, viewport_height=720)
+    r = await spawn_browser(headless=True, viewport_width=1280, viewport_height=720)
     return r["instance_id"]
 
 
@@ -117,6 +117,7 @@ class TestWebSocketHealth:
 class TestInstancePersistence:
 
     @pytest.mark.asyncio
+    @pytest.mark.timeout(60)
     async def test_instance_id_stable_across_10_navigations(self):
         """Same instance_id must be usable for 10 consecutive navigations."""
         iid = await _spawn()
@@ -147,10 +148,12 @@ class TestInstancePersistence:
         iid = await _spawn()
 
         await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
+        await asyncio.sleep(0.3)  # Give browser time to stabilize
         state1 = await get_instance_state(iid)
         assert "html" in state1["url"]
 
         await navigate(iid, "https://httpbin.org/json", inject_cookies=False)
+        await asyncio.sleep(0.3)  # Give browser time to stabilize
         state2 = await get_instance_state(iid)
         assert "json" in state2["url"]
 
@@ -358,7 +361,7 @@ class TestNetworkCapture:
         """list_network_requests must return captured requests after navigation."""
         iid = await _spawn()
         await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.3)  # Reduced from 1s
 
         requests = await list_network_requests(iid)
         assert isinstance(requests, list)
@@ -373,7 +376,7 @@ class TestNetworkCapture:
         """list_network_requests with filter must return filtered list."""
         iid = await _spawn()
         await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
-        await asyncio.sleep(1)
+        await asyncio.sleep(0.3)  # Reduced from 1s
 
         requests = await list_network_requests(iid, filter_type="document")
         assert isinstance(requests, list)
@@ -436,8 +439,8 @@ class TestLoginGuardIntegration:
         When instance is pending login, MCP tools must return a blocked dict
         instead of executing normally.
         """
-        from login_watcher import login_watcher
-        from manual_login_handler import manual_login_handler
+        from core.login_watcher import login_watcher
+        from core.manual_login_handler import manual_login_handler
 
         iid = await _spawn()
         await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
@@ -466,8 +469,8 @@ class TestLoginGuardIntegration:
     @pytest.mark.asyncio
     async def test_tools_unblocked_after_confirm(self):
         """After confirm_manual_login, tools must work normally again."""
-        from login_watcher import login_watcher
-        from manual_login_handler import manual_login_handler
+        from core.login_watcher import login_watcher
+        from core.manual_login_handler import manual_login_handler
 
         iid = await _spawn()
         await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
@@ -497,6 +500,7 @@ class TestLoginGuardIntegration:
 class TestFullAIWorkflow:
 
     @pytest.mark.asyncio
+    @pytest.mark.timeout(60)
     async def test_complete_workflow_spawn_navigate_interact_screenshot(self):
         """
         Full workflow: spawn → navigate → query → type → screenshot → close.
@@ -541,6 +545,7 @@ class TestFullAIWorkflow:
         assert not any(i["instance_id"] == iid for i in instances)
 
     @pytest.mark.asyncio
+    @pytest.mark.timeout(60)
     async def test_workflow_with_cookie_save_and_reuse(self):
         """
         Simulate saving session cookies and reusing them:
@@ -572,13 +577,14 @@ class TestFullAIWorkflow:
         assert isinstance(cookies, list)
 
         # Health check — give browser a moment to settle
-        await asyncio.sleep(0.5)
+        await asyncio.sleep(0.2)  # Reduced from 0.5s
         health = await check_instance_health(iid)
         assert health["healthy"] is True, f"WebSocket died: {health.get('reason')}"
 
         await _close(iid)
 
     @pytest.mark.asyncio
+    @pytest.mark.timeout(60)
     async def test_workflow_multi_page_scraping(self):
         """
         Simulate scraping multiple pages with same instance:
@@ -607,6 +613,7 @@ class TestFullAIWorkflow:
         await _close(iid)
 
     @pytest.mark.asyncio
+    @pytest.mark.timeout(60)
     async def test_workflow_login_flow_complete(self):
         """
         Complete login flow as the AI would execute it:
@@ -616,8 +623,8 @@ class TestFullAIWorkflow:
         4. confirm_manual_login() → success
         5. Continue automation normally
         """
-        from login_watcher import login_watcher
-        from manual_login_handler import manual_login_handler
+        from core.login_watcher import login_watcher
+        from core.manual_login_handler import manual_login_handler
 
         iid = await _spawn()
         await navigate(iid, "https://httpbin.org/html", inject_cookies=False)
@@ -694,6 +701,7 @@ class TestConcurrentToolCalls:
         await _close(iid)
 
     @pytest.mark.asyncio
+    @pytest.mark.timeout(60)
     async def test_two_instances_independent(self):
         """Two instances must operate independently without interfering."""
         iid1 = await _spawn()
