@@ -94,6 +94,23 @@ def should_disable_browser_sandbox() -> bool:
     )
 
 
+def should_force_browser_headless() -> bool:
+    """
+    Decide whether browser launches must be forced into headless mode.
+
+    Linux CI runners usually do not provide a DISPLAY server. A headed Chrome
+    launch can exit before nodriver connects to the debugging port.
+
+    Returns:
+        bool: True when headed browser launches are not expected to work
+    """
+    return (
+        platform.system().lower() == "linux"
+        and is_running_in_ci()
+        and not os.environ.get("DISPLAY")
+    )
+
+
 def get_required_sandbox_args() -> List[str]:
     """
     Get the required browser arguments for sandbox handling based on current environment.
@@ -165,6 +182,7 @@ def get_platform_info() -> dict:
         "is_container": is_running_in_container(),
         "is_ci": is_running_in_ci(),
         "should_disable_sandbox": should_disable_browser_sandbox(),
+        "should_force_headless": should_force_browser_headless(),
         "required_sandbox_args": get_required_sandbox_args(),
         "user_id": getattr(os, "getuid", lambda: "N/A")(),
         "effective_user_id": getattr(os, "geteuid", lambda: "N/A")(),
@@ -311,6 +329,9 @@ def validate_browser_environment() -> dict:
 
     if platform_info["should_disable_sandbox"] and not platform_info["is_root"]:
         warnings.append("Browser sandbox will be disabled for this runtime environment")
+
+    if platform_info["should_force_headless"]:
+        warnings.append("Browser launches will be forced to headless mode")
 
     if platform_info["system"] not in ["Windows", "Linux", "Darwin"]:
         warnings.append(f"Untested platform: {platform_info['system']}")

@@ -17,6 +17,7 @@ from core.platform_utils import (
     get_platform_info,
     merge_browser_args,
     should_disable_browser_sandbox,
+    should_force_browser_headless,
 )
 from core.process_cleanup import process_cleanup
 
@@ -65,16 +66,18 @@ class BrowserManager:
                 browser_type = "Google Chrome"
 
             effective_sandbox = options.sandbox and not should_disable_browser_sandbox()
+            effective_headless = options.headless or should_force_browser_headless()
             browser_args = merge_browser_args()
+            instance.headless = effective_headless
 
             debug_logger.log_info(
                 "browser_manager",
                 "spawn_browser",
-                f"Platform: {platform_info['system']} | Root: {platform_info['is_root']} | Container: {platform_info['is_container']} | CI: {platform_info['is_ci']} | Sandbox: {effective_sandbox} | Browser: {browser_type} ({browser_executable})",
+                f"Platform: {platform_info['system']} | Root: {platform_info['is_root']} | Container: {platform_info['is_container']} | CI: {platform_info['is_ci']} | Headless: {effective_headless} | Sandbox: {effective_sandbox} | Browser: {browser_type} ({browser_executable})",
             )
 
             config = uc.Config(
-                headless=options.headless,
+                headless=effective_headless,
                 user_data_dir=options.user_data_dir,
                 sandbox=effective_sandbox,
                 browser_executable_path=browser_executable,

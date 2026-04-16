@@ -196,6 +196,7 @@ class TestPlatformUtils:
             "is_container",
             "is_ci",
             "should_disable_sandbox",
+            "should_force_headless",
             "required_sandbox_args",
         ]
         for key in required:
@@ -210,6 +211,7 @@ class TestPlatformUtils:
         assert isinstance(info["is_container"], bool)
         assert isinstance(info["is_ci"], bool)
         assert isinstance(info["should_disable_sandbox"], bool)
+        assert isinstance(info["should_force_headless"], bool)
         assert isinstance(info["required_sandbox_args"], list)
 
     def test_check_browser_executable_finds_browser(self):
@@ -273,6 +275,15 @@ class TestPlatformUtils:
         assert platform_utils.is_running_in_ci() is True
         assert platform_utils.should_disable_browser_sandbox() is True
         assert "--no-sandbox" in platform_utils.get_required_sandbox_args()
+
+    def test_linux_ci_without_display_forces_headless(self, monkeypatch):
+        from core import platform_utils
+
+        monkeypatch.setenv("CI", "true")
+        monkeypatch.delenv("DISPLAY", raising=False)
+        monkeypatch.setattr(platform_utils.platform, "system", lambda: "Linux")
+
+        assert platform_utils.should_force_browser_headless() is True
 
 
 # ─────────────────────────────────────────────────────────────────────────────
