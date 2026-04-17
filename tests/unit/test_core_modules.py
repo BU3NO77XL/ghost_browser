@@ -275,6 +275,7 @@ class TestPlatformUtils:
         assert platform_utils.is_running_in_ci() is True
         assert platform_utils.should_disable_browser_sandbox() is True
         assert "--no-sandbox" in platform_utils.get_required_sandbox_args()
+        assert "--single-process" not in platform_utils.get_required_sandbox_args()
 
     def test_linux_ci_without_display_forces_headless(self, monkeypatch):
         from core import platform_utils

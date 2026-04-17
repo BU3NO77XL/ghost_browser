@@ -127,7 +127,12 @@ def get_required_sandbox_args() -> List[str]:
                 "--disable-setuid-sandbox",
                 "--disable-dev-shm-usage",
                 "--disable-gpu",
-                "--single-process",
+                "--no-zygote",
+                "--disable-extensions",
+                "--disable-background-networking",
+                "--disable-sync",
+                "--metrics-recording-only",
+                "--mute-audio",
             ]
         )
 
