@@ -24,8 +24,51 @@ Bypass Cloudflare, antibot systems, and social media blocks with real browser in
 
 ---
 
+## Start in Seconds
+
+No source checkout, Python setup, or local paths required. Install Docker Desktop or Docker Compose, run the published image, and connect your MCP client over HTTP.
+
+PowerShell:
+
+```powershell
+(Invoke-WebRequest -Uri https://raw.githubusercontent.com/BU3NO77XL/Ghost_Browser_MCP/main/docker-compose.image.yml -UseBasicParsing).Content | docker compose -f - up -d
+```
+
+Bash:
+
+```bash
+curl -fsSL https://raw.githubusercontent.com/BU3NO77XL/Ghost_Browser_MCP/main/docker-compose.image.yml | docker compose -f - up -d
+```
+
+Then add this MCP template to your AI client:
+
+```json
+{
+  "mcpServers": {
+    "ghost_browser_mcp": {
+      "type": "http",
+      "url": "http://localhost:8000/mcp",
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+```
+
+That is the fast path: Docker pulls `ghcr.io/bu3no77xl/ghost_browser_mcp:latest`, starts Ghost Browser MCP in the background, and your client connects to the already-running server. The first run downloads the image; after that, the MCP client can load the 225-tool server in seconds because the service is already warm.
+
+Technical details:
+
+- [Development vs quick reproduction](#development-vs-quick-reproduction)
+- [Quick reproduction mode](#quick-reproduction-mode)
+- [Docker runtime](#docker-runtime)
+- [Docker MCP HTTP template](#mcp-client-template-for-docker-http)
+
+---
+
 ## Table of Contents
 
+- [Start in Seconds](#start-in-seconds)
 - [Demo](#demo)
 - [What Ghost Adds](#what-ghost-adds)
 - [Features](#features)
