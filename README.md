@@ -27,6 +27,7 @@ Bypass Cloudflare, antibot systems, and social media blocks with real browser in
 - [Demo](#demo)
 - [Features](#features)
 - [Quickstart](#quickstart)
+- [Docker Runtime](#docker-runtime)
 - [Modular Architecture](#modular-architecture)
 - [Toolbox](#toolbox)
 - [Ghost vs Playwright MCP](#ghost-vs-playwright-mcp)
@@ -173,6 +174,43 @@ fastmcp install cursor src/server.py
 Restart your MCP client and ask your agent:
 
 > "Use ghost_browser to navigate to https://example.com and take a screenshot."
+
+---
+
+## Docker Runtime
+
+Run Ghost Browser with MCP HTTP transport and a remote Chromium viewer:
+
+```bash
+docker compose up -d --build
+```
+
+Default endpoints:
+
+| Service | URL |
+|---------|-----|
+| MCP HTTP | `http://localhost:8000/mcp` |
+| noVNC browser viewer | `http://localhost:6080/vnc.html` |
+
+For a VPS or reverse proxy, set the public noVNC URL so manual-login responses can be
+forwarded to users:
+
+```bash
+GHOST_REMOTE_VIEWER_PUBLIC_URL=https://browser.example.com docker compose up -d
+```
+
+Relevant environment variables:
+
+| Variable | Default | Purpose |
+|----------|---------|---------|
+| `GHOST_ENABLE_NOVNC` | `true` | Starts Xvfb, x11vnc, and noVNC inside the container |
+| `GHOST_REMOTE_VIEWER_ENABLED` | `true` in compose | Adds remote login metadata to pending-login responses |
+| `GHOST_REMOTE_VIEWER_PUBLIC_URL` | `http://localhost:6080` | Public URL agents should send to the user |
+| `GHOST_REMOTE_VIEWER_TOKEN_SECRET` | `change-me-local-only` | Signs manual-login URLs for downstream gateways |
+| `GHOST_REMOTE_VIEWER_TOKEN_TTL_SECONDS` | `900` | Expiration window for generated login URLs |
+
+The compose file binds noVNC to `127.0.0.1:6080` by default. On a VPS, expose it through
+HTTPS with a reverse proxy and authentication; do not publish the raw VNC port.
 
 ---
 

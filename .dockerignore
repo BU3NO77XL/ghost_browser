@@ -1,34 +1,35 @@
 # Git
 .git
+.github
 .gitignore
 
 # Python
 __pycache__/
-*.pyc
+*.py[cod]
 *.pyo
 *.pyd
 .Python
 *.so
 .pytest_cache/
+.mypy_cache/
+.ruff_cache/
 
-# Virtual environments
+# Virtual environments and local caches
 .venv/
 venv/
 env/
 ENV/
+.uv-cache/
 
-# IDE
+# IDE / OS
 .vscode/
 .idea/
 *.swp
 *.swo
-
-# OS
 .DS_Store
 Thumbs.db
 
-# Documentation
-README.md
+# Documentation and media not needed at runtime
 CHANGELOG.md
 docs/
 *.md
@@ -38,24 +39,26 @@ examples/
 tests/
 test_*.py
 
-# Development files
+# Development and local configuration
+.env
 .env.local
 .env.development
-.uv-cache/
+.mcp.json
 debug_logs/
 screenshots/
+reports/
+tests/reports/
+htmlcov/
 
 # Old stuff and backups
 oldstuff/
 old_network_hook_system/
+testing/
 *_backup*
 *.bak
 
-# Clone files (temporary data)
+# Runtime-generated files
 element_clones/
-
-# Media files (not needed in container)
-media/
-
-# Development scripts
-scripts/
+src/element_clones/
+downloads/
+tmp_*/

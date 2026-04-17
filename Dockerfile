@@ -7,7 +7,15 @@ RUN apt-get update && apt-get install -y \
     gnupg \
     unzip \
     curl \
+    ca-certificates \
+    bash \
     xvfb \
+    fluxbox \
+    x11vnc \
+    novnc \
+    websockify \
+    dbus-x11 \
+    fonts-liberation \
     git \
     && apt-get clean \
     && rm -rf /var/lib/apt/lists/*
@@ -36,16 +44,25 @@ RUN uv sync --frozen --no-dev --no-install-project
 COPY . .
 
 # Create non-root user for security
-RUN useradd -m -u 1000 mcpuser && chown -R mcpuser:mcpuser /app
+RUN useradd -m -u 1000 mcpuser \
+    && mkdir -p /data/profiles /data/output /data/storage \
+    && chmod +x /app/docker/entrypoint.sh \
+    && chown -R mcpuser:mcpuser /app /data
 USER mcpuser
 
-# Expose port (Smithery will set PORT env var)
+# Expose MCP HTTP and noVNC ports
 EXPOSE 8000
+EXPOSE 6080
 ENV PORT=8000
+ENV DISPLAY=:99
+ENV XVFB_WHD=1920x1080x24
+ENV GHOST_ENABLE_NOVNC=true
+ENV STEALTH_BROWSER_STORAGE_FILE=/data/storage/instances.json
 
 # Health check for FastMCP HTTP server (uses PORT env var)
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
     CMD curl -s http://localhost:$PORT/mcp -o /dev/null || exit 1
 
 # Start the MCP server with HTTP transport (reads PORT env var automatically)
+ENTRYPOINT ["bash", "docker/entrypoint.sh"]
 CMD [".venv/bin/python", "src/server.py", "--transport", "http", "--host", "0.0.0.0"]
