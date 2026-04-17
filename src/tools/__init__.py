@@ -1,1 +1,1 @@
-"""Tool modules for the Browser Automation MCP server."""
+"""Tool modules for the Ghost Browser MCP server."""

@@ -1,8 +1,10 @@
+name: ghost_browser_mcp
+
 services:
-  ghost-browser:
+  ghost-browser-mcp:
     build:
       context: .
-    image: ghost-browser:local
+    image: ghost-browser-mcp:local
     shm_size: "1gb"
     environment:
       PORT: "8000"
@@ -18,8 +20,8 @@ services:
       - "8000:8000"
       - "127.0.0.1:6080:6080"
     volumes:
-      - ghost_browser_data:/data
+      - ghost_browser_mcp_data:/data
     restart: unless-stopped
 
 volumes:
-  ghost_browser_data:
+  ghost_browser_mcp_data:

@@ -37,10 +37,10 @@ dev = [
 
 # Repository metadata
 [project.urls]
-Homepage = "https://github.com/bu3n0roots3ven/ghost-browser-mcp"
-Documentation = "https://github.com/bu3n0roots3ven/ghost-browser-mcp#readme"
-Repository = "https://github.com/bu3n0roots3ven/ghost-browser-mcp.git"
-Issues = "https://github.com/bu3n0roots3ven/ghost-browser-mcp/issues"
+Homepage = "https://github.com/BU3NO77XL/Ghost_Browser_MCP"
+Documentation = "https://github.com/BU3NO77XL/Ghost_Browser_MCP#readme"
+Repository = "https://github.com/BU3NO77XL/Ghost_Browser_MCP.git"
+Issues = "https://github.com/BU3NO77XL/Ghost_Browser_MCP/issues"
 
 # Code formatting
 [tool.black]

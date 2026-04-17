@@ -132,7 +132,7 @@ def section_tool(section: str):
 @asynccontextmanager
 async def app_lifespan(server):
     """Manage application lifecycle with proper cleanup."""
-    debug_logger.log_info("server", "startup", "Starting Browser Automation MCP Server...")
+    debug_logger.log_info("server", "startup", "Starting Ghost Browser MCP Server...")
     try:
         persistent_storage.clear_all()
         debug_logger.log_info(
@@ -156,9 +156,7 @@ async def app_lifespan(server):
     try:
         yield
     finally:
-        debug_logger.log_info(
-            "server", "shutdown", "Shutting down Browser Automation MCP Server..."
-        )
+        debug_logger.log_info("server", "shutdown", "Shutting down Ghost Browser MCP Server...")
         try:
             await browser_manager.close_all()
             debug_logger.log_info("server", "cleanup", "All browser instances closed")
@@ -187,13 +185,11 @@ async def app_lifespan(server):
                 )
         except Exception as e:
             debug_logger.log_error("server", "storage_cleanup", e)
-        debug_logger.log_info(
-            "server", "shutdown", "Browser Automation MCP Server shutdown complete"
-        )
+        debug_logger.log_info("server", "shutdown", "Ghost Browser MCP Server shutdown complete")
 
 
 mcp = FastMCP(
-    name="Browser Automation MCP",
+    name="Ghost Browser MCP",
     instructions="""
     This MCP server provides undetectable browser automation using nodriver (CDP-based).
 
@@ -452,7 +448,7 @@ def _format_tool_sections() -> List[str]:
 if __name__ == "__main__":
     import argparse
 
-    parser = argparse.ArgumentParser(description="Stealth Browser MCP Server with 225 tools")
+    parser = argparse.ArgumentParser(description="Ghost Browser MCP Server with 225 tools")
     parser.add_argument(
         "--transport", choices=["stdio", "http"], default="stdio", help="Transport protocol to use"
     )

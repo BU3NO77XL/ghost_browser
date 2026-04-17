@@ -131,7 +131,7 @@ So the flow is:
 1. Choose local source mode or Docker mode.
 2. Start Ghost Browser.
 3. Add the matching MCP template to your client.
-4. Ask the agent to use ghost_browser.
+4. Ask the agent to use ghost_browser_mcp.
 5. If login is needed, open the browser/noVNC link, log in, and let the agent continue.
 ```
 
@@ -163,8 +163,8 @@ Or see the official installation docs: https://docs.astral.sh/uv/getting-started
 Download the source code and install the Python dependencies:
 
 ```bash
-git clone <your-fork-url> ghost_browser
-cd ghost_browser
+git clone https://github.com/BU3NO77XL/Ghost_Browser_MCP.git Ghost_Browser_MCP
+cd Ghost_Browser_MCP
 uv sync
 ```
 
@@ -178,20 +178,20 @@ In local source mode, the MCP client must know where Python and `src/server.py` 
 
 Windows:
 ```bash
-claude mcp add-json ghost_browser "{\"type\":\"stdio\",\"command\":\"C:\\path\\to\\ghost_browser\\.venv\\Scripts\\python.exe\",\"args\":[\"C:\\path\\to\\ghost_browser\\src\\server.py\"],\"env\":{\"PYTHONPATH\":\"C:\\path\\to\\ghost_browser\\src\"}}"
+claude mcp add-json ghost_browser_mcp "{\"type\":\"stdio\",\"command\":\"C:\\path\\to\\Ghost_Browser_MCP\\.venv\\Scripts\\python.exe\",\"args\":[\"C:\\path\\to\\Ghost_Browser_MCP\\src\\server.py\"],\"env\":{\"PYTHONPATH\":\"C:\\path\\to\\Ghost_Browser_MCP\\src\"}}"
 ```
 
 Mac/Linux:
 ```bash
-claude mcp add-json ghost_browser '{
+claude mcp add-json ghost_browser_mcp '{
   "type": "stdio",
-  "command": "/path/to/ghost_browser/.venv/bin/python",
-  "args": ["/path/to/ghost_browser/src/server.py"],
-  "env": {"PYTHONPATH": "/path/to/ghost_browser/src"}
+  "command": "/path/to/Ghost_Browser_MCP/.venv/bin/python",
+  "args": ["/path/to/Ghost_Browser_MCP/src/server.py"],
+  "env": {"PYTHONPATH": "/path/to/Ghost_Browser_MCP/src"}
 }'
 ```
 
-> Replace `/path/to/ghost_browser/` with your actual project path.
+> Replace `/path/to/Ghost_Browser_MCP/` with your actual project path.
 
 <details>
 <summary><strong>Manual JSON configuration (Claude Desktop, Cursor, Kiro, etc.)</strong></summary>
@@ -200,12 +200,12 @@ Windows (`%APPDATA%\Claude\claude_desktop_config.json`):
 ```json
 {
   "mcpServers": {
-    "ghost_browser": {
+    "ghost_browser_mcp": {
       "type": "stdio",
-      "command": "C:\\path\\to\\ghost_browser\\.venv\\Scripts\\python.exe",
-      "args": ["C:\\path\\to\\ghost_browser\\src\\server.py"],
+      "command": "C:\\path\\to\\Ghost_Browser_MCP\\.venv\\Scripts\\python.exe",
+      "args": ["C:\\path\\to\\Ghost_Browser_MCP\\src\\server.py"],
       "env": {
-        "PYTHONPATH": "C:\\path\\to\\ghost_browser\\src"
+        "PYTHONPATH": "C:\\path\\to\\Ghost_Browser_MCP\\src"
       }
     }
   }
@@ -216,19 +216,19 @@ Mac/Linux (`~/Library/Application Support/Claude/claude_desktop_config.json`):
 ```json
 {
   "mcpServers": {
-    "ghost_browser": {
+    "ghost_browser_mcp": {
       "type": "stdio",
-      "command": "/path/to/ghost_browser/.venv/bin/python",
-      "args": ["/path/to/ghost_browser/src/server.py"],
+      "command": "/path/to/Ghost_Browser_MCP/.venv/bin/python",
+      "args": ["/path/to/Ghost_Browser_MCP/src/server.py"],
       "env": {
-        "PYTHONPATH": "/path/to/ghost_browser/src"
+        "PYTHONPATH": "/path/to/Ghost_Browser_MCP/src"
       }
     }
   }
 }
 ```
 
-> Replace `/path/to/ghost_browser/` with your actual project path.
+> Replace `/path/to/Ghost_Browser_MCP/` with your actual project path.
 
 </details>
 
@@ -250,7 +250,7 @@ fastmcp install cursor src/server.py
 
 Restart your MCP client and ask your agent:
 
-> "Use ghost_browser to navigate to https://example.com and take a screenshot."
+> "Use ghost_browser_mcp to navigate to https://example.com and take a screenshot."
 
 ---
 
@@ -279,8 +279,8 @@ You edit files, run tests, commit changes, and push.
 ```
 
 ```bash
-git clone <your-fork-url> ghost_browser
-cd ghost_browser
+git clone https://github.com/BU3NO77XL/Ghost_Browser_MCP.git Ghost_Browser_MCP
+cd Ghost_Browser_MCP
 uv sync
 uv run black --check src/ tests/ --line-length 100
 uv run pytest
@@ -324,25 +324,25 @@ You do not need local Python paths.
 Fastest path, streaming the compose file from GitHub without saving it:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/BU3NO77XL/ghost_browser/main/docker-compose.image.yml | docker compose -f - up -d
+curl -fsSL https://raw.githubusercontent.com/BU3NO77XL/Ghost_Browser_MCP/main/docker-compose.image.yml | docker compose -f - up -d
 ```
 
 Windows PowerShell:
 
 ```powershell
-(Invoke-WebRequest -Uri https://raw.githubusercontent.com/BU3NO77XL/ghost_browser/main/docker-compose.image.yml -UseBasicParsing).Content | docker compose -f - up -d
+(Invoke-WebRequest -Uri https://raw.githubusercontent.com/BU3NO77XL/Ghost_Browser_MCP/main/docker-compose.image.yml -UseBasicParsing).Content | docker compose -f - up -d
 ```
 
 To stop it, stream the same compose file again:
 
 ```bash
-curl -fsSL https://raw.githubusercontent.com/BU3NO77XL/ghost_browser/main/docker-compose.image.yml | docker compose -f - down
+curl -fsSL https://raw.githubusercontent.com/BU3NO77XL/Ghost_Browser_MCP/main/docker-compose.image.yml | docker compose -f - down
 ```
 
 Windows PowerShell:
 
 ```powershell
-(Invoke-WebRequest -Uri https://raw.githubusercontent.com/BU3NO77XL/ghost_browser/main/docker-compose.image.yml -UseBasicParsing).Content | docker compose -f - down
+(Invoke-WebRequest -Uri https://raw.githubusercontent.com/BU3NO77XL/Ghost_Browser_MCP/main/docker-compose.image.yml -UseBasicParsing).Content | docker compose -f - down
 ```
 
 Some Docker Compose versions do not handle `-f https://...` URLs consistently across
@@ -350,9 +350,9 @@ operating systems. Streaming with `-f -` avoids that path issue. If you prefer t
 runtime file locally, use the universal fallback:
 
 ```bash
-mkdir ghost_browser_runtime
-cd ghost_browser_runtime
-curl -O https://raw.githubusercontent.com/BU3NO77XL/ghost_browser/main/docker-compose.image.yml
+mkdir ghost_browser_mcp_runtime
+cd ghost_browser_mcp_runtime
+curl -O https://raw.githubusercontent.com/BU3NO77XL/Ghost_Browser_MCP/main/docker-compose.image.yml
 docker compose -f docker-compose.image.yml pull
 docker compose -f docker-compose.image.yml up -d
 ```
@@ -360,9 +360,9 @@ docker compose -f docker-compose.image.yml up -d
 On Windows PowerShell, the fallback is:
 
 ```powershell
-mkdir ghost_browser_runtime
-cd ghost_browser_runtime
-Invoke-WebRequest -Uri https://raw.githubusercontent.com/BU3NO77XL/ghost_browser/main/docker-compose.image.yml -OutFile docker-compose.image.yml
+mkdir ghost_browser_mcp_runtime
+cd ghost_browser_mcp_runtime
+Invoke-WebRequest -Uri https://raw.githubusercontent.com/BU3NO77XL/Ghost_Browser_MCP/main/docker-compose.image.yml -OutFile docker-compose.image.yml
 docker compose -f docker-compose.image.yml pull
 docker compose -f docker-compose.image.yml up -d
 ```
@@ -371,8 +371,8 @@ If you prefer a minimal compose file, use the published image directly:
 
 ```yaml
 services:
-  ghost-browser:
-    image: ghcr.io/bu3no77xl/ghost_browser:latest
+  ghost-browser-mcp:
+    image: ghcr.io/bu3no77xl/ghost_browser_mcp:latest
     shm_size: "1gb"
     environment:
       PORT: "8000"
@@ -384,11 +384,11 @@ services:
       - "8000:8000"
       - "127.0.0.1:6080:6080"
     volumes:
-      - ghost_browser_data:/data
+      - ghost_browser_mcp_data:/data
     restart: unless-stopped
 
 volumes:
-  ghost_browser_data:
+  ghost_browser_mcp_data:
 ```
 
 Then run:
@@ -402,7 +402,7 @@ Connect an MCP client to the running Docker service with HTTP transport:
 ```json
 {
   "mcpServers": {
-    "ghost_browser": {
+    "ghost_browser_mcp": {
       "type": "http",
       "url": "http://localhost:8000/mcp",
       "disabled": false,
@@ -417,7 +417,7 @@ For a VPS, use the public MCP endpoint exposed by your reverse proxy:
 ```json
 {
   "mcpServers": {
-    "ghost_browser": {
+    "ghost_browser_mcp": {
       "type": "http",
       "url": "https://mcp.example.com/mcp",
       "disabled": false,
@@ -444,8 +444,8 @@ The CI workflow builds and smoke-tests the Docker image after the existing lint,
 unit, integration, and E2E jobs pass. On pushes to `main`, it publishes:
 
 ```text
-ghcr.io/bu3no77xl/ghost_browser:latest
-ghcr.io/bu3no77xl/ghost_browser:<commit-sha>
+ghcr.io/bu3no77xl/ghost_browser_mcp:latest
+ghcr.io/bu3no77xl/ghost_browser_mcp:<commit-sha>
 ```
 
 The Docker job checks:
@@ -475,7 +475,7 @@ Python, Chrome, system libraries, Xvfb, or noVNC directly on the host. The conta
 - MCP HTTP server on port `8000`
 - Chromium/Chrome inside a virtual display (`Xvfb`)
 - noVNC browser viewer on port `6080`
-- persistent runtime data under the Docker volume `ghost_browser_data`
+- persistent runtime data under the Docker volume `ghost_browser_mcp_data`
 
 This is especially useful for VPS deployments and mobile handoff flows. If an AI agent reaches
 a manual login page, Ghost Browser can return a remote noVNC URL; the user opens that URL,
@@ -537,7 +537,7 @@ Check status and logs:
 
 ```bash
 docker compose ps
-docker compose logs -f ghost-browser
+docker compose logs -f ghost-browser-mcp
 ```
 
 Default endpoints:
@@ -622,7 +622,7 @@ Use this template when Ghost Browser is already running through Docker Compose:
 ```json
 {
   "mcpServers": {
-    "ghost_browser": {
+    "ghost_browser_mcp": {
       "type": "http",
       "url": "http://localhost:8000/mcp",
       "disabled": false,
@@ -637,7 +637,7 @@ For hosted deployments, replace the URL with the public MCP route:
 ```json
 {
   "mcpServers": {
-    "ghost_browser": {
+    "ghost_browser_mcp": {
       "type": "http",
       "url": "https://mcp.example.com/mcp",
       "disabled": false,

@@ -14,7 +14,7 @@ concurrency:
 env:
   PYTHON_VERSION: "3.12"
   UV_VERSION: "latest"
-  DOCKER_IMAGE: ghcr.io/bu3no77xl/ghost_browser
+  DOCKER_IMAGE: ghcr.io/bu3no77xl/ghost_browser_mcp
 
 permissions:
   contents: read
@@ -259,7 +259,7 @@ jobs:
       - name: Start Docker smoke-test container
         run: |
           docker run -d \
-            --name ghost-browser-ci \
+            --name ghost-browser-mcp-ci \
             --shm-size=1g \
             -p 8000:8000 \
             -p 127.0.0.1:6080:6080 \
@@ -361,11 +361,11 @@ jobs:
 
       - name: Show Docker logs on failure
         if: failure()
-        run: docker logs ghost-browser-ci || true
+        run: docker logs ghost-browser-mcp-ci || true
 
       - name: Stop Docker smoke-test container
         if: always()
-        run: docker rm -f ghost-browser-ci || true
+        run: docker rm -f ghost-browser-mcp-ci || true
 
       - name: Login to GitHub Container Registry
         if: github.event_name == 'push' && github.ref == 'refs/heads/main'
