@@ -260,6 +260,39 @@ Then run:
 docker compose up -d
 ```
 
+Connect an MCP client to the running Docker service with HTTP transport:
+
+```json
+{
+  "mcpServers": {
+    "ghost_browser": {
+      "type": "http",
+      "url": "http://localhost:8000/mcp",
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+```
+
+For a VPS, use the public MCP endpoint exposed by your reverse proxy:
+
+```json
+{
+  "mcpServers": {
+    "ghost_browser": {
+      "type": "http",
+      "url": "https://mcp.example.com/mcp",
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+```
+
+In Docker mode, the MCP client connects to a server that is already running. Do not point the
+client at `python`, `.venv`, or `src/server.py`; those paths are only for local source mode.
+
 Use quick reproduction mode when:
 
 - you want the fastest way to test or host Ghost Browser
@@ -433,6 +466,40 @@ Use:
 Accept: application/json, text/event-stream
 Content-Type: application/json
 ```
+
+### MCP Client Template for Docker HTTP
+
+Use this template when Ghost Browser is already running through Docker Compose:
+
+```json
+{
+  "mcpServers": {
+    "ghost_browser": {
+      "type": "http",
+      "url": "http://localhost:8000/mcp",
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+```
+
+For hosted deployments, replace the URL with the public MCP route:
+
+```json
+{
+  "mcpServers": {
+    "ghost_browser": {
+      "type": "http",
+      "url": "https://mcp.example.com/mcp",
+      "disabled": false,
+      "autoApprove": []
+    }
+  }
+}
+```
+
+Keep the local source template as `stdio`. Keep the Docker template as `http`.
 
 ### Environment Variables
 
