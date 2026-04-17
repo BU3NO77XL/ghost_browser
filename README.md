@@ -7,6 +7,8 @@
 
 **Improved fork of [Stealth Browser MCP](https://github.com/vibheksoni/stealth-browser-mcp) adapted as Ghost Browser MCP.**
 
+Ghost Browser MCP turns a real browser into a full MCP-native research, extraction, and page-reconstruction toolkit. It combines 225 browser tools, Chrome DevTools Protocol access, network inspection, asset downloading, and pixel-accurate page cloning in one agent-ready server.
+
 Bypass Cloudflare, antibot systems, and social media blocks with real browser instances powered by [nodriver](https://github.com/ultrafunkamsterdam/nodriver) + Chrome DevTools Protocol + [FastMCP](https://github.com/jlowin/fastmcp).
 
 <p align="center">
@@ -25,6 +27,7 @@ Bypass Cloudflare, antibot systems, and social media blocks with real browser in
 ## Table of Contents
 
 - [Demo](#demo)
+- [What Ghost Adds](#what-ghost-adds)
 - [Features](#features)
 - [How It Fits Together](#how-it-fits-together)
 - [Quickstart](#quickstart)
@@ -53,6 +56,19 @@ Bypass Cloudflare, antibot systems, and social media blocks with real browser in
 </div>
 
 *Ghost Browser MCP bypassing Cloudflare, cloning UI elements, and intercepting network traffic — all through AI chat commands.*
+
+---
+
+## What Ghost Adds
+
+Ghost Browser MCP is more than a browser controller. It is a practical reverse-engineering and reconstruction toolkit for authorized web analysis:
+
+- **225 MCP tools** — Navigation, screenshots, DOM extraction, CDP commands, network tracing, downloads, sessions, hooks, and page-state inspection.
+- **Pixel-accurate cloning** — Extract page structure, styles, computed layout, screenshots, and loaded assets to recreate pages in minutes.
+- **Asset-aware extraction** — Download the images, icons, fonts, CSS, and media actually loaded by the current page instead of collecting unrelated noise.
+- **Deep page intelligence** — Inspect HTML, accessibility data, console logs, network requests, storage, cookies, event listeners, and element relationships.
+- **Manual-login handoff** — Let a human complete authentication in a real browser, then return control to the AI agent with the same session.
+- **Docker-ready runtime** — Run from source for development or from a published image for fast reproduction on Windows, macOS, Linux, or a VPS.
 
 ---
 
