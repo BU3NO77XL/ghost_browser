@@ -27,6 +27,7 @@ Bypass Cloudflare, antibot systems, and social media blocks with real browser in
 - [Demo](#demo)
 - [Features](#features)
 - [Quickstart](#quickstart)
+- [Development vs Quick Reproduction](#development-vs-quick-reproduction)
 - [Docker Runtime](#docker-runtime)
 - [Modular Architecture](#modular-architecture)
 - [Toolbox](#toolbox)
@@ -177,6 +178,114 @@ Restart your MCP client and ask your agent:
 
 ---
 
+## Development vs Quick Reproduction
+
+There are two recommended ways to run Ghost Browser, depending on what you need.
+
+### Development Mode
+
+Use this when you want to edit the source code, run tests, change tools, debug internals, or
+contribute patches.
+
+```bash
+git clone <your-fork-url> ghost_browser
+cd ghost_browser
+uv sync
+uv run black --check src/ tests/ --line-length 100
+uv run pytest
+```
+
+Run the MCP server from source:
+
+```bash
+uv run python src/server.py --transport stdio
+```
+
+Or run HTTP transport while developing:
+
+```bash
+uv run python src/server.py --transport http --host 0.0.0.0 --port 8000
+```
+
+Use development mode when:
+
+- you are changing Python code or JavaScript extractors
+- you need fast edit/test cycles
+- you want to inspect logs directly from the source tree
+- you are adding or removing MCP tools
+- you are debugging CI failures
+
+### Quick Reproduction Mode
+
+Use this when you only want to run the latest packaged browser server quickly on a local
+machine or VPS, without cloning the source code or installing Python dependencies.
+
+After the Docker image is published, the workflow will be:
+
+```bash
+mkdir ghost_browser_runtime
+cd ghost_browser_runtime
+curl -O https://raw.githubusercontent.com/BU3NO77XL/ghost_browser/main/docker-compose.image.yml
+docker compose -f docker-compose.image.yml pull
+docker compose -f docker-compose.image.yml up -d
+```
+
+If you prefer a minimal compose file, use the published image directly:
+
+```yaml
+services:
+  ghost-browser:
+    image: ghcr.io/bu3no77xl/ghost_browser:latest
+    shm_size: "1gb"
+    environment:
+      PORT: "8000"
+      GHOST_ENABLE_NOVNC: "true"
+      GHOST_REMOTE_VIEWER_ENABLED: "true"
+      GHOST_REMOTE_VIEWER_PUBLIC_URL: "http://localhost:6080"
+      GHOST_REMOTE_VIEWER_TOKEN_SECRET: "change-me-local-only"
+    ports:
+      - "8000:8000"
+      - "127.0.0.1:6080:6080"
+    volumes:
+      - ghost_browser_data:/data
+    restart: unless-stopped
+
+volumes:
+  ghost_browser_data:
+```
+
+Then run:
+
+```bash
+docker compose up -d
+```
+
+Use quick reproduction mode when:
+
+- you want the fastest way to test or host Ghost Browser
+- you are deploying to a VPS
+- you do not want source code on the target machine
+- you want reproducible runtime behavior across machines
+- you want updates to be as simple as `docker compose pull && docker compose up -d`
+
+### Docker Image Publishing
+
+The repository is intended to publish a fresh Docker image from CI after pushes to `main`.
+Once that workflow is enabled, every accepted code change can produce a new image such as:
+
+```text
+ghcr.io/bu3no77xl/ghost_browser:latest
+ghcr.io/bu3no77xl/ghost_browser:<commit-sha>
+```
+
+Until image publishing is configured in CI, use local build mode:
+
+```bash
+docker compose up -d --build
+```
+
+---
+
 ## Docker Runtime
 
 Docker is the recommended runtime when you want to run Ghost Browser without managing
@@ -228,12 +337,19 @@ docker --version
 docker compose version
 ```
 
-### Run Locally
+### Run Locally From Source
 
 Build and start the container:
 
 ```bash
 docker compose up -d --build
+```
+
+To run from a published image instead of building locally, use `docker-compose.image.yml`:
+
+```bash
+docker compose -f docker-compose.image.yml pull
+docker compose -f docker-compose.image.yml up -d
 ```
 
 Check status and logs:
