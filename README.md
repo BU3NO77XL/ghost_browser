@@ -14,7 +14,7 @@ Bypass Cloudflare, antibot systems, and social media blocks with real browser in
   <img src="https://img.shields.io/badge/nodriver-0.48-1a1a1a?style=for-the-badge&logo=googlechrome&logoColor=white" alt="nodriver"/>
   <img src="https://img.shields.io/badge/HTTPx-Async-FF6B6B?style=for-the-badge&logo=fastapi&logoColor=white" alt="HTTPx Async"/>
   <img src="https://img.shields.io/badge/License-MIT-8B0000?style=for-the-badge&logo=opensourceinitiative&logoColor=white" alt="License MIT"/>
-  <img src="https://img.shields.io/badge/author-bu3no77xl -6A0DAD?style=for-the-badge&logo=github&logoColor=white" alt="Author"/>
+  <img src="https://img.shields.io/badge/author-BU3NO77XL-6A0DAD?style=for-the-badge&logo=github&logoColor=white" alt="Author"/>
 </p>
 
 
@@ -57,7 +57,7 @@ Bypass Cloudflare, antibot systems, and social media blocks with real browser in
 
 - **Antibot bypass** — Works on Cloudflare, Queue-It, and other protection systems that block traditional automation
 - **~209 tools across 20 sections** — From basic navigation to advanced CDP function execution
-- **Modular loading** — Run the full 92-tool arsenal or a minimal 21-tool core; disable what you don't need
+- **Modular loading** — Run the full tool suite or a minimal 21-tool core; disable what you don't need
 - **Pixel-accurate element cloning** — Extract complete elements with all CSS, DOM structure, events, and assets via CDP
 - **Network interception** — Inspect every request, response, header, and payload through your AI agent
 - **Dynamic hook system** — AI-generated Python functions that intercept and modify network traffic in real-time
@@ -178,7 +178,7 @@ Restart your MCP client and ask your agent:
 
 ## Modular Architecture
 
-Choose exactly what functionality you need. Run the full 92-tool suite or strip it down to 21 core tools.
+Choose exactly what functionality you need. Run the full tool suite or strip it down to 21 core tools.
 
 | Mode | Tools | Use Case |
 |------|-------|----------|
@@ -470,10 +470,7 @@ Roadmap items are tracked in this fork and, when relevant, in the upstream repos
 
 ## Support
 
-If this tool saved you time or made you money, consider supporting development:
-
-- [Buy me a coffee](https://buymeacoffee.com/vibheksoni)
-- [Join the Discord](https://discord.gg/secrets)
+Issues, feature requests, and contributions are welcome through this repository.
 
 ---
 
