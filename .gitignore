@@ -246,6 +246,7 @@ ignore/
 .oclaude/
 CLAUDE.md
 AGENTS.md
+processo.md
 arquivo.md
 CDP_PERFORMANCE.md
 CDP_USAGE_EXAMPLES.md

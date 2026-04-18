@@ -21,7 +21,11 @@ services:
       - "127.0.0.1:6080:6080"
     volumes:
       - ghost_browser_mcp_data:/data
-      - ./ghost_browser_mcp_output:/workspace
+      - type: bind
+        source: ./ghost_browser_mcp_output
+        target: /workspace
+        bind:
+          create_host_path: true
     restart: unless-stopped
 
 volumes:
