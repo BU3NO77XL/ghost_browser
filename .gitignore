@@ -250,6 +250,10 @@ ignore/
 .oclaude/
 CLAUDE.md
 AGENTS.md
+processo.md
+arquivo.md
+GUIA_RAPIDO_PT.md
+RESPOSTA_SIMPLES.md
 CDP_PERFORMANCE.md
 CDP_USAGE_EXAMPLES.md
 CDP_ANALYSIS.md

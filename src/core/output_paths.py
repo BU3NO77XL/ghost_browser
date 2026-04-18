@@ -72,26 +72,26 @@ def _map_host_path_to_container(host_path: str) -> Optional[Path]:
 
     normalized_root = _norm_host(host_root)
     normalized_path = _norm_host(host_path)
-    
+
     # For Windows paths, ensure we handle drive letters correctly
     # Extract drive letter if present
     root_drive = None
     path_drive = None
-    
+
     if _is_windows_abs(normalized_root):
         root_parts = normalized_root.split("/", 1)
         if len(root_parts) > 0 and len(root_parts[0]) >= 2 and root_parts[0][1] == ":":
             root_drive = root_parts[0].lower()
-    
+
     if _is_windows_abs(normalized_path):
         path_parts = normalized_path.split("/", 1)
         if len(path_parts) > 0 and len(path_parts[0]) >= 2 and path_parts[0][1] == ":":
             path_drive = path_parts[0].lower()
-    
+
     # If both have drives and they don't match, this path is not under host_root
     if root_drive and path_drive and root_drive != path_drive:
         return None
-    
+
     root_cmp = normalized_root.lower() if _is_windows_abs(normalized_root) else normalized_root
     path_cmp = normalized_path.lower() if _is_windows_abs(normalized_path) else normalized_path
 
@@ -132,9 +132,10 @@ def resolve_output_path(output_path: str, client_roots: Optional[Iterable[str]] 
     workspace = get_client_workspace()
     raw = str(output_path).replace("\\", "/")
     client_root = _first_client_root(client_roots)
-    
+
     # Debug logging for path resolution
     import logging
+
     logger = logging.getLogger(__name__)
     logger.debug(f"Resolving output_path: {output_path}")
     logger.debug(f"  raw normalized: {raw}")
