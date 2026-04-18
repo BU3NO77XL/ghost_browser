@@ -7,6 +7,8 @@ from pathlib import Path
 from typing import Any, Dict, List
 
 from core.login_guard import check_pending_login_guard
+from core.output_paths import get_client_workspace
+from core.platform_utils import is_running_in_container
 from core.system_info_handler import SystemInfoHandler
 
 
@@ -30,13 +32,27 @@ def register(mcp, section_tool, deps):
                 path_sep    — path separator for this OS (\\ on Windows, / elsewhere)
                 home        — user home directory
         """
-        return {
+        info = {
             "cwd": str(Path.cwd().absolute()),
             "platform": platform.system(),
             "python": sys.version.split()[0],
             "path_sep": os.sep,
             "home": str(Path.home()),
         }
+        if is_running_in_container():
+            info["container"] = True
+            info["client_workspace_mount"] = str(get_client_workspace())
+            info["client_workspace_host_hint"] = os.environ.get(
+                "GHOST_CLIENT_WORKSPACE_HOST", "ghost_browser_mcp_output"
+            )
+            info["output_path_guidance"] = (
+                "In Docker mode, save artifacts under /workspace or pass normal paths like "
+                "/app/name/file.html; they will be redirected to the client-visible "
+                "workspace mount."
+            )
+        else:
+            info["container"] = False
+        return info
 
     @section_tool("system-info-management")
     async def system_info_get_info(instance_id: str) -> Dict[str, Any]:

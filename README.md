@@ -718,7 +718,15 @@ Keep the local source template as `stdio`. Keep the Docker template as `http`.
 | `GHOST_REMOTE_VIEWER_PUBLIC_URL` | `http://localhost:6080` | Public URL agents should send to the user |
 | `GHOST_REMOTE_VIEWER_TOKEN_SECRET` | `change-me-local-only` | Signs manual-login URLs for downstream gateways |
 | `GHOST_REMOTE_VIEWER_TOKEN_TTL_SECONDS` | `900` | Expiration window for generated login URLs |
+| `GHOST_CLIENT_WORKSPACE` | `/workspace` | Container path for client-visible clone/download artifacts |
+| `GHOST_CLIENT_WORKSPACE_HOST` | `ghost_browser_mcp_output` | Host-side path hint returned in tool responses |
 | `STEALTH_BROWSER_STORAGE_FILE` | `/data/storage/instances.json` | Persistent runtime instance metadata |
+
+Docker Compose mounts `./ghost_browser_mcp_output` to `/workspace`. File tools such as
+`save_page_html`, `clone_element_to_file`, `download_element_assets_to_folder`, `take_screenshot`,
+and `print_to_pdf` write there in Docker mode. If an agent passes `/app/govbr/index.html`, Ghost
+Browser redirects it to `/workspace/govbr/index.html` and returns the host hint
+`ghost_browser_mcp_output/govbr/index.html`.
 
 ### Verified Smoke Test
 
@@ -733,7 +741,7 @@ docker compose ps
 
 The MCP server exposed all `225` tools, `spawn_browser(headless=false)` created a visible
 Chromium session in noVNC, `navigate` loaded `https://example.com`, and `take_screenshot`
-saved an image under `/data/output`.
+saved an image under `/workspace`.
 
 ---
 

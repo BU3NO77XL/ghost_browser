@@ -7,6 +7,9 @@ Use this workflow for pixel-perfect site clones.
    - `navigate`
    - `save_page_html`
    - `take_screenshot`
+   - In Docker mode, write artifacts under `/workspace/...`. Paths such as
+     `/app/govbr/index.html` are redirected to the client-visible
+     `ghost_browser_mcp_output/govbr/index.html` folder.
 
 2. Download local assets before rewriting anything:
    - `download_element_assets_to_folder`
@@ -19,6 +22,8 @@ Use this workflow for pixel-perfect site clones.
    - Avoid `extract_complete_element_to_file` on `html` with children unless needed; it is heavy.
 
 4. Build the clone from the saved HTML:
+   - Read the saved HTML file from the workspace/output folder. Do not recreate
+     it from chat context if `save_page_html` already succeeded.
    - Rewrite asset URLs to the downloaded files from `manifest.json`.
    - Prefer local CSS/assets over CDN links when the goal is an offline pixel clone.
    - Keep CDN links only as a fallback when an asset cannot be downloaded.

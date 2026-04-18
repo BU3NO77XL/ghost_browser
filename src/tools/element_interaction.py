@@ -10,6 +10,7 @@ from typing import Any, Dict, List, Optional, Union
 
 from core.debug_logger import debug_logger
 from core.login_guard import check_pending_login_guard
+from core.output_paths import output_path_metadata, resolve_output_path
 from core.temp_file_manager import temp_file_manager
 
 
@@ -391,14 +392,14 @@ def register(mcp, section_tool, deps):
         if not selector and include_doctype and not html.lstrip().lower().startswith("<!doctype"):
             html = "<!DOCTYPE html>\n" + html
 
-        dest = Path(output_path)
+        dest = resolve_output_path(output_path)
         dest.parent.mkdir(parents=True, exist_ok=True)
         dest.write_text(html, encoding="utf-8")
 
         page_url = await tab.evaluate("window.location.href")
 
         return {
-            "file_path": str(dest.absolute()),
+            **output_path_metadata(dest),
             "file_size_kb": round(dest.stat().st_size / 1024, 2),
             "url": page_url,
             "selector": selector,
@@ -435,10 +436,16 @@ def register(mcp, section_tool, deps):
             raise Exception(f"Instance not found: {instance_id}")
 
         if file_path:
-            save_path = Path(file_path)
+            save_path = resolve_output_path(file_path)
             save_path.parent.mkdir(parents=True, exist_ok=True)
             await tab.save_screenshot(save_path)
-            return f"Screenshot saved. AI agents should use the Read tool to view this image: {str(save_path.absolute())}"
+            metadata = output_path_metadata(save_path)
+            return {
+                **metadata,
+                "message": (
+                    "Screenshot saved. AI agents should use the Read tool to view this image."
+                ),
+            }
 
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_file:
             tmp_path = Path(tmp_file.name)

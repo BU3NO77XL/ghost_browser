@@ -314,6 +314,38 @@ class TestBrowserManagementTools:
         assert normalize_sandbox_option(raw_value) is expected
 
 
+class TestOutputPaths:
+
+    def test_container_app_path_maps_to_workspace(self, monkeypatch):
+        from core import output_paths
+
+        monkeypatch.setattr(output_paths, "is_running_in_container", lambda: True)
+        monkeypatch.setenv("GHOST_CLIENT_WORKSPACE", "/workspace")
+
+        result = output_paths.resolve_output_path("/app/govbr/index.html")
+
+        assert result.as_posix() == "/workspace/govbr/index.html"
+
+    def test_container_relative_path_maps_to_workspace(self, monkeypatch):
+        from core import output_paths
+
+        monkeypatch.setattr(output_paths, "is_running_in_container", lambda: True)
+        monkeypatch.setenv("GHOST_CLIENT_WORKSPACE", "/workspace")
+
+        result = output_paths.resolve_output_path("govbr/index.html")
+
+        assert result.as_posix() == "/workspace/govbr/index.html"
+
+    def test_local_path_is_preserved(self, monkeypatch):
+        from core import output_paths
+
+        monkeypatch.setattr(output_paths, "is_running_in_container", lambda: False)
+
+        result = output_paths.resolve_output_path("govbr/index.html")
+
+        assert result.as_posix() == "govbr/index.html"
+
+
 # ─────────────────────────────────────────────────────────────────────────────
 # process_cleanup.py
 # ─────────────────────────────────────────────────────────────────────────────

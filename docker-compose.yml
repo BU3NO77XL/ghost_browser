@@ -16,11 +16,14 @@ services:
       GHOST_REMOTE_VIEWER_TOKEN_SECRET: "${GHOST_REMOTE_VIEWER_TOKEN_SECRET:-change-me-local-only}"
       GHOST_REMOTE_VIEWER_TOKEN_TTL_SECONDS: "${GHOST_REMOTE_VIEWER_TOKEN_TTL_SECONDS:-900}"
       STEALTH_BROWSER_STORAGE_FILE: "/data/storage/instances.json"
+      GHOST_CLIENT_WORKSPACE: "/workspace"
+      GHOST_CLIENT_WORKSPACE_HOST: "${GHOST_CLIENT_WORKSPACE_HOST:-ghost_browser_mcp_output}"
     ports:
       - "8000:8000"
       - "127.0.0.1:6080:6080"
     volumes:
       - ghost_browser_mcp_data:/data
+      - ./ghost_browser_mcp_output:/workspace
     restart: unless-stopped
 
 volumes:

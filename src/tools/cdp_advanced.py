@@ -4,6 +4,7 @@ import asyncio
 from typing import Any, Dict, List, Optional
 
 from core.login_guard import check_pending_login_guard
+from core.output_paths import output_path_metadata, resolve_output_path
 
 
 def register(mcp, section_tool, deps):
@@ -662,7 +663,6 @@ def register(mcp, section_tool, deps):
             return {"error": f"Instance not found: {instance_id}"}
         try:
             import base64
-            from pathlib import Path
 
             result = await tab.send(
                 tab.browser.connection.send(
@@ -680,10 +680,17 @@ def register(mcp, section_tool, deps):
             )
             data = result.get("data", "")
             pdf_bytes = base64.b64decode(data)
-            Path(output_path).write_bytes(pdf_bytes)
+            dest = resolve_output_path(output_path)
+            dest.parent.mkdir(parents=True, exist_ok=True)
+            dest.write_bytes(pdf_bytes)
             return {
                 "success": True,
-                "output_path": output_path,
+                "output_path": str(dest.absolute()),
+                **{
+                    key: value
+                    for key, value in output_path_metadata(dest).items()
+                    if key != "file_path"
+                },
                 "size_bytes": len(pdf_bytes),
                 "size_kb": round(len(pdf_bytes) / 1024, 1),
             }

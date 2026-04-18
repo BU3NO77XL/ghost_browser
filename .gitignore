@@ -265,6 +265,7 @@ src/core/.storage/
 element_clones/
 src/element_clones/
 src/core/element_clones/
+ghost_browser_mcp_output/
 
 # PID tracking file written to home dir by process_cleanup
 ~/.stealth_browser_pids.json

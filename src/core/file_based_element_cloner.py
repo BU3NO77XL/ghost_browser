@@ -31,6 +31,7 @@ sys.path.append(str(project_root))
 
 from core.comprehensive_element_cloner import ComprehensiveElementCloner
 from core.element_cloner import element_cloner
+from core.output_paths import output_path_metadata, resolve_output_path
 
 
 class FileBasedElementCloner:
@@ -85,11 +86,14 @@ class FileBasedElementCloner:
                 "output_path is required. Pass an absolute path inside your workspace so the "
                 "file is written directly there and never stored on the server."
             )
-        file_path = Path(output_path)
+        file_path = resolve_output_path(output_path)
         file_path.parent.mkdir(parents=True, exist_ok=True)
         with open(file_path, "w", encoding="utf-8") as f:
             json.dump(data, f, indent=2, ensure_ascii=False)
         return str(file_path.absolute())
+
+    def _path_metadata(self, path: str) -> Dict[str, str]:
+        return output_path_metadata(Path(path))
 
     def _safe_filename(self, url: str, content_type: Optional[str], index: int) -> str:
         parsed = urlparse(url)
@@ -306,7 +310,7 @@ class FileBasedElementCloner:
                 "file_element_cloner", "extract_styles_to_file", f"Styles saved to {file_path}"
             )
             return {
-                "file_path": file_path,
+                **self._path_metadata(file_path),
                 "extraction_type": "styles",
                 "selector": selector,
                 "url": getattr(tab, "url", "unknown"),
@@ -359,7 +363,7 @@ class FileBasedElementCloner:
                 f"Saved complete element data to {file_path}",
             )
             return {
-                "file_path": file_path,
+                **self._path_metadata(file_path),
                 "extraction_type": "complete_comprehensive",
                 "selector": selector,
                 "url": complete_data.get("url", "unknown"),
@@ -438,7 +442,7 @@ class FileBasedElementCloner:
                 f"Saved structure data to {file_path}",
             )
             return {
-                "file_path": file_path,
+                **self._path_metadata(file_path),
                 "extraction_type": "structure",
                 "selector": selector,
                 "summary": {
@@ -508,7 +512,7 @@ class FileBasedElementCloner:
                 "file_element_cloner", "extract_events_to_file", f"Saved events data to {file_path}"
             )
             return {
-                "file_path": file_path,
+                **self._path_metadata(file_path),
                 "extraction_type": "events",
                 "selector": selector,
                 "summary": {
@@ -581,7 +585,7 @@ class FileBasedElementCloner:
                 f"Saved animations data to {file_path}",
             )
             return {
-                "file_path": file_path,
+                **self._path_metadata(file_path),
                 "extraction_type": "animations",
                 "selector": selector,
                 "summary": {
@@ -657,7 +661,7 @@ class FileBasedElementCloner:
                 "file_element_cloner", "extract_assets_to_file", f"Saved assets data to {file_path}"
             )
             return {
-                "file_path": file_path,
+                **self._path_metadata(file_path),
                 "extraction_type": "assets",
                 "selector": selector,
                 "summary": {
@@ -720,7 +724,7 @@ class FileBasedElementCloner:
             if max_assets < 1:
                 raise ValueError("max_assets must be at least 1")
 
-            destination = Path(output_dir)
+            destination = resolve_output_path(output_dir)
             destination.mkdir(parents=True, exist_ok=True)
 
             asset_data = {}
@@ -836,13 +840,22 @@ class FileBasedElementCloner:
             with open(manifest_path, "w", encoding="utf-8") as f:
                 json.dump(manifest, f, indent=2, ensure_ascii=False)
 
-            return {
+            result = {
                 "manifest_path": str(manifest_path.absolute()),
                 "output_dir": str(destination.absolute()),
                 "selector": selector,
                 "url": getattr(tab, "url", "unknown"),
                 "summary": manifest["summary"],
             }
+            manifest_metadata = output_path_metadata(manifest_path)
+            destination_metadata = output_path_metadata(destination)
+            if "client_path_hint" in manifest_metadata:
+                result["client_manifest_path_hint"] = manifest_metadata["client_path_hint"]
+            if "client_path_hint" in destination_metadata:
+                result["client_output_dir_hint"] = destination_metadata["client_path_hint"]
+            if "workspace_mount" in destination_metadata:
+                result["workspace_mount"] = destination_metadata["workspace_mount"]
+            return result
         except Exception as e:
             debug_logger.log_error("file_element_cloner", "download_assets_to_folder", e)
             return {"error": str(e)}
@@ -898,7 +911,7 @@ class FileBasedElementCloner:
                 f"Saved related files data to {file_path}",
             )
             return {
-                "file_path": file_path,
+                **self._path_metadata(file_path),
                 "extraction_type": "related_files",
                 "selector": selector,
                 "summary": {
@@ -949,7 +962,7 @@ class FileBasedElementCloner:
             }
             file_path = self._save_to_file(complete_data, output_path)
             summary = {
-                "file_path": file_path,
+                **self._path_metadata(file_path),
                 "extraction_type": "complete_clone",
                 "selector": selector,
                 "url": complete_data.get("url"),
