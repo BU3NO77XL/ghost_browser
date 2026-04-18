@@ -7,7 +7,7 @@ from fastmcp import Context
 
 from core.client_roots import get_client_root_paths
 from core.login_guard import check_pending_login_guard
-from core.output_paths import output_path_metadata, resolve_output_path
+from core.output_paths import resolve_output_path
 
 
 def register(mcp, section_tool, deps):
@@ -690,11 +690,6 @@ def register(mcp, section_tool, deps):
             return {
                 "success": True,
                 "output_path": str(dest.absolute()),
-                **{
-                    key: value
-                    for key, value in output_path_metadata(dest).items()
-                    if key != "file_path"
-                },
                 "size_bytes": len(pdf_bytes),
                 "size_kb": round(len(pdf_bytes) / 1024, 1),
             }

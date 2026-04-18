@@ -3,25 +3,15 @@
 import os
 import platform
 import sys
-from pathlib import Path, PureWindowsPath
+from pathlib import Path
 from typing import Any, Dict, List
 
 from fastmcp import Context
 
 from core.client_roots import get_client_root_paths
 from core.login_guard import check_pending_login_guard
-from core.output_paths import (
-    file_uri_to_path,
-    get_client_workspace,
-    get_host_root,
-    get_host_root_mount,
-)
-from core.platform_utils import is_running_in_container
+from core.output_paths import file_uri_to_path
 from core.system_info_handler import SystemInfoHandler
-
-
-def _is_host_path_absolute(path: str) -> bool:
-    return Path(path).is_absolute() or PureWindowsPath(path).is_absolute()
 
 
 def register(mcp, section_tool, deps):
@@ -51,29 +41,6 @@ def register(mcp, section_tool, deps):
             "path_sep": os.sep,
             "home": str(Path.home()),
         }
-        if is_running_in_container():
-            host_hint = os.environ.get("GHOST_CLIENT_WORKSPACE_HOST", "ghost_browser_mcp_output")
-            info["container"] = True
-            info["client_workspace_mount"] = str(get_client_workspace())
-            info["client_workspace_host_hint"] = host_hint
-            info["client_workspace_host_hint_is_absolute"] = _is_host_path_absolute(host_hint)
-            info["host_root"] = get_host_root()
-            info["host_root_mount"] = str(get_host_root_mount())
-            info["output_path_guidance"] = (
-                "In Docker mode, save artifacts under /workspace or pass normal paths like "
-                "/app/name/file.html; they will be redirected to the client-visible "
-                "workspace mount. Files in this mounted workspace are user-facing outputs "
-                "and are not automatically deleted by the server cleanup sweep."
-            )
-            if not _is_host_path_absolute(host_hint):
-                info["docker_workspace_note"] = (
-                    "client_path_hint is relative to the host folder mounted as /workspace. "
-                    "If your agent is working in another local directory, restart Docker with "
-                    "GHOST_HOST_WORKSPACE and GHOST_CLIENT_WORKSPACE_HOST pointing at that "
-                    "directory."
-                )
-        else:
-            info["container"] = False
         if ctx is not None:
             try:
                 root_paths = await get_client_root_paths(ctx)

@@ -444,17 +444,9 @@ def register(mcp, section_tool, deps):
             save_path = resolve_output_path(file_path, await get_client_root_paths(ctx))
             save_path.parent.mkdir(parents=True, exist_ok=True)
             await tab.save_screenshot(save_path)
-            metadata = output_path_metadata(save_path)
-            if "client_path_hint" not in metadata:
-                return (
-                    "Screenshot saved. AI agents should use the Read tool to view this image: "
-                    f"{str(save_path.absolute())}"
-                )
             return {
-                **metadata,
-                "message": (
-                    "Screenshot saved. AI agents should use the Read tool to view this image."
-                ),
+                **output_path_metadata(save_path),
+                "message": "Screenshot saved. AI agents should use the Read tool to view this image.",
             }
 
         with tempfile.NamedTemporaryFile(suffix=".png", delete=False) as tmp_file:

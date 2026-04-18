@@ -855,14 +855,6 @@ class FileBasedElementCloner:
                 "url": getattr(tab, "url", "unknown"),
                 "summary": manifest["summary"],
             }
-            manifest_metadata = output_path_metadata(manifest_path)
-            destination_metadata = output_path_metadata(destination)
-            if "client_path_hint" in manifest_metadata:
-                result["client_manifest_path_hint"] = manifest_metadata["client_path_hint"]
-            if "client_path_hint" in destination_metadata:
-                result["client_output_dir_hint"] = destination_metadata["client_path_hint"]
-            if "workspace_mount" in destination_metadata:
-                result["workspace_mount"] = destination_metadata["workspace_mount"]
             return result
         except Exception as e:
             debug_logger.log_error("file_element_cloner", "download_assets_to_folder", e)

@@ -73,10 +73,10 @@ class BrowserManager:
             debug_logger.log_info(
                 "browser_manager",
                 "spawn_browser",
-                f"Platform: {platform_info['system']} | Root: {platform_info['is_root']} | Container: {platform_info['is_container']} | CI: {platform_info['is_ci']} | Headless: {effective_headless} | Sandbox: {effective_sandbox} | Browser: {browser_type} ({browser_executable})",
+                f"Platform: {platform_info['system']} | Root: {platform_info['is_root']} | CI: {platform_info['is_ci']} | Headless: {effective_headless} | Sandbox: {effective_sandbox} | Browser: {browser_type} ({browser_executable})",
             )
 
-            max_start_attempts = 5 if platform_info["is_ci"] or platform_info["is_container"] else 1
+            max_start_attempts = 5 if platform_info["is_ci"] else 1
             browser = None
             for attempt in range(1, max_start_attempts + 1):
                 config = uc.Config(
