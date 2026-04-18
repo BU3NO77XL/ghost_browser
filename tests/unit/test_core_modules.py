@@ -288,6 +288,33 @@ class TestPlatformUtils:
 
 
 # ─────────────────────────────────────────────────────────────────────────────
+# browser_management.py
+# ─────────────────────────────────────────────────────────────────────────────
+class TestBrowserManagementTools:
+
+    @pytest.mark.parametrize(
+        ("raw_value", "expected"),
+        [
+            ({"no_sandbox": True}, False),
+            ({"no_sandbox": False}, True),
+            ({"enabled": False}, False),
+            ({"sandbox": True}, True),
+            ("no_sandbox", False),
+            ("false", False),
+            ("true", True),
+            (0, False),
+            (1, True),
+            (False, False),
+            (True, True),
+        ],
+    )
+    def test_normalize_sandbox_option(self, raw_value, expected):
+        from tools.browser_management import normalize_sandbox_option
+
+        assert normalize_sandbox_option(raw_value) is expected
+
+
+# ─────────────────────────────────────────────────────────────────────────────
 # process_cleanup.py
 # ─────────────────────────────────────────────────────────────────────────────
 class TestProcessCleanup:

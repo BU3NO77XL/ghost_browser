@@ -59,9 +59,12 @@ ENV XVFB_WHD=1920x1080x24
 ENV GHOST_ENABLE_NOVNC=true
 ENV STEALTH_BROWSER_STORAGE_FILE=/data/storage/instances.json
 
-# Health check for FastMCP HTTP server (uses PORT env var)
+# Health check for FastMCP HTTP server (uses PORT env var).
+# FastMCP's /mcp route can return 400/406 to raw GET requests without a
+# negotiated MCP session, so the container only verifies that the port accepts
+# TCP connections.
 HEALTHCHECK --interval=30s --timeout=10s --start-period=5s --retries=3 \
-    CMD curl -s http://localhost:$PORT/mcp -o /dev/null || exit 1
+    CMD python -c "import os, socket; s = socket.create_connection(('127.0.0.1', int(os.getenv('PORT', '8000'))), 5); s.close()" || exit 1
 
 # Start the MCP server with HTTP transport (reads PORT env var automatically)
 ENTRYPOINT ["bash", "docker/entrypoint.sh"]

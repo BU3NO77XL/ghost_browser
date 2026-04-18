@@ -8,6 +8,31 @@ from core.login_guard import check_pending_login_guard
 from core.models import BrowserOptions
 
 
+def normalize_sandbox_option(sandbox: Optional[Any]) -> bool:
+    """Normalize MCP sandbox inputs into nodriver's sandbox boolean."""
+    from core.platform_utils import should_disable_browser_sandbox
+
+    if sandbox is None:
+        return not should_disable_browser_sandbox()
+
+    if isinstance(sandbox, dict):
+        if "no_sandbox" in sandbox:
+            return not bool(sandbox["no_sandbox"])
+        if "enabled" in sandbox:
+            return bool(sandbox["enabled"])
+        if "sandbox" in sandbox:
+            return bool(sandbox["sandbox"])
+        return True
+
+    if isinstance(sandbox, str):
+        value = sandbox.strip().lower()
+        if value in ("false", "0", "no", "off", "disabled", "no-sandbox", "no_sandbox"):
+            return False
+        return value in ("true", "1", "yes", "on", "enabled", "sandbox")
+
+    return bool(sandbox)
+
+
 def register(mcp, section_tool, deps):
     browser_manager = deps["browser_manager"]
     network_interceptor = deps["network_interceptor"]
@@ -44,16 +69,7 @@ def register(mcp, section_tool, deps):
             Dict[str, Any]: Instance information including instance_id.
         """
         try:
-            from core.platform_utils import should_disable_browser_sandbox
-
-            if sandbox is None:
-                sandbox = not should_disable_browser_sandbox()
-            elif isinstance(sandbox, str):
-                sandbox = sandbox.lower() in ("true", "1", "yes", "on", "enabled")
-            elif isinstance(sandbox, int):
-                sandbox = bool(sandbox)
-            elif not isinstance(sandbox, bool):
-                sandbox = bool(sandbox)
+            sandbox = normalize_sandbox_option(sandbox)
 
             options = BrowserOptions(
                 headless=headless,
