@@ -323,9 +323,10 @@ class TestOutputPaths:
         assert file_uri_to_path("file:///D:/workspace/project") == "D:/workspace/project"
 
     def test_output_path_metadata_returns_file_path(self):
-        from core.output_paths import output_path_metadata
-        from pathlib import Path
         import os
+        from pathlib import Path
+
+        from core.output_paths import output_path_metadata
 
         metadata = output_path_metadata(Path("site/index.html"))
         assert "file_path" in metadata
