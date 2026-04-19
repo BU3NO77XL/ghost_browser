@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from nodriver import Tab, cdp
 
+from core.cdp_result import exception_details_to_dict, remote_object_to_dict, runtime_parts, runtime_value
 from core.debug_logger import debug_logger
 
 
@@ -27,7 +28,7 @@ class DebuggerHandler:
         """
         try:
             result = await tab.send(cdp.debugger.enable())
-            return str(result.debugger_id) if result and result.debugger_id else ""
+            return str(getattr(result, "debugger_id", result)) if result else ""
         except Exception as e:
             error_msg = str(e).lower()
             if "already enabled" in error_msg:
@@ -90,10 +91,16 @@ class DebuggerHandler:
                     condition=condition,
                 )
             )
-            breakpoint_id = str(result.breakpoint_id)
+            if isinstance(result, (tuple, list)):
+                raw_breakpoint_id = result[0] if len(result) > 0 else ""
+                raw_locations = result[1] if len(result) > 1 else []
+            else:
+                raw_breakpoint_id = getattr(result, "breakpoint_id", "")
+                raw_locations = getattr(result, "locations", [])
+            breakpoint_id = str(raw_breakpoint_id)
             locations = []
-            if result.locations:
-                for loc in result.locations:
+            if raw_locations:
+                for loc in raw_locations:
                     locations.append(
                         {
                             "script_id": str(loc.script_id),
@@ -267,8 +274,9 @@ class DebuggerHandler:
                 )
             )
             stack_str = ""
-            if result and result.result and result.result.value:
-                stack_str = result.result.value
+            value = runtime_value(result)
+            if value:
+                stack_str = value
             frames = []
             for line in stack_str.split("\n")[1:]:  # skip first "Error" line
                 line = line.strip()
@@ -315,20 +323,9 @@ class DebuggerHandler:
                     return_by_value=True,
                 )
             )
-            value = None
-            exception_details = None
-            if result.result:
-                value = {
-                    "type": result.result.type_.value if result.result.type_ else None,
-                    "value": result.result.value,
-                    "description": result.result.description,
-                }
-            if result.exception_details:
-                exception_details = {
-                    "text": result.exception_details.text,
-                    "line_number": result.exception_details.line_number,
-                    "column_number": result.exception_details.column_number,
-                }
+            remote_object, exception = runtime_parts(result)
+            value = remote_object_to_dict(remote_object) if remote_object else None
+            exception_details = exception_details_to_dict(exception) if exception else None
             return {"result": value, "exception_details": exception_details}
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")

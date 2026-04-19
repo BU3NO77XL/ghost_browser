@@ -68,7 +68,7 @@ class WebAuthnHandler:
                 is_user_verified=is_user_verified,
             )
             result = await tab.send(cdp.web_authn.add_virtual_authenticator(options=options))
-            authenticator_id = str(result.authenticator_id)
+            authenticator_id = str(getattr(result, "authenticator_id", result))
             debug_logger.log_info(
                 "WebAuthnHandler",
                 "add_virtual_authenticator",
@@ -220,7 +220,10 @@ class WebAuthnHandler:
                 )
             )
             credentials = []
-            for cred in (result.credentials if result.credentials else []):
+            credential_items = (
+                result if isinstance(result, list) else getattr(result, "credentials", None) or []
+            )
+            for cred in credential_items:
                 credentials.append(
                     {
                         "credential_id": cred.credential_id,

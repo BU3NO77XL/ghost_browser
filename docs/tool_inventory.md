@@ -130,7 +130,7 @@ Criterio: Execucao JS/CDP generica; flexivel, mas aumenta superficie e escolhas.
 - `create_python_binding` - Create a binding that allows JavaScript to call Python functions.
 - `discover_global_functions` - Discover all global JavaScript functions available in the page.
 - `discover_object_methods` - Discover methods of a specific JavaScript object.
-- `execute_cdp_command` - Execute any CDP Runtime command with given parameters.
+- `execute_cdp_command` - Execute Runtime commands or raw fully-qualified CDP methods.
 - `execute_function_sequence` - Execute a sequence of JavaScript function calls.
 - `execute_python_in_browser` - Execute Python code by translating it to JavaScript.
 - `get_execution_contexts` - Get all available JavaScript execution contexts.

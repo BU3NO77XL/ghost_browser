@@ -223,7 +223,11 @@ def register(mcp, section_tool, deps):
             }
 
             if referrer:
-                await tab.send(uc.cdp.network.set_extra_http_headers(headers={"Referer": referrer}))
+                await tab.send(
+                    uc.cdp.network.set_extra_http_headers(
+                        headers=uc.cdp.network.Headers({"Referer": referrer})
+                    )
+                )
 
             pre_injected = False
             if inject_cookies:

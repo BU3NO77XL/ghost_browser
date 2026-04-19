@@ -332,10 +332,12 @@ class FetchHandler:
                     request_id=cdp.fetch.RequestId(request_id),
                 )
             )
-            return {
-                "body": result.body,
-                "base64_encoded": result.base64_encoded,
-            }
+            if isinstance(result, (tuple, list)):
+                body, base64_encoded = result
+            else:
+                body = getattr(result, "body", "")
+                base64_encoded = getattr(result, "base64_encoded", False)
+            return {"body": body, "base64_encoded": base64_encoded}
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
         except Exception as e:

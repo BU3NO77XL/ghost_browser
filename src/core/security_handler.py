@@ -5,6 +5,7 @@ from typing import Any, Dict, Optional
 
 from nodriver import Tab, cdp
 
+from core.cdp_result import runtime_value
 from core.debug_logger import debug_logger
 
 
@@ -101,9 +102,10 @@ class SecurityHandler:
             import json
 
             state = {}
-            if result and result.result and result.result.value:
+            value = runtime_value(result)
+            if value:
                 try:
-                    state = json.loads(result.result.value)
+                    state = json.loads(value) if isinstance(value, str) else value
                 except Exception:
                     pass
             return {

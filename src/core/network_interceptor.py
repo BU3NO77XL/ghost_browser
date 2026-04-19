@@ -9,6 +9,7 @@ from typing import Any, Dict, List, Optional
 import nodriver as uc
 from nodriver import Tab
 
+from core.cdp_result import to_json
 from core.debug_logger import debug_logger
 from core.models import NetworkRequest, NetworkResponse
 
@@ -351,6 +352,9 @@ class NetworkInterceptor:
                 cookie["expires"] = uc.cdp.network.TimeSinceEpoch(float(expires))
             elif isinstance(expires, str) and expires.strip().isdigit():
                 cookie["expires"] = uc.cdp.network.TimeSinceEpoch(float(expires.strip()))
+            same_site = cookie.get("same_site")
+            if isinstance(same_site, str):
+                cookie["same_site"] = uc.cdp.network.CookieSameSite(same_site)
 
             await asyncio.wait_for(tab.send(uc.cdp.network.set_cookie(**cookie)), timeout=10.0)
             return True
@@ -401,13 +405,9 @@ class NetworkInterceptor:
                             tab.send(uc.cdp.storage.get_cookies(browser_context_id=None)),
                             timeout=4.0,
                         )
-                        cdp_cookies = (
-                            result.get("cookies", [])
-                            if isinstance(result, dict)
-                            else (result if isinstance(result, list) else [])
-                        )
+                        cdp_cookies = result.get("cookies", []) if isinstance(result, dict) else result
                         if isinstance(cdp_cookies, list) and cdp_cookies:
-                            cookies = cdp_cookies
+                            cookies = [to_json(cookie) for cookie in cdp_cookies]
                     except Exception as cdp_err:
                         debug_logger.log_warning(
                             "network_interceptor",

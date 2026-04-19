@@ -6,6 +6,7 @@ from typing import Any, Dict, List, Optional
 
 from nodriver import Tab, cdp
 
+from core.cdp_result import coverage_parts
 from core.debug_logger import debug_logger
 
 # Maximum profile data size to return (truncate large profiles)
@@ -82,9 +83,9 @@ class ProfilerHandler:
         debug_logger.log_info("ProfilerHandler", "stop_profiling", "Stopping CPU profiling")
         try:
             result = await tab.send(cdp.profiler.stop())
-            if not result or not result.profile:
+            profile = getattr(result, "profile", result)
+            if not profile:
                 return {"nodes": [], "start_time": 0, "end_time": 0, "samples": []}
-            profile = result.profile
             nodes = []
             if profile.nodes:
                 for node in profile.nodes[:MAX_PROFILE_NODES]:
@@ -214,8 +215,9 @@ class ProfilerHandler:
         try:
             result = await tab.send(cdp.profiler.take_precise_coverage())
             scripts = []
-            if result and result.result:
-                for script in result.result:
+            coverage, timestamp = coverage_parts(result)
+            if coverage:
+                for script in coverage:
                     url = script.url or ""
                     if url_filter and url_filter not in url:
                         continue
@@ -246,7 +248,7 @@ class ProfilerHandler:
                     )
             return {
                 "scripts": scripts,
-                "timestamp": result.timestamp if result else 0,
+                "timestamp": timestamp,
                 "total_scripts": len(scripts),
             }
         except asyncio.TimeoutError:

@@ -73,10 +73,16 @@ class AuditsHandler:
                     quality=quality,
                 )
             )
+            if isinstance(result, (tuple, list)):
+                body, original_size, encoded_size = result
+            else:
+                body = getattr(result, "body", None)
+                original_size = getattr(result, "original_size", 0)
+                encoded_size = getattr(result, "encoded_size", 0)
             return {
-                "body": result.body if result.body is not None else "",
-                "original_size": result.original_size,
-                "encoded_size": result.encoded_size,
+                "body": body if body is not None else "",
+                "original_size": original_size,
+                "encoded_size": encoded_size,
             }
         except ValueError:
             raise

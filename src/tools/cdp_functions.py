@@ -25,12 +25,14 @@ def register(mcp, section_tool, deps):
         instance_id: str, command: str, params: Dict[str, Any] = None
     ) -> Dict[str, Any]:
         """
-        Execute any CDP Runtime command with given parameters.
+        Execute a CDP command with given parameters.
 
         Args:
             instance_id (str): Browser instance ID.
-            command (str): CDP command name (e.g., 'evaluate', 'callFunctionOn').
-            params (Dict[str, Any], optional): Command parameters (use snake_case).
+            command (str): Runtime command name (e.g., 'evaluate') or fully-qualified
+                CDP method (e.g., 'Input.dispatchMouseEvent').
+            params (Dict[str, Any], optional): Command parameters. Runtime helpers use
+                snake_case; fully-qualified raw methods use CDP wire names.
 
         Returns:
             Dict[str, Any]: Command execution result.

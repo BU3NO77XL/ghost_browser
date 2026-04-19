@@ -5,12 +5,57 @@ from typing import Any, Dict, List, Optional
 
 from nodriver import Tab, cdp
 
+from core.cdp_result import dom_storage_items_to_dict, indexeddb_request_data_to_dict, to_json
 from core.debug_logger import debug_logger
 from core.response_handler import response_handler
 
 
 class StorageHandler:
     """Handles browser storage operations via CDP Storage domain."""
+
+    @staticmethod
+    def _storage_id(origin: str, is_local_storage: bool):
+        return cdp.dom_storage.StorageId(
+            security_origin=origin, is_local_storage=is_local_storage
+        )
+
+    @staticmethod
+    def _is_null_origin(origin: str) -> bool:
+        return origin == "null"
+
+    @staticmethod
+    async def _get_web_storage_js(tab: Tab, storage_name: str) -> Dict[str, str]:
+        script = f"""
+        (function() {{
+            const out = {{}};
+            const storage = window.{storage_name};
+            for (let i = 0; i < storage.length; i++) {{
+                const key = storage.key(i);
+                out[key] = storage.getItem(key);
+            }}
+            return out;
+        }})()
+        """
+        result = await tab.evaluate(script)
+        return result if isinstance(result, dict) else {}
+
+    @staticmethod
+    async def _set_web_storage_js(tab: Tab, storage_name: str, key: str, value: str) -> None:
+        import json
+
+        await tab.evaluate(
+            f"window.{storage_name}.setItem({json.dumps(key)}, {json.dumps(value)})"
+        )
+
+    @staticmethod
+    async def _remove_web_storage_js(tab: Tab, storage_name: str, key: str) -> None:
+        import json
+
+        await tab.evaluate(f"window.{storage_name}.removeItem({json.dumps(key)})")
+
+    @staticmethod
+    async def _clear_web_storage_js(tab: Tab, storage_name: str) -> None:
+        await tab.evaluate(f"window.{storage_name}.clear()")
 
     @staticmethod
     async def get_local_storage(tab: Tab, origin: str) -> Dict[str, str]:
@@ -30,15 +75,13 @@ class StorageHandler:
             f"Getting localStorage for origin: {origin}",
         )
         try:
-            storage_id = {"securityOrigin": origin, "isLocalStorage": True}
+            if StorageHandler._is_null_origin(origin):
+                return await StorageHandler._get_web_storage_js(tab, "localStorage")
+            storage_id = StorageHandler._storage_id(origin, True)
             result = await tab.send(cdp.dom_storage.get_dom_storage_items(storage_id))
 
             # Convert list of [key, value] pairs to dictionary
-            items = {}
-            if result and "entries" in result:
-                for entry in result["entries"]:
-                    if len(entry) >= 2:
-                        items[entry[0]] = entry[1]
+            items = dom_storage_items_to_dict(result)
 
             debug_logger.log_info(
                 "StorageHandler",
@@ -90,7 +133,10 @@ class StorageHandler:
             f"Setting localStorage item: {key} for origin: {origin}",
         )
         try:
-            storage_id = {"securityOrigin": origin, "isLocalStorage": True}
+            if StorageHandler._is_null_origin(origin):
+                await StorageHandler._set_web_storage_js(tab, "localStorage", key, value)
+                return True
+            storage_id = StorageHandler._storage_id(origin, True)
             await tab.send(cdp.dom_storage.set_dom_storage_item(storage_id, key, value))
             debug_logger.log_info(
                 "StorageHandler",
@@ -146,7 +192,10 @@ class StorageHandler:
             f"Removing localStorage item: {key} for origin: {origin}",
         )
         try:
-            storage_id = {"securityOrigin": origin, "isLocalStorage": True}
+            if StorageHandler._is_null_origin(origin):
+                await StorageHandler._remove_web_storage_js(tab, "localStorage", key)
+                return True
+            storage_id = StorageHandler._storage_id(origin, True)
             await tab.send(cdp.dom_storage.remove_dom_storage_item(storage_id, key))
             debug_logger.log_info(
                 "StorageHandler",
@@ -201,7 +250,10 @@ class StorageHandler:
             f"Clearing localStorage for origin: {origin}",
         )
         try:
-            storage_id = {"securityOrigin": origin, "isLocalStorage": True}
+            if StorageHandler._is_null_origin(origin):
+                await StorageHandler._clear_web_storage_js(tab, "localStorage")
+                return True
+            storage_id = StorageHandler._storage_id(origin, True)
             await tab.send(cdp.dom_storage.clear(storage_id))
             debug_logger.log_info(
                 "StorageHandler",
@@ -251,15 +303,13 @@ class StorageHandler:
             f"Getting sessionStorage for origin: {origin}",
         )
         try:
-            storage_id = {"securityOrigin": origin, "isLocalStorage": False}
+            if StorageHandler._is_null_origin(origin):
+                return await StorageHandler._get_web_storage_js(tab, "sessionStorage")
+            storage_id = StorageHandler._storage_id(origin, False)
             result = await tab.send(cdp.dom_storage.get_dom_storage_items(storage_id))
 
             # Convert list of [key, value] pairs to dictionary
-            items = {}
-            if result and "entries" in result:
-                for entry in result["entries"]:
-                    if len(entry) >= 2:
-                        items[entry[0]] = entry[1]
+            items = dom_storage_items_to_dict(result)
 
             debug_logger.log_info(
                 "StorageHandler",
@@ -311,7 +361,10 @@ class StorageHandler:
             f"Setting sessionStorage item: {key} for origin: {origin}",
         )
         try:
-            storage_id = {"securityOrigin": origin, "isLocalStorage": False}
+            if StorageHandler._is_null_origin(origin):
+                await StorageHandler._set_web_storage_js(tab, "sessionStorage", key, value)
+                return True
+            storage_id = StorageHandler._storage_id(origin, False)
             await tab.send(cdp.dom_storage.set_dom_storage_item(storage_id, key, value))
             debug_logger.log_info(
                 "StorageHandler",
@@ -367,7 +420,10 @@ class StorageHandler:
             f"Removing sessionStorage item: {key} for origin: {origin}",
         )
         try:
-            storage_id = {"securityOrigin": origin, "isLocalStorage": False}
+            if StorageHandler._is_null_origin(origin):
+                await StorageHandler._remove_web_storage_js(tab, "sessionStorage", key)
+                return True
+            storage_id = StorageHandler._storage_id(origin, False)
             await tab.send(cdp.dom_storage.remove_dom_storage_item(storage_id, key))
             debug_logger.log_info(
                 "StorageHandler",
@@ -422,7 +478,10 @@ class StorageHandler:
             f"Clearing sessionStorage for origin: {origin}",
         )
         try:
-            storage_id = {"securityOrigin": origin, "isLocalStorage": False}
+            if StorageHandler._is_null_origin(origin):
+                await StorageHandler._clear_web_storage_js(tab, "sessionStorage")
+                return True
+            storage_id = StorageHandler._storage_id(origin, False)
             await tab.send(cdp.dom_storage.clear(storage_id))
             debug_logger.log_info(
                 "StorageHandler",
@@ -493,19 +552,25 @@ class StorageHandler:
             f"Listing IndexedDB databases for origin: {origin}",
         )
         try:
+            if StorageHandler._is_null_origin(origin):
+                result = await tab.evaluate(
+                    """
+                    (async () => {
+                        if (!indexedDB.databases) return [];
+                        const dbs = await indexedDB.databases();
+                        return dbs.map(db => db.name).filter(Boolean);
+                    })()
+                    """
+                )
+                return result if isinstance(result, list) else []
             # Enable IndexedDB domain first
             await StorageHandler._enable_indexed_db(tab)
 
             # Request database names
             result = await tab.send(cdp.indexed_db.request_database_names(security_origin=origin))
 
-            # Handle both dict and object responses
-            if hasattr(result, "database_names"):
-                database_names = result.database_names or []
-            elif isinstance(result, dict):
-                database_names = result.get("databaseNames", [])
-            else:
-                database_names = []
+            mock_database_names = getattr(result, "database_names", None)
+            database_names = mock_database_names if isinstance(mock_database_names, list) else result or []
 
             debug_logger.log_info(
                 "StorageHandler",
@@ -566,7 +631,7 @@ class StorageHandler:
                 cdp.indexed_db.request_database(security_origin=origin, database_name=database_name)
             )
 
-            database_info = result.get("databaseWithObjectStores", {}) if result else {}
+            database_info = to_json(result) if result else {}
 
             debug_logger.log_info(
                 "StorageHandler",
@@ -647,8 +712,7 @@ class StorageHandler:
                 )
             )
 
-            # Extract data entries
-            object_store_data = result if result else {}
+            object_store_data = indexeddb_request_data_to_dict(result) if result else {}
 
             # Handle large responses
             if object_store_data:

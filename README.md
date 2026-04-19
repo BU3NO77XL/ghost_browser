@@ -343,7 +343,7 @@ python src/server.py --list-sections
 
 | Tool | Description |
 |------|-------------|
-| `execute_cdp_command()` | Direct CDP commands (use snake_case) |
+| `execute_cdp_command()` | Direct Runtime commands, or raw `Domain.method` CDP commands |
 | `discover_global_functions()` | Find JavaScript functions |
 | `discover_object_methods()` | Discover object methods (93+ methods) |
 | `call_javascript_function()` | Execute any function |

@@ -21,7 +21,7 @@ def _make_tab():
 async def test_enable_css_domain_success():
     tab = _make_tab()
     await CSSHandler.enable_css_domain(tab)
-    tab.send.assert_called_once()
+    assert tab.send.call_count == 2
 
 
 @pytest.mark.asyncio
@@ -77,8 +77,8 @@ async def test_get_computed_style_success():
     mock_result = MagicMock()
     mock_result.computed_style = [mock_prop1, mock_prop2]
 
-    # enable_css_domain (1 call) + get_document (1) + query_selector (1) + get_computed_style (1)
-    tab.send = AsyncMock(side_effect=[None, mock_doc, 10, mock_result])
+    # enable_css_domain (2 calls) + get_document + query_selector + get_computed_style
+    tab.send = AsyncMock(side_effect=[None, None, mock_doc, 10, mock_result])
 
     result = await CSSHandler.get_computed_style(tab, "body")
     assert isinstance(result, dict)
@@ -93,7 +93,7 @@ async def test_get_computed_style_empty():
     mock_result = MagicMock()
     mock_result.computed_style = []
 
-    tab.send = AsyncMock(side_effect=[None, mock_doc, 10, mock_result])
+    tab.send = AsyncMock(side_effect=[None, None, mock_doc, 10, mock_result])
 
     result = await CSSHandler.get_computed_style(tab, "body")
     assert result == {}
@@ -138,8 +138,8 @@ async def test_get_inline_styles_success():
     mock_result = MagicMock()
     mock_result.inline_style = mock_inline
 
-    # enable_css_domain + get_document + query_selector + get_inline_styles
-    tab.send = AsyncMock(side_effect=[None, mock_doc, 10, mock_result])
+    # enable_css_domain (2 calls) + get_document + query_selector + get_inline_styles
+    tab.send = AsyncMock(side_effect=[None, None, mock_doc, 10, mock_result])
 
     result = await CSSHandler.get_inline_styles(tab, "#el")
     assert isinstance(result, dict)
@@ -154,7 +154,7 @@ async def test_get_inline_styles_no_inline():
     mock_result = MagicMock()
     mock_result.inline_style = None
 
-    tab.send = AsyncMock(side_effect=[None, mock_doc, 10, mock_result])
+    tab.send = AsyncMock(side_effect=[None, None, mock_doc, 10, mock_result])
 
     result = await CSSHandler.get_inline_styles(tab, "#el")
     assert result == {}
@@ -168,7 +168,7 @@ async def test_get_stylesheet_text_success():
     tab = _make_tab()
     mock_result = MagicMock()
     mock_result.text = "body { color: red; }"
-    tab.send = AsyncMock(side_effect=[None, mock_result])
+    tab.send = AsyncMock(side_effect=[None, None, mock_result])
 
     result = await CSSHandler.get_stylesheet_text(tab, "1")
     assert result == "body { color: red; }"
@@ -179,7 +179,7 @@ async def test_get_stylesheet_text_empty():
     tab = _make_tab()
     mock_result = MagicMock()
     mock_result.text = None
-    tab.send = AsyncMock(side_effect=[None, mock_result])
+    tab.send = AsyncMock(side_effect=[None, None, mock_result])
 
     result = await CSSHandler.get_stylesheet_text(tab, "1")
     assert result == ""
@@ -227,7 +227,7 @@ async def test_get_media_queries_success():
     mock_result = MagicMock()
     mock_result.medias = [mock_media]
 
-    tab.send = AsyncMock(side_effect=[None, mock_result])
+    tab.send = AsyncMock(side_effect=[None, None, mock_result])
 
     result = await CSSHandler.get_media_queries(tab)
     assert isinstance(result, list)
@@ -240,7 +240,7 @@ async def test_get_media_queries_empty():
     tab = _make_tab()
     mock_result = MagicMock()
     mock_result.medias = []
-    tab.send = AsyncMock(side_effect=[None, mock_result])
+    tab.send = AsyncMock(side_effect=[None, None, mock_result])
 
     result = await CSSHandler.get_media_queries(tab)
     assert result == []

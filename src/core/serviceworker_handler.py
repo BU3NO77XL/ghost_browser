@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from nodriver import Tab, cdp
 
+from core.cdp_result import runtime_value
 from core.debug_logger import debug_logger
 
 
@@ -62,8 +63,9 @@ class ServiceWorkerHandler:
                     return_by_value=True,
                 )
             )
-            if result and result.result and result.result.value:
-                return result.result.value
+            value = runtime_value(result)
+            if value:
+                return value
             return []
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")

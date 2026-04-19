@@ -18,6 +18,7 @@ from typing import Any, Callable, Dict, List, Optional, Union
 import nodriver as uc
 from nodriver import Tab
 
+from core.cdp_result import to_json
 from core.debug_logger import debug_logger
 
 
@@ -151,31 +152,39 @@ class CDPFunctionExecutor:
         self, tab: Tab, command: str, params: Dict[str, Any]
     ) -> Dict[str, Any]:
         """
-        Executes any CDP Runtime command with given parameters.
+        Executes a CDP command with given parameters.
 
         Args:
             tab (Tab): The browser tab.
-            command (str): CDP command name.
+            command (str): Runtime command name, or a fully-qualified CDP method.
             params (Dict[str, Any]): Parameters for the command.
 
         Returns:
             Dict[str, Any]: Result of the command execution.
         """
         try:
-            await self.enable_runtime(tab)
-            cdp_method = getattr(uc.cdp.runtime, command, None)
-            if not cdp_method:
-                raise ValueError(f"Unknown CDP command: {command}")
-            result = await tab.send(cdp_method(**params))
+            if "." in command:
+                result = await tab.send(self._raw_cdp_command(command, params))
+            else:
+                await self.enable_runtime(tab)
+                cdp_method = getattr(uc.cdp.runtime, command, None)
+                if not cdp_method:
+                    raise ValueError(f"Unknown CDP Runtime command: {command}")
+                result = await tab.send(cdp_method(**params))
             debug_logger.log_info(
                 "cdp_function_executor",
                 "execute_cdp_command",
                 f"Executed {command} with params: {params}",
             )
-            return {"success": True, "result": result, "command": command, "params": params}
+            return {"success": True, "result": to_json(result), "command": command, "params": params}
         except Exception as e:
             debug_logger.log_error("cdp_function_executor", "execute_cdp_command", e)
             return {"success": False, "error": str(e), "command": command, "params": params}
+
+    @staticmethod
+    def _raw_cdp_command(method: str, params: Dict[str, Any]):
+        result = yield {"method": method, "params": params}
+        return result
 
     async def get_execution_contexts(self, tab: Tab) -> List[ExecutionContext]:
         """

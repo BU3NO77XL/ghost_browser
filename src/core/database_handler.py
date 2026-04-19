@@ -11,6 +11,7 @@ from typing import Any, Dict, List, Optional
 
 from nodriver import Tab, cdp
 
+from core.cdp_result import runtime_value
 from core.debug_logger import debug_logger
 
 
@@ -58,9 +59,10 @@ class DatabaseHandler:
                     return_by_value=True,
                 )
             )
-            if result and result.result and result.result.value:
+            value = runtime_value(result)
+            if value:
                 try:
-                    return json.loads(result.result.value)
+                    return json.loads(value) if isinstance(value, str) else value
                 except Exception:
                     pass
             return []
@@ -125,9 +127,10 @@ class DatabaseHandler:
                     return_by_value=True,
                 )
             )
-            if result and result.result and result.result.value:
+            value = runtime_value(result)
+            if value:
                 try:
-                    return json.loads(result.result.value)
+                    return json.loads(value) if isinstance(value, str) else value
                 except Exception:
                     pass
             return []
@@ -213,9 +216,10 @@ class DatabaseHandler:
                     return_by_value=True,
                 )
             )
-            if result and result.result and result.result.value:
+            value = runtime_value(result)
+            if value:
                 try:
-                    data = json.loads(result.result.value)
+                    data = json.loads(value) if isinstance(value, str) else value
                     column_names = data.get("columns", [])
                     raw_rows = data.get("rows", [])
                     rows = []

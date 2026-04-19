@@ -5,6 +5,7 @@ from typing import Any, Dict, List, Optional
 
 from nodriver import Tab, cdp
 
+from core.cdp_result import remote_object_to_dict
 from core.debug_logger import debug_logger
 
 # Maximum snapshot size to return (heap snapshots can be very large)
@@ -147,9 +148,9 @@ class HeapProfilerHandler:
         debug_logger.log_info("HeapProfilerHandler", "stop_sampling", "Stopping heap sampling")
         try:
             result = await tab.send(cdp.heap_profiler.stop_sampling())
-            if not result or not result.profile:
+            profile = getattr(result, "profile", result)
+            if not profile:
                 return {"head": None, "samples": []}
-            profile = result.profile
 
             def serialize_node(node, depth=0):
                 if depth > 10:
@@ -308,15 +309,10 @@ class HeapProfilerHandler:
                     object_id=cdp.heap_profiler.HeapSnapshotObjectId(heap_snapshot_object_id)
                 )
             )
-            if not result or not result.result:
+            obj = getattr(result, "result", result)
+            if not obj:
                 return None
-            obj = result.result
-            return {
-                "type": obj.type_.value if obj.type_ else None,
-                "value": obj.value,
-                "description": obj.description,
-                "object_id": str(obj.object_id) if obj.object_id else None,
-            }
+            return remote_object_to_dict(obj)
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
         except Exception as e:

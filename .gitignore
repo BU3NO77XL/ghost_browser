@@ -55,6 +55,7 @@ coverage.xml
 *.py,cover
 .hypothesis/
 .pytest_cache/
+.tmp/
 .pytest-cache-files-*/
 pytest-cache-files-*/
 .pytest-tmp/

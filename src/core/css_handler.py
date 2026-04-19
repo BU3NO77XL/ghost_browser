@@ -20,6 +20,7 @@ class CSSHandler:
             tab (Tab): The browser tab object.
         """
         try:
+            await tab.send(cdp.dom.enable())
             await tab.send(cdp.css.enable())
         except Exception as e:
             error_msg = str(e).lower()
@@ -67,9 +68,18 @@ class CSSHandler:
             await CSSHandler.enable_css_domain(tab)
             node_id = await CSSHandler._get_node_id_from_selector(tab, selector)
             result = await tab.send(cdp.css.get_matched_styles_for_node(node_id=node_id))
+            inline_style, _, matched_css_rules = (
+                result[:3]
+                if isinstance(result, (tuple, list))
+                else (
+                    getattr(result, "inline_style", None),
+                    getattr(result, "attributes_style", None),
+                    getattr(result, "matched_css_rules", None),
+                )
+            )
             matched = []
-            if result.matched_css_rules:
-                for rule_match in result.matched_css_rules:
+            if matched_css_rules:
+                for rule_match in matched_css_rules:
                     rule = rule_match.rule
                     matched.append(
                         {
@@ -81,8 +91,8 @@ class CSSHandler:
                         }
                     )
             inline = {}
-            if result.inline_style and result.inline_style.css_properties:
-                inline = {p.name: p.value for p in result.inline_style.css_properties if p.value}
+            if inline_style and inline_style.css_properties:
+                inline = {p.name: p.value for p in inline_style.css_properties if p.value}
             return {"matched_rules": matched, "inline_style": inline}
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
@@ -115,11 +125,12 @@ class CSSHandler:
             await CSSHandler.enable_css_domain(tab)
             node_id = await CSSHandler._get_node_id_from_selector(tab, selector)
             result = await tab.send(cdp.css.get_inline_styles_for_node(node_id=node_id))
-            if not result.inline_style or not result.inline_style.css_properties:
+            inline_style = (
+                result[0] if isinstance(result, (tuple, list)) else getattr(result, "inline_style", None)
+            )
+            if not inline_style or not inline_style.css_properties:
                 return {}
-            return {
-                p.name: p.value for p in result.inline_style.css_properties if p.value is not None
-            }
+            return {p.name: p.value for p in inline_style.css_properties if p.value is not None}
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
         except Exception as e:
@@ -151,9 +162,14 @@ class CSSHandler:
             await CSSHandler.enable_css_domain(tab)
             node_id = await CSSHandler._get_node_id_from_selector(tab, selector)
             result = await tab.send(cdp.css.get_computed_style_for_node(node_id=node_id))
-            if not result.computed_style:
+            computed_style = (
+                result[0]
+                if isinstance(result, (tuple, list))
+                else getattr(result, "computed_style", None)
+            )
+            if not computed_style:
                 return {}
-            return {p.name: p.value for p in result.computed_style}
+            return {p.name: p.value for p in computed_style}
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
         except Exception as e:
@@ -186,7 +202,7 @@ class CSSHandler:
             result = await tab.send(
                 cdp.css.get_style_sheet_text(style_sheet_id=cdp.css.StyleSheetId(stylesheet_id))
             )
-            return result.text if result.text else ""
+            return result if isinstance(result, str) else getattr(result, "text", None) or ""
         except asyncio.TimeoutError:
             raise Exception("Operation timed out")
         except Exception as e:
@@ -256,17 +272,21 @@ class CSSHandler:
             await CSSHandler.enable_css_domain(tab)
             result = await tab.send(cdp.css.get_media_queries())
             medias = []
-            for media in (result.medias if result.medias else []):
+            media_items = result if isinstance(result, list) else getattr(result, "medias", None) or []
+            for media in media_items:
                 expressions = []
                 if media.media_list:
-                    for expr in media.media_list:
-                        expressions.append(
-                            {
-                                "value": expr.value,
-                                "unit": expr.unit,
-                                "feature": expr.feature,
-                            }
-                        )
+                    for query in media.media_list:
+                        query_expressions = getattr(query, "expressions", None) or [query]
+                        for expr in query_expressions:
+                            expressions.append(
+                                {
+                                    "value": expr.value,
+                                    "unit": expr.unit,
+                                    "feature": expr.feature,
+                                    "active": getattr(query, "active", None),
+                                }
+                            )
                 medias.append(
                     {
                         "text": media.text,

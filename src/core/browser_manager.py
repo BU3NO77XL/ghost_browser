@@ -118,7 +118,11 @@ class BrowserManager:
                 )
 
             if options.extra_headers:
-                await tab.send(uc.cdp.network.set_extra_http_headers(headers=options.extra_headers))
+                await tab.send(
+                    uc.cdp.network.set_extra_http_headers(
+                        headers=uc.cdp.network.Headers(options.extra_headers)
+                    )
+                )
 
             await tab.set_window_size(
                 left=0, top=0, width=options.viewport_width, height=options.viewport_height
