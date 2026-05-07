@@ -2,14 +2,14 @@
 
 ## v0.5.0 — CDP Extended Domains
 
-### 9 Novos Domínios CDP Implementados
+### 9 New CDP Domains Implemented
 
 **Log Domain** (`log-management`)
 - `log_enable` / `log_disable` / `log_clear`
 - `log_start_violations_report` / `log_stop_violations_report`
 
 **StorageCDP Domain** (`storage-cdp-management`)
-- `storage_clear_data_for_origin` / `storage_get_usage_and_quota` (inclui campo `usage_mb`)
+- `storage_clear_data_for_origin` / `storage_get_usage_and_quota` (includes `usage_mb` field)
 - `storage_track_cache_storage_for_origin` / `storage_untrack_cache_storage_for_origin`
 
 **SystemInfo Domain** (`system-info-management`)
@@ -26,37 +26,37 @@
 
 **Audits Domain** (`audits-management`)
 - `audits_enable` / `audits_disable`
-- `audits_get_encoded_response` (valida encoding: webp, jpeg, png)
+- `audits_get_encoded_response` (validates encoding: webp, jpeg, png)
 - `audits_check_contrast`
 
 **Target Domain** (`target-management`)
-- `target_get_targets` (filtra targets do tipo "browser")
+- `target_get_targets` (filters out "browser" type targets)
 - `target_get_target_info` / `target_create_target` / `target_close_target`
 - `target_activate_target` / `target_attach_to_target` / `target_detach_from_target`
 
 **BrowserCDP Domain** (`browser-cdp-management`)
 - `browser_get_window_for_target` / `browser_set_window_bounds` / `browser_get_window_bounds`
 - `browser_grant_permissions` / `browser_reset_permissions`
-- `browser_set_download_behavior` (valida download_path para behavior allow/allowAndName)
+- `browser_set_download_behavior` (validates download_path for behavior allow/allowAndName)
 
 **DOMSnapshot Domain** (`dom-snapshot-management`)
 - `dom_snapshot_enable` / `dom_snapshot_disable`
-- `dom_snapshot_capture` (computed_styles com default, node_count, include_dom_rects)
+- `dom_snapshot_capture` (computed_styles with defaults, node_count, include_dom_rects)
 
-### Novos Arquivos
-- 9 novos handlers em `src/core/` (log_handler, storage_cdp_handler, system_info_handler, fetch_handler, overlay_handler, audits_handler, target_handler, browser_cdp_handler, dom_snapshot_handler)
-- 9 novos tool modules em `src/tools/` (log_management, storage_cdp_management, system_info_management, fetch_management, overlay_management, audits_management, target_management, browser_cdp_management, dom_snapshot_management)
-- 19 novos arquivos de testes (9 unit + 10 integration)
+### New Files
+- 9 new handlers in `src/core/` (log_handler, storage_cdp_handler, system_info_handler, fetch_handler, overlay_handler, audits_handler, target_handler, browser_cdp_handler, dom_snapshot_handler)
+- 9 new tool modules in `src/tools/` (log_management, storage_cdp_management, system_info_management, fetch_management, overlay_management, audits_management, target_management, browser_cdp_management, dom_snapshot_management)
+- 19 new test files (9 unit + 10 integration)
 
-### Cobertura CDP
-- **Antes**: ~57% (22 domínios, ~163 MCP tools)
-- **Depois**: ~70% (31 domínios, ~209 MCP tools)
+### CDP Coverage
+- **Before**: ~57% (22 domains, ~163 MCP tools)
+- **After**: ~70% (31 domains, ~225 MCP tools)
 
 ---
 
 ## v0.4.0 — CDP Complete Implementation
 
-### 11 Novos Domínios CDP Implementados
+### 11 New CDP Domains Implemented
 
 **Storage Domain** (`storage-management`)
 - `get_local_storage` / `set_local_storage_item` / `remove_local_storage_item` / `clear_local_storage`
@@ -102,37 +102,36 @@
 - `take_heap_snapshot` / `start_heap_sampling` / `stop_heap_sampling`
 - `start_tracking_heap_objects` / `stop_tracking_heap_objects` / `collect_garbage` / `get_object_by_heap_id`
 
-### Novos Arquivos
-- 11 novos handlers em `src/core/` (css_handler, database_handler, serviceworker_handler, backgroundservice_handler, webauthn_handler, security_handler, animation_handler, debugger_handler, profiler_handler, heapprofiler_handler)
-- 11 novos tool modules em `src/tools/` (storage_management, css_management, database_management, serviceworker_management, backgroundservice_management, webauthn_management, security_management, animation_management, debugger_management, profiler_management, heapprofiler_management)
-- `docs/CDP_USAGE_EXAMPLES.md` — exemplos de uso para todos os domínios
+### New Files
+- 11 new handlers in `src/core/` (css_handler, database_handler, serviceworker_handler, backgroundservice_handler, webauthn_handler, security_handler, animation_handler, debugger_handler, profiler_handler, heapprofiler_handler)
+- 11 new tool modules in `src/tools/` (storage_management, css_management, database_management, serviceworker_management, backgroundservice_management, webauthn_management, security_management, animation_management, debugger_management, profiler_management, heapprofiler_management)
 
-### Cobertura CDP
-- **Antes**: ~30% (8 domínios)
-- **Depois**: ~65% (19 domínios, ~163 MCP tools)
+### CDP Coverage
+- **Before**: ~30% (8 domains)
+- **After**: ~65% (19 domains, ~163 MCP tools)
 
 ---
 
 ## v0.3.0
 
-### Refatoração Completa
-- **87% menos código** no server.py (3050 → 400 linhas)
-- **11 módulos organizados** em `src/tools/` por categoria
-- **Injeção de dependências** para fácil teste e manutenção
-- **Separação CORE vs TOOLS** (cérebro vs portal)
+### Complete Refactoring
+- **87% less code** in server.py (3050 → 400 lines)
+- **11 organized modules** in `src/tools/` by category
+- **Dependency injection** for easy testing and maintenance
+- **CORE vs TOOLS separation** (brain vs gateway)
 
 ### Performance Boost
-- **HTTPx async** substitui requests blocking
-- **4-10x mais rápido** em operações com HTTP
-- **Requisições paralelas** ao invés de seriais
-- **Event loop livre** - outras operações continuam
+- **HTTPx async** replaces blocking requests
+- **4-10x faster** on HTTP operations
+- **Parallel requests** instead of serial
+- **Event loop freed** — other operations continue
 
-### Melhorias Técnicas
-- **Exception handling** melhorado e documentado
-- **get_page_state** otimizado (1 JS call vs 7+ CDP calls)
-- **Timeout reduzido** de 30s+ para ~200ms típico
-- **108 testes unitários** passando
+### Technical Improvements
+- **Exception handling** improved and documented
+- **get_page_state** optimized (1 JS call vs 7+ CDP calls)
+- **Reduced timeout** from 30s+ to ~200ms typical
+- **108 unit tests** passing
 
 ## v0.2.5
 
-- Versão base antes da refatoração completa
+- Base version before the complete refactoring

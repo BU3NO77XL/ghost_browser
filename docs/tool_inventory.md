@@ -1,55 +1,55 @@
-# Inventario de ferramentas MCP
+# MCP Tool Inventory
 
-Total detectado em `src/tools`: 225 ferramentas em 32 secoes.
-Todas ficam habilitadas por padrao. Use `--minimal` para manter apenas o nucleo ou `--disable-<secao>` para podar secoes especificas.
+Total detected in `src/tools`: 225 tools across 32 sections.
+All are enabled by default. Use `--minimal` to keep only the core or `--disable-<section>` to prune specific sections.
 
-## Resumo por utilidade
+## Summary by Utility
 
-### A - Mais uteis / manter primeiro (36 ferramentas)
-- `browser-management` (11): Core. Manter. Essencial para criar, navegar, recuperar e fechar browsers.
-- `cookies-storage` (3): Core para sessao. Pequeno e valioso para login, cookies e estado.
-- `element-interaction` (12): Core. Manter. Essencial para clicar, digitar, consultar DOM, capturar tela e ler pagina.
-- `network-debugging` (5): Core para diagnostico. Alto valor para scraping, depuracao e entender chamadas de rede.
-- `tabs` (5): Core. Manter. Muito util para fluxos reais com varias abas.
+### A — Most useful / keep first (36 tools)
+- `browser-management` (11): Core. Keep. Essential for spawning, navigating, recovering, and closing browsers.
+- `cookies-storage` (3): Core for sessions. Small and valuable for login, cookies, and state.
+- `element-interaction` (12): Core. Keep. Essential for clicking, typing, querying DOM, capturing screenshots, and reading pages.
+- `network-debugging` (5): Core for diagnostics. High value for scraping, debugging, and understanding network calls.
+- `tabs` (5): Core. Keep. Very useful for real-world multi-tab workflows.
 
-### B - Muito uteis sob demanda (90 ferramentas)
-- `browser-cdp-management` (6): Muito util sob demanda. Janelas, permissoes e downloads; importante em automacao mais completa.
-- `cdp-advanced` (13): Muito util sob demanda. Performance, emulacao, acessibilidade, PDF e input baixo nivel.
-- `cdp-functions` (13): Poderoso, usar com criterio. Execucao JS/CDP generica; flexivel, mas aumenta superficie e escolhas.
-- `css-management` (6): Muito util sob demanda. Inspecao/edicao CSS; util para frontend e clonagem visual.
-- `debugging` (7): Manter em desenvolvimento. Diagnostico do servidor; pode ser removido em producao enxuta.
-- `dom-snapshot-management` (3): Muito util sob demanda. Snapshots completos; muito bom para analise, pesado para uso comum.
-- `element-extraction` (9): Muito util sob demanda. Clonagem/extracao detalhada de elementos; alto valor, custo maior.
-- `fetch-management` (7): Muito util sob demanda. Intercepcao/modificacao de requests; poderoso, mas nem todo fluxo precisa.
-- `storage-management` (15): Muito util sob demanda. Amplo controle de storage; util quando precisa estado persistido.
-- `system-info-management` (4): Util leve. Info do servidor/browser/processos; barato e bom para diagnostico.
-- `target-management` (7): Muito util sob demanda. Poderoso para targets, workers e iframes, mas duplica parte de abas/browser.
+### B — Very useful on demand (90 tools)
+- `browser-cdp-management` (6): Very useful on demand. Windows, permissions, and downloads; important for more complete automation.
+- `cdp-advanced` (13): Very useful on demand. Performance, emulation, accessibility, PDF, and low-level input.
+- `cdp-functions` (13): Powerful, use with care. Generic JS/CDP execution; flexible but increases surface area and choices.
+- `css-management` (6): Very useful on demand. CSS inspection/editing; useful for frontend and visual cloning.
+- `debugging` (7): Keep during development. Server diagnostics; can be removed in lean production.
+- `dom-snapshot-management` (3): Very useful on demand. Full snapshots; great for analysis, heavy for everyday use.
+- `element-extraction` (9): Very useful on demand. Detailed element cloning/extraction; high value, higher cost.
+- `fetch-management` (7): Very useful on demand. Request interception/modification; powerful, but not every flow needs it.
+- `storage-management` (15): Very useful on demand. Broad storage control; useful when persistent state is needed.
+- `system-info-management` (4): Lightweight utility. Server/browser/process info; cheap and good for diagnostics.
+- `target-management` (7): Very useful on demand. Powerful for targets, workers, and iframes, but duplicates parts of tabs/browser.
 
-### C - Especializadas / candidatas a disable (75 ferramentas)
-- `debugger-management` (9): Especializado. Debugger JS completo; valioso para dev, pesado para automacao simples.
-- `dynamic-hooks` (10): Especializado. Hooks dinamicos de rede; poderoso, mas complexo e menos comum.
-- `file-extraction` (8): Especializado. Versoes que escrevem em arquivo; util para artefatos grandes, mas duplicativo.
-- `log-management` (5): Especializado. Dominio Log/violations; util em auditoria, pouco usado em navegacao comum.
-- `overlay-management` (8): Especializado visual. Overlays CDP; util para debug visual, dispensavel em automacao headless.
-- `profiler-management` (5): Especializado. CPU profiling e coverage; manter para performance/debug.
-- `progressive-cloning` (10): Especializado. Clonagem incremental rica; manter se esse fluxo for frequente.
-- `security-management` (3): Sensivel. Certificados/estado de seguranca; pequeno, mas pode enfraquecer seguranca.
-- `serviceworker-management` (7): Especializado PWA. Bom para PWAs; desnecessario para navegacao simples.
-- `storage-cdp-management` (4): Especializado. Quota e limpeza por origem; bom para debug, menos usado no dia a dia.
-- `webauthn-management` (6): Especializado auth. Passkeys/FIDO2 virtual; manter se testa autenticacao moderna.
+### C — Specialized / disable candidates (75 tools)
+- `debugger-management` (9): Specialized. Full JS debugger; valuable for dev, heavy for simple automation.
+- `dynamic-hooks` (10): Specialized. Dynamic network hooks; powerful, but complex and less common.
+- `file-extraction` (8): Specialized. File-writing versions; useful for large artifacts, but duplicative.
+- `log-management` (5): Specialized. Log domain/violations; useful in auditing, rarely used in common navigation.
+- `overlay-management` (8): Specialized visual. CDP overlays; useful for visual debugging, expendable in headless automation.
+- `profiler-management` (5): Specialized. CPU profiling and coverage; keep for performance/debugging.
+- `progressive-cloning` (10): Specialized. Rich incremental cloning; keep if this workflow is frequent.
+- `security-management` (3): Sensitive. Certificates/security state; small, but can weaken security.
+- `serviceworker-management` (7): Specialized PWA. Good for PWAs; unnecessary for simple browsing.
+- `storage-cdp-management` (4): Specialized. Quota and origin cleanup; good for debugging, less used day-to-day.
+- `webauthn-management` (6): Specialized auth. Virtual passkeys/FIDO2; keep if testing modern authentication.
 
-### D - Menos uteis para uso geral / candidatas fortes a remover (24 ferramentas)
-- `animation-management` (6): Baixa utilidade geral. Controle de animacoes; util em testes visuais especificos.
-- `audits-management` (4): Baixa utilidade geral. Contraste/respostas codificadas; bom nicho de auditoria.
-- `backgroundservice-management` (4): Baixa utilidade geral. Eventos PWA de background; nicho.
-- `database-management` (3): Legado/nicho. WebSQL e legado; candidato forte a remover se nao usado.
-- `heapprofiler-management` (7): Baixa utilidade geral. Heap snapshots e GC; raro fora de investigacao de memoria.
+### D — Less useful for general use / strong removal candidates (24 tools)
+- `animation-management` (6): Low general utility. Animation control; useful in specific visual tests.
+- `audits-management` (4): Low general utility. Contrast/encoded responses; good auditing niche.
+- `backgroundservice-management` (4): Low general utility. Background PWA events; niche.
+- `database-management` (3): Legacy/niche. WebSQL is legacy; strong removal candidate if not used.
+- `heapprofiler-management` (7): Low general utility. Heap snapshots and GC; rare outside memory investigation.
 
-## Lista completa por secao
+## Complete List by Section
 
 ### animation-management (6)
-Classificacao: D - Baixa utilidade geral.
-Criterio: Controle de animacoes; util em testes visuais especificos.
+Classification: D — Low general utility.
+Criteria: Animation control; useful in specific visual tests.
 
 - `get_animation_timing` - Get the current timing information for a specific animation.
 - `list_animations` - List all active animations on the current page.
@@ -59,8 +59,8 @@ Criterio: Controle de animacoes; util em testes visuais especificos.
 - `set_animation_playback_rate` - Set the global playback rate for all animations on the page.
 
 ### audits-management (4)
-Classificacao: D - Baixa utilidade geral.
-Criterio: Contraste/respostas codificadas; bom nicho de auditoria.
+Classification: D — Low general utility.
+Criteria: Contrast/encoded responses; good auditing niche.
 
 - `audits_check_contrast` - Trigger a contrast check on the current page.
 - `audits_disable` - Disable the Audits domain for a browser instance.
@@ -68,8 +68,8 @@ Criterio: Contraste/respostas codificadas; bom nicho de auditoria.
 - `audits_get_encoded_response` - Get an encoded version of a network response.
 
 ### backgroundservice-management (4)
-Classificacao: D - Baixa utilidade geral.
-Criterio: Eventos PWA de background; nicho.
+Classification: D — Low general utility.
+Criteria: Background PWA events; niche.
 
 - `clear_background_service_events` - Clear all recorded background service events for a given service type.
 - `get_background_service_events` - Retrieve recorded background service events for a given service type.
@@ -77,8 +77,8 @@ Criterio: Eventos PWA de background; nicho.
 - `stop_observing_background_service` - Stop observing background service events for a given service type.
 
 ### browser-cdp-management (6)
-Classificacao: B - Muito util sob demanda.
-Criterio: Janelas, permissoes e downloads; importante em automacao mais completa.
+Classification: B — Very useful on demand.
+Criteria: Windows, permissions, and downloads; important for more complete automation.
 
 - `browser_get_window_bounds` - Get the bounds of a browser window.
 - `browser_get_window_for_target` - Get the browser window ID and bounds for the current target.
@@ -88,8 +88,8 @@ Criterio: Janelas, permissoes e downloads; importante em automacao mais completa
 - `browser_set_window_bounds` - Set the bounds (position/size/state) of a browser window.
 
 ### browser-management (11)
-Classificacao: A - Core. Manter.
-Criterio: Essencial para criar, navegar, recuperar e fechar browsers.
+Classification: A — Core. Keep.
+Criteria: Essential for spawning, navigating, recovering, and closing browsers.
 
 - `check_instance_health` - Check if browser instance is healthy and WebSocket connection is alive.
 - `check_login_status` - Check if the user has completed login on an open browser instance.
@@ -104,8 +104,8 @@ Criterio: Essencial para criar, navegar, recuperar e fechar browsers.
 - `spawn_browser` - Spawn a new browser instance.
 
 ### cdp-advanced (13)
-Classificacao: B - Muito util sob demanda.
-Criterio: Performance, emulacao, acessibilidade, PDF e input baixo nivel.
+Classification: B — Very useful on demand.
+Criteria: Performance, emulation, accessibility, PDF, and low-level input.
 
 - `dispatch_mouse_event` - Dispatch low-level mouse events via CDP Input domain.
 - `emulate_color_scheme` - Emulate prefers-color-scheme media feature (dark/light).
@@ -122,8 +122,8 @@ Criterio: Performance, emulacao, acessibilidade, PDF e input baixo nivel.
 - `print_to_pdf` - Export the current page as PDF via CDP Page.printToPDF.
 
 ### cdp-functions (13)
-Classificacao: B - Poderoso, usar com criterio.
-Criterio: Execucao JS/CDP generica; flexivel, mas aumenta superficie e escolhas.
+Classification: B — Powerful, use with care.
+Criteria: Generic JS/CDP execution; flexible but increases surface area and choices.
 
 - `call_javascript_function` - Call a JavaScript function with arguments.
 - `create_persistent_function` - Create a persistent JavaScript function that survives page reloads.
@@ -140,16 +140,16 @@ Criterio: Execucao JS/CDP generica; flexivel, mas aumenta superficie e escolhas.
 - `list_cdp_commands` - List all available CDP Runtime commands for function execution.
 
 ### cookies-storage (3)
-Classificacao: A - Core para sessao.
-Criterio: Pequeno e valioso para login, cookies e estado.
+Classification: A — Core for sessions.
+Criteria: Small and valuable for login, cookies, and state.
 
 - `clear_cookies` - Clear cookies.
 - `get_cookies` - Get cookies for current page or specific URLs.
 - `set_cookie` - Set a cookie.
 
 ### css-management (6)
-Classificacao: B - Muito util sob demanda.
-Criterio: Inspecao/edicao CSS; util para frontend e clonagem visual.
+Classification: B — Very useful on demand.
+Criteria: CSS inspection/editing; useful for frontend and visual cloning.
 
 - `get_computed_style` - Get computed CSS styles for an element (all resolved values).
 - `get_inline_styles` - Get inline CSS styles for an element.
@@ -159,16 +159,16 @@ Criterio: Inspecao/edicao CSS; util para frontend e clonagem visual.
 - `set_stylesheet_text` - Replace the full text content of a stylesheet.
 
 ### database-management (3)
-Classificacao: D - Legado/nicho.
-Criterio: WebSQL e legado; candidato forte a remover se nao usado.
+Classification: D — Legacy/niche.
+Criteria: WebSQL is legacy; strong removal candidate if not used.
 
 - `execute_websql_query` - Execute a SQL query against a WebSQL database.
 - `get_websql_table_names` - Get all table names in a WebSQL database.
 - `list_websql_databases` - List all WebSQL databases on the current page.
 
 ### debugger-management (9)
-Classificacao: C - Especializado.
-Criterio: Debugger JS completo; valioso para dev, pesado para automacao simples.
+Classification: C — Specialized.
+Criteria: Full JS debugger; valuable for dev, heavy for simple automation.
 
 - `disable_debugger` - Disable the JavaScript debugger for a browser instance.
 - `enable_debugger` - Enable the JavaScript debugger for a browser instance.
@@ -181,8 +181,8 @@ Criterio: Debugger JS completo; valioso para dev, pesado para automacao simples.
 - `step_over` - Step over the current statement (execute current line, stop at next).
 
 ### debugging (7)
-Classificacao: B - Manter em desenvolvimento.
-Criterio: Diagnostico do servidor; pode ser removido em producao enxuta.
+Classification: B — Keep during development.
+Criteria: Server diagnostics; can be removed in lean production.
 
 - `clear_debug_view` - Clear all debug logs and statistics with timeout protection.
 - `export_debug_logs` - Export debug logs to a file using the fastest available method with timeout protection.
@@ -193,16 +193,16 @@ Criterio: Diagnostico do servidor; pode ser removido em producao enxuta.
 - `validate_browser_environment_tool` - Validate browser environment and diagnose potential issues.
 
 ### dom-snapshot-management (3)
-Classificacao: B - Muito util sob demanda.
-Criterio: Snapshots completos; muito bom para analise, pesado para uso comum.
+Classification: B — Very useful on demand.
+Criteria: Full snapshots; great for analysis, heavy for everyday use.
 
 - `dom_snapshot_capture` - Capture a full DOM snapshot of the current page including computed styles.
 - `dom_snapshot_disable` - Disable the DOMSnapshot domain for a browser instance.
 - `dom_snapshot_enable` - Enable the DOMSnapshot domain for a browser instance.
 
 ### dynamic-hooks (10)
-Classificacao: C - Especializado.
-Criterio: Hooks dinamicos de rede; poderoso, mas complexo e menos comum.
+Classification: C — Specialized.
+Criteria: Dynamic network hooks; powerful, but complex and less common.
 
 - `create_dynamic_hook` - Create a new dynamic hook with AI-generated Python function.
 - `create_simple_dynamic_hook` - Create a simple dynamic hook using predefined templates (easier for AI).
@@ -216,8 +216,8 @@ Criterio: Hooks dinamicos de rede; poderoso, mas complexo e menos comum.
 - `validate_hook_function` - Validate hook function code for common issues before creating.
 
 ### element-extraction (9)
-Classificacao: B - Muito util sob demanda.
-Criterio: Clonagem/extracao detalhada de elementos; alto valor, custo maior.
+Classification: B — Very useful on demand.
+Criteria: Detailed element cloning/extraction; high value, higher cost.
 
 - `clone_element_complete` - Master function that extracts ALL element data using specialized functions.
 - `extract_complete_element_cdp` - Extract complete element using native CDP methods for 100% accuracy.
@@ -230,8 +230,8 @@ Criterio: Clonagem/extracao detalhada de elementos; alto valor, custo maior.
 - `extract_related_files` - Discover and analyze related CSS/JS files for context.
 
 ### element-interaction (12)
-Classificacao: A - Core. Manter.
-Criterio: Essencial para clicar, digitar, consultar DOM, capturar tela e ler pagina.
+Classification: A — Core. Keep.
+Criteria: Essential for clicking, typing, querying DOM, capturing screenshots, and reading pages.
 
 - `click_element` - Click an element.
 - `execute_script` - Execute JavaScript in page context.
@@ -247,8 +247,8 @@ Criterio: Essencial para clicar, digitar, consultar DOM, capturar tela e ler pag
 - `wait_for_element` - Wait for an element to appear.
 
 ### fetch-management (7)
-Classificacao: B - Muito util sob demanda.
-Criterio: Intercepcao/modificacao de requests; poderoso, mas nem todo fluxo precisa.
+Classification: B — Very useful on demand.
+Criteria: Request interception/modification; powerful, but not every flow needs it.
 
 - `fetch_continue_request` - Continue an intercepted request, optionally modifying it.
 - `fetch_continue_with_auth` - Continue an intercepted request that requires authentication.
@@ -259,8 +259,8 @@ Criterio: Intercepcao/modificacao de requests; poderoso, mas nem todo fluxo prec
 - `fetch_get_response_body` - Get the response body for an intercepted request.
 
 ### file-extraction (8)
-Classificacao: C - Especializado.
-Criterio: Versoes que escrevem em arquivo; util para artefatos grandes, mas duplicativo.
+Classification: C — Specialized.
+Criteria: File-writing versions; useful for large artifacts, but duplicative.
 
 - `clone_element_to_file` - Clone element completely and save directly to output_path in the workspace.
 - `download_element_assets_to_folder` - Download images, backgrounds, icons, fonts, and media related to an element.
@@ -272,8 +272,8 @@ Criterio: Versoes que escrevem em arquivo; util para artefatos grandes, mas dupl
 - `extract_element_styles_to_file` - Extract element styles and save to output_path.
 
 ### heapprofiler-management (7)
-Classificacao: D - Baixa utilidade geral.
-Criterio: Heap snapshots e GC; raro fora de investigacao de memoria.
+Classification: D — Low general utility.
+Criteria: Heap snapshots and GC; rare outside memory investigation.
 
 - `collect_garbage` - Force a JavaScript garbage collection cycle.
 - `get_object_by_heap_id` - Get a JavaScript object by its heap snapshot object ID.
@@ -284,8 +284,8 @@ Criterio: Heap snapshots e GC; raro fora de investigacao de memoria.
 - `take_heap_snapshot` - Take a heap snapshot of the current JavaScript heap.
 
 ### log-management (5)
-Classificacao: C - Especializado.
-Criterio: Dominio Log/violations; util em auditoria, pouco usado em navegacao comum.
+Classification: C — Specialized.
+Criteria: Log domain/violations; useful in auditing, rarely used in common navigation.
 
 - `log_clear` - Clear the browser log for a browser instance.
 - `log_disable` - Disable the Log domain for a browser instance.
@@ -294,8 +294,8 @@ Criterio: Dominio Log/violations; util em auditoria, pouco usado em navegacao co
 - `log_stop_violations_report` - Stop violation reporting for a browser instance.
 
 ### network-debugging (5)
-Classificacao: A - Core para diagnostico.
-Criterio: Alto valor para scraping, depuracao e entender chamadas de rede.
+Classification: A — Core for diagnostics.
+Criteria: High value for scraping, debugging, and understanding network calls.
 
 - `get_request_details` - Get detailed information about a network request.
 - `get_response_content` - Get response body content.
@@ -304,8 +304,8 @@ Criterio: Alto valor para scraping, depuracao e entender chamadas de rede.
 - `modify_headers` - Modify request headers for future requests.
 
 ### overlay-management (8)
-Classificacao: C - Especializado visual.
-Criterio: Overlays CDP; util para debug visual, dispensavel em automacao headless.
+Classification: C — Specialized visual.
+Criteria: CDP overlays; useful for visual debugging, expendable in headless automation.
 
 - `overlay_disable` - Disable the Overlay domain for a browser instance.
 - `overlay_enable` - Enable the Overlay domain for a browser instance.
@@ -317,8 +317,8 @@ Criterio: Overlays CDP; util para debug visual, dispensavel em automacao headles
 - `overlay_set_show_scroll_snap_overlays` - Show scroll snap overlays for the specified nodes.
 
 ### profiler-management (5)
-Classificacao: C - Especializado.
-Criterio: CPU profiling e coverage; manter para performance/debug.
+Classification: C — Specialized.
+Criteria: CPU profiling and coverage; keep for performance/debugging.
 
 - `start_code_coverage` - Start collecting JavaScript code coverage data.
 - `start_cpu_profiling` - Start CPU profiling for a browser instance.
@@ -327,8 +327,8 @@ Criterio: CPU profiling e coverage; manter para performance/debug.
 - `take_code_coverage_snapshot` - Take a snapshot of the current code coverage data.
 
 ### progressive-cloning (10)
-Classificacao: C - Especializado.
-Criterio: Clonagem incremental rica; manter se esse fluxo for frequente.
+Classification: C — Specialized.
+Criteria: Rich incremental cloning; keep if this workflow is frequent.
 
 - `clear_all_elements` - Clear all stored elements.
 - `clear_stored_element` - Clear a specific stored element.
@@ -342,16 +342,16 @@ Criterio: Clonagem incremental rica; manter se esse fluxo for frequente.
 - `list_stored_elements` - List all stored elements with their basic info.
 
 ### security-management (3)
-Classificacao: C - Sensivel.
-Criterio: Certificados/estado de seguranca; pequeno, mas pode enfraquecer seguranca.
+Classification: C — Sensitive.
+Criteria: Certificates/security state; small, but can weaken security.
 
 - `get_security_state` - Get the current security state of the page.
 - `handle_certificate_error` - Handle a certificate error event by continuing or cancelling the request.
 - `set_ignore_certificate_errors` - Set whether SSL/TLS certificate errors should be ignored.
 
 ### serviceworker-management (7)
-Classificacao: C - Especializado PWA.
-Criterio: Bom para PWAs; desnecessario para navegacao simples.
+Classification: C — Specialized PWA.
+Criteria: Good for PWAs; unnecessary for simple browsing.
 
 - `deliver_push_message` - Deliver a simulated push message to a service worker.
 - `dispatch_sync_event` - Dispatch a background sync event to a service worker.
@@ -362,8 +362,8 @@ Criterio: Bom para PWAs; desnecessario para navegacao simples.
 - `unregister_service_worker` - Unregister a service worker by its scope URL.
 
 ### storage-cdp-management (4)
-Classificacao: C - Especializado.
-Criterio: Quota e limpeza por origem; bom para debug, menos usado no dia a dia.
+Classification: C — Specialized.
+Criteria: Quota and origin cleanup; good for debugging, less used day-to-day.
 
 - `storage_clear_data_for_origin` - Clear storage data for a given origin.
 - `storage_get_usage_and_quota` - Get storage usage and quota for a given origin.
@@ -371,8 +371,8 @@ Criterio: Quota e limpeza por origem; bom para debug, menos usado no dia a dia.
 - `storage_untrack_cache_storage_for_origin` - Stop tracking cache storage for a given origin.
 
 ### storage-management (15)
-Classificacao: B - Muito util sob demanda.
-Criterio: Amplo controle de storage; util quando precisa estado persistido.
+Classification: B — Very useful on demand.
+Criteria: Broad storage control; useful when persistent state is needed.
 
 - `clear_local_storage` - Clear all LocalStorage items for a given origin.
 - `clear_session_storage` - Clear all SessionStorage items for a given origin.
@@ -391,8 +391,8 @@ Criterio: Amplo controle de storage; util quando precisa estado persistido.
 - `set_session_storage_item` - Set a SessionStorage item for a given origin.
 
 ### system-info-management (4)
-Classificacao: B - Util leve.
-Criterio: Info do servidor/browser/processos; barato e bom para diagnostico.
+Classification: B — Lightweight utility.
+Criteria: Server/browser/process info; cheap and good for diagnostics.
 
 - `get_server_info` - Return information about the MCP server process itself.
 - `system_info_get_feature_state` - Return the state of a browser feature flag for a browser instance.
@@ -400,8 +400,8 @@ Criterio: Info do servidor/browser/processos; barato e bom para diagnostico.
 - `system_info_get_process_info` - Return information about all running browser processes for a browser instance.
 
 ### tabs (5)
-Classificacao: A - Core. Manter.
-Criterio: Muito util para fluxos reais com varias abas.
+Classification: A — Core. Keep.
+Criteria: Very useful for real-world multi-tab workflows.
 
 - `close_tab` - Close a specific tab.
 - `get_active_tab` - Get information about the currently active tab.
@@ -410,8 +410,8 @@ Criterio: Muito util para fluxos reais com varias abas.
 - `switch_tab` - Switch to a specific tab by bringing it to front.
 
 ### target-management (7)
-Classificacao: B - Muito util sob demanda.
-Criterio: Poderoso para targets, workers e iframes, mas duplica parte de abas/browser.
+Classification: B — Very useful on demand.
+Criteria: Powerful for targets, workers, and iframes, but duplicates parts of tabs/browser.
 
 - `target_activate_target` - Activate (focus) a browser target.
 - `target_attach_to_target` - Attach to a browser target to create a debugging session.
@@ -422,8 +422,8 @@ Criterio: Poderoso para targets, workers e iframes, mas duplica parte de abas/br
 - `target_get_targets` - Get all browser targets (pages, workers, iframes), excluding browser-type targets.
 
 ### webauthn-management (6)
-Classificacao: C - Especializado auth.
-Criterio: Passkeys/FIDO2 virtual; manter se testa autenticacao moderna.
+Classification: C — Specialized auth.
+Criteria: Virtual passkeys/FIDO2; keep if testing modern authentication.
 
 - `add_virtual_authenticator` - Add a virtual WebAuthn authenticator for testing passkeys and FIDO2.
 - `add_webauthn_credential` - Add a credential to a virtual WebAuthn authenticator.
@@ -431,4 +431,3 @@ Criterio: Passkeys/FIDO2 virtual; manter se testa autenticacao moderna.
 - `remove_virtual_authenticator` - Remove a virtual WebAuthn authenticator.
 - `remove_webauthn_credential` - Remove a credential from a virtual WebAuthn authenticator.
 - `set_webauthn_user_verified` - Set the user verified state for a virtual WebAuthn authenticator.
-

@@ -7,7 +7,7 @@ Undetectable browser automation for MCP-compatible AI agents.
 
 Improved fork of Stealth Browser MCP adapted as Ghost Browser MCP.
 
-Ghost Browser MCP turns a real browser into a full MCP-native research, extraction, and page-reconstruction toolkit. It combines 225 browser tools, Chrome DevTools Protocol access, network inspection, asset downloading, and pixel-accurate page cloning in one agent-ready server.
+Ghost Browser MCP turns a real browser into a full MCP-native research, extraction, and page-reconstruction toolkit. It combines 225 browser tools across 32 sections, Chrome DevTools Protocol access, network inspection, asset downloading, and pixel-accurate page cloning in one agent-ready server.
 
 Bypass Cloudflare, antibot systems, and social media blocks with real browser instances powered by [nodriver](https://github.com/ultrafunkamsterdam/nodriver) + Chrome DevTools Protocol + [FastMCP](https://github.com/jlowin/fastmcp).
 
@@ -61,7 +61,7 @@ Bypass Cloudflare, antibot systems, and social media blocks with real browser in
 
 Ghost Browser MCP is more than a browser controller. It is a practical reverse-engineering and reconstruction toolkit for authorized web analysis:
 
-- **225 MCP tools** — Navigation, screenshots, DOM extraction, CDP commands, network tracing, downloads, sessions, hooks, and page-state inspection.
+- **225 MCP tools across 32 sections** — Navigation, screenshots, DOM extraction, CDP commands, network tracing, downloads, sessions, hooks, and page-state inspection.
 - **Pixel-accurate cloning** — Extract page structure, styles, computed layout, screenshots, and loaded assets to recreate pages in minutes.
 - **Asset-aware extraction** — Download the images, icons, fonts, CSS, and media actually loaded by the current page instead of collecting unrelated noise.
 - **Deep page intelligence** — Inspect HTML, accessibility data, console logs, network requests, storage, cookies, event listeners, and element relationships.
@@ -72,7 +72,7 @@ Ghost Browser MCP is more than a browser controller. It is a practical reverse-e
 ## Features
 
 - **Antibot bypass** — Works on Cloudflare, Queue-It, and other protection systems that block traditional automation
-- **225 tools across 32 sections** — From basic navigation to advanced CDP function execution
+- **225 tools across 32 sections** — From basic navigation to advanced CDP domain management
 - **Modular loading** — Run the full tool suite or a minimal 23-tool core; disable what you don't need
 - **Pixel-accurate element cloning** — Extract complete elements with all CSS, DOM structure, events, and assets via CDP
 - **Network interception** — Inspect every request, response, header, and payload through your AI agent
@@ -207,7 +207,7 @@ Choose exactly what functionality you need. Run the full tool suite or strip it 
 
 | Mode | Tools | Use Case |
 |------|-------|----------|
-| **Full** (default) | 225 | Complete browser automation and debugging |
+| **Full** (default) | 225 | Complete browser automation and debugging across 32 sections |
 | **Minimal** (`--minimal`) | 23 | Core browser automation only |
 | **Custom** (`--disable-*`) | Your choice | Disable specific sections |
 
@@ -226,21 +226,33 @@ python src/server.py --list-sections
 | `element-extraction` | 9 | Element cloning and extraction |
 | `file-extraction` | 8 | File-based extraction tools |
 | `network-debugging` | 5 | Network monitoring and interception |
+| `cdp-advanced` | 13 | Performance, emulation, accessibility, PDF |
 | `cdp-functions` | 13 | Chrome DevTools Protocol execution |
 | `progressive-cloning` | 10 | Advanced element cloning |
 | `cookies-storage` | 3 | Cookie and storage management |
 | `tabs` | 5 | Tab management |
 | `debugging` | 7 | Debug and system tools |
 | `dynamic-hooks` | 10 | AI-powered network hooks |
-| `log-management` | 5 | CDP Log domain — console logs and violations |
-| `storage-cdp-management` | 4 | Origin data clearing and quota |
-| `system-info-management` | 4 | GPU, process, and feature flag info |
-| `fetch-management` | 7 | Granular request interception |
-| `overlay-management` | 8 | Element highlighting and visual overlays |
-| `audits-management` | 4 | Lighthouse-style audits and contrast checks |
-| `target-management` | 7 | Advanced tab, worker, and iframe management |
+| `animation-management` | 6 | CSS animation control and inspection |
+| `audits-management` | 4 | Contrast checks and encoded responses |
+| `backgroundservice-management` | 4 | Background PWA event observation |
 | `browser-cdp-management` | 6 | Window management, permissions, downloads |
+| `css-management` | 6 | CSS style inspection and editing |
+| `database-management` | 3 | WebSQL database queries |
+| `debugger-management` | 9 | Full JavaScript debugger (breakpoints, stepping) |
 | `dom-snapshot-management` | 3 | Full DOM snapshot with computed styles |
+| `fetch-management` | 7 | Granular request interception |
+| `heapprofiler-management` | 7 | Heap snapshots, sampling, and GC |
+| `log-management` | 5 | CDP Log domain — console logs and violations |
+| `overlay-management` | 8 | Element highlighting and visual overlays |
+| `profiler-management` | 5 | CPU profiling and code coverage |
+| `security-management` | 3 | Certificate and security state |
+| `serviceworker-management` | 7 | Service worker lifecycle and push events |
+| `storage-cdp-management` | 4 | Origin data clearing and quota |
+| `storage-management` | 15 | LocalStorage, SessionStorage, IndexedDB, Cache Storage |
+| `system-info-management` | 4 | GPU, process, and feature flag info |
+| `target-management` | 7 | Advanced tab, worker, and iframe management |
+| `webauthn-management` | 6 | Virtual authenticators and passkey testing |
 
 ---
 
@@ -259,8 +271,9 @@ python src/server.py --list-sections
 | `go_back()` | Navigate back in history |
 | `go_forward()` | Navigate forward in history |
 | `reload_page()` | Reload current page |
-| `hot_reload()` | Reload modules without restart |
-| `reload_status()` | Check module reload status |
+| `check_instance_health()` | Check WebSocket connection health |
+| `check_login_status()` | Check if manual login completed |
+| `confirm_manual_login()` | Confirm manual login and recover session |
 
 </details>
 
@@ -278,6 +291,9 @@ python src/server.py --list-sections
 | `execute_script()` | Run JavaScript |
 | `select_option()` | Dropdown selection |
 | `get_element_state()` | Element properties |
+| `get_page_content()` | HTML and text content |
+| `take_screenshot()` | Capture page screenshot |
+| `save_page_html()` | Serialize DOM directly to disk |
 
 </details>
 
@@ -287,8 +303,7 @@ python src/server.py --list-sections
 | Tool | Description |
 |------|-------------|
 | `extract_complete_element_cdp()` | Complete CDP-based element clone |
-| `clone_element_complete()` | Complete element cloning |
-| `extract_complete_element_to_file()` | Save complete extraction to file |
+| `clone_element_complete()` | Master extraction function |
 | `extract_element_styles()` | 300+ CSS properties via CDP |
 | `extract_element_styles_cdp()` | Pure CDP styles extraction |
 | `extract_element_structure()` | Full DOM tree |
@@ -309,32 +324,22 @@ python src/server.py --list-sections
 | `extract_element_events_to_file()` | Save events to file |
 | `extract_element_animations_to_file()` | Save animations to file |
 | `extract_element_assets_to_file()` | Save assets to file |
+| `extract_complete_element_to_file()` | Save complete extraction to file |
 | `clone_element_to_file()` | Save complete clone to file |
-| `list_clone_files()` | List saved clone files |
-| `cleanup_clone_files()` | Clean up old clone files |
+| `download_element_assets_to_folder()` | Download images, fonts, CSS to folder |
 
 </details>
 
 <details>
-<summary><strong>Network Debugging and Interception</strong></summary>
+<summary><strong>Network Debugging</strong></summary>
 
 | Tool | Description |
 |------|-------------|
 | `list_network_requests()` | List captured network requests |
 | `get_request_details()` | Inspect headers and payload for a request |
-| `get_response_content()` | Get response data from a request |
+| `get_response_details()` | Get response metadata |
+| `get_response_content()` | Get response body from a request |
 | `modify_headers()` | Add custom headers to requests |
-| `spawn_browser(block_resources=[...])` | Block tracking scripts, ads, etc. |
-| `create_dynamic_hook()` | Create Python functions to intercept/modify requests |
-| `create_simple_dynamic_hook()` | Quick hook creation with presets |
-| `list_dynamic_hooks()` | List active hooks with statistics |
-| `get_dynamic_hook_details()` | Inspect hook source code |
-| `remove_dynamic_hook()` | Remove a hook |
-| `get_hook_documentation()` | Request object structure and HookAction types |
-| `get_hook_examples()` | 10 detailed examples: blockers, redirects, proxies |
-| `get_hook_requirements_documentation()` | Pattern matching and best practices |
-| `get_hook_common_patterns()` | Ad blocking, API proxying, auth injection |
-| `validate_hook_function()` | Validate hook code before deployment |
 
 </details>
 
@@ -385,8 +390,6 @@ python src/server.py --list-sections
 | `get_cookies()` | Read cookies |
 | `set_cookie()` | Set cookies |
 | `clear_cookies()` | Clear cookies |
-| `get_instance_state()` | localStorage and sessionStorage snapshot |
-| `execute_script()` | Read/modify storage via JS |
 
 </details>
 
@@ -404,17 +407,288 @@ python src/server.py --list-sections
 </details>
 
 <details>
-<summary><strong>Page Analysis and Debugging</strong></summary>
+<summary><strong>Debugging and Diagnostics</strong></summary>
 
 | Tool | Description |
 |------|-------------|
-| `take_screenshot()` | Capture screenshots |
-| `get_page_content()` | HTML and metadata |
 | `get_debug_view()` | Debug info with pagination |
 | `clear_debug_view()` | Clear debug logs |
 | `export_debug_logs()` | Export logs (JSON/pickle/gzip) |
 | `get_debug_lock_status()` | Debug lock status |
+| `hot_reload()` | Hot reload modules without restart |
+| `reload_status()` | Check module reload status |
 | `validate_browser_environment_tool()` | Diagnose platform issues and browser compatibility |
+
+</details>
+
+<details>
+<summary><strong>CDP Advanced — Performance, Emulation, Accessibility</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `get_performance_metrics()` | JS heap, DOM nodes, layout count |
+| `get_page_vitals()` | LCP, FID, CLS, FCP, TTFB |
+| `emulate_device()` | Mobile device presets (iPhone 14, Pixel 7, etc.) |
+| `emulate_geolocation()` | Override geolocation coordinates |
+| `emulate_color_scheme()` | Dark/light mode emulation |
+| `emulate_network_conditions()` | Throttle network (2G, 3G, 4G, offline) |
+| `get_accessibility_tree()` | AXTree for screen reader testing |
+| `get_console_logs()` | Browser console log capture |
+| `inject_console_capture()` | Inject console capture before navigation |
+| `get_dom_node_info()` | CDP DOM node details and bounding box |
+| `print_to_pdf()` | Export page as PDF via CDP |
+| `dispatch_mouse_event()` | Low-level mouse events via CDP Input |
+| `hover_element()` | Hover over element via mouseMoved event |
+
+</details>
+
+<details>
+<summary><strong>Animation Management</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `list_animations()` | List all active CSS/Web Animations |
+| `pause_animation()` | Pause animation by ID |
+| `play_animation()` | Resume paused animation |
+| `set_animation_playback_rate()` | Global playback rate control |
+| `seek_animations()` | Seek to specific time position |
+| `get_animation_timing()` | Current timing information |
+
+</details>
+
+<details>
+<summary><strong>Audits Management</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `audits_enable()` | Enable Audits domain |
+| `audits_disable()` | Disable Audits domain |
+| `audits_get_encoded_response()` | Encode response (webp/jpeg/png) |
+| `audits_check_contrast()` | Trigger contrast check |
+
+</details>
+
+<details>
+<summary><strong>BackgroundService Management</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `start_observing_background_service()` | Observe sync/fetch/push events |
+| `stop_observing_background_service()` | Stop observation |
+| `get_background_service_events()` | Retrieve recorded events |
+| `clear_background_service_events()` | Clear recorded events |
+
+</details>
+
+<details>
+<summary><strong>Browser CDP Management</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `browser_get_window_for_target()` | Get window ID and bounds |
+| `browser_set_window_bounds()` | Set position/size/state |
+| `browser_get_window_bounds()` | Get window bounds |
+| `browser_grant_permissions()` | Grant permissions for origin |
+| `browser_reset_permissions()` | Reset all permissions |
+| `browser_set_download_behavior()` | Allow/deny downloads |
+
+</details>
+
+<details>
+<summary><strong>CSS Management</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `get_matched_styles()` | All matched CSS styles for element |
+| `get_inline_styles()` | Inline styles only |
+| `get_computed_style()` | All resolved computed values |
+| `get_stylesheet_text()` | Full stylesheet content by ID |
+| `set_stylesheet_text()` | Replace stylesheet content |
+| `get_media_queries()` | All media queries from page |
+
+</details>
+
+<details>
+<summary><strong>Database Management (WebSQL)</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `list_websql_databases()` | List all WebSQL databases |
+| `get_websql_table_names()` | Get table names from database |
+| `execute_websql_query()` | Run SQL query (with parameters) |
+
+</details>
+
+<details>
+<summary><strong>Debugger Management</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `enable_debugger()` | Enable JavaScript debugger |
+| `disable_debugger()` | Disable JavaScript debugger |
+| `set_breakpoint()` | Set breakpoint at URL + line |
+| `remove_breakpoint()` | Remove breakpoint by ID |
+| `resume_execution()` | Resume after breakpoint pause |
+| `step_over()` | Step over current statement |
+| `step_into()` | Step into function call |
+| `get_call_stack()` | Get current call stack |
+| `evaluate_on_call_frame()` | Evaluate expression in call frame |
+
+</details>
+
+<details>
+<summary><strong>DOM Snapshot Management</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `dom_snapshot_enable()` | Enable DOMSnapshot domain |
+| `dom_snapshot_disable()` | Disable DOMSnapshot domain |
+| `dom_snapshot_capture()` | Full DOM snapshot with computed styles |
+
+</details>
+
+<details>
+<summary><strong>Fetch Management (Request Interception)</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `fetch_enable()` | Enable Fetch domain for interception |
+| `fetch_disable()` | Disable Fetch domain |
+| `fetch_fail_request()` | Fail request with error reason |
+| `fetch_fulfill_request()` | Fulfill with custom response |
+| `fetch_continue_request()` | Continue with optional modifications |
+| `fetch_continue_with_auth()` | Continue with auth credentials |
+| `fetch_get_response_body()` | Get response body of intercepted request |
+
+</details>
+
+<details>
+<summary><strong>HeapProfiler Management</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `take_heap_snapshot()` | Full heap snapshot (metadata preview) |
+| `start_heap_sampling()` | Low-overhead sampling profiler |
+| `stop_heap_sampling()` | Stop and return sampling profile |
+| `start_tracking_heap_objects()` | Track allocations over time |
+| `stop_tracking_heap_objects()` | Stop tracking |
+| `collect_garbage()` | Force garbage collection |
+| `get_object_by_heap_id()` | Inspect specific heap object |
+
+</details>
+
+<details>
+<summary><strong>Profiler Management</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `start_cpu_profiling()` | Start CPU profiling |
+| `stop_cpu_profiling()` | Stop and return profile data |
+| `start_code_coverage()` | Track script execution coverage |
+| `stop_code_coverage()` | Stop coverage collection |
+| `take_code_coverage_snapshot()` | Snapshot of current coverage |
+
+</details>
+
+<details>
+<summary><strong>Security Management</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `get_security_state()` | HTTPS and connection security info |
+| `set_ignore_certificate_errors()` | Enable/disable SSL bypass |
+| `handle_certificate_error()` | Respond to certificate error event |
+
+</details>
+
+<details>
+<summary><strong>ServiceWorker Management</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `list_service_workers()` | List registered service workers |
+| `unregister_service_worker()` | Remove service worker |
+| `force_update_service_worker()` | Bypass 24-hour update throttle |
+| `skip_waiting_service_worker()` | Activate new worker immediately |
+| `set_service_worker_force_update()` | Force update on every load |
+| `deliver_push_message()` | Simulate push notification |
+| `dispatch_sync_event()` | Trigger background sync |
+
+</details>
+
+<details>
+<summary><strong>Storage CDP Management</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `storage_clear_data_for_origin()` | Clear cookies, localStorage, etc. |
+| `storage_get_usage_and_quota()` | Storage usage in bytes |
+| `storage_track_cache_storage_for_origin()` | Start cache storage tracking |
+| `storage_untrack_cache_storage_for_origin()` | Stop cache storage tracking |
+
+</details>
+
+<details>
+<summary><strong>Storage Management (Full)</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `get_local_storage()` | Read all LocalStorage for origin |
+| `set_local_storage_item()` | Set LocalStorage key/value |
+| `remove_local_storage_item()` | Remove LocalStorage key |
+| `clear_local_storage()` | Clear all LocalStorage |
+| `get_session_storage()` | Read all SessionStorage |
+| `set_session_storage_item()` | Set SessionStorage key/value |
+| `remove_session_storage_item()` | Remove SessionStorage key |
+| `clear_session_storage()` | Clear all SessionStorage |
+| `list_indexed_databases()` | List IndexedDB databases |
+| `get_indexed_db_schema()` | Object stores and indexes |
+| `get_indexed_db_data()` | Query records with pagination |
+| `delete_indexed_database()` | Delete entire IndexedDB database |
+| `list_cache_storage()` | List Cache Storage caches |
+| `get_cached_response()` | Retrieve cached response |
+| `delete_cache()` | Delete cache by name |
+
+</details>
+
+<details>
+<summary><strong>System Info Management</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `get_server_info()` | Server cwd, platform, Python version |
+| `system_info_get_info()` | GPU, model name, browser launch command |
+| `system_info_get_feature_state()` | Browser feature flag status |
+| `system_info_get_process_info()` | Running browser processes |
+
+</details>
+
+<details>
+<summary><strong>Target Management</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `target_get_targets()` | List all targets (pages, workers, iframes) |
+| `target_get_target_info()` | Get specific target info |
+| `target_create_target()` | Open new tab/window |
+| `target_close_target()` | Close target |
+| `target_activate_target()` | Focus target |
+| `target_attach_to_target()` | Create debugging session |
+| `target_detach_from_target()` | Detach from session |
+
+</details>
+
+<details>
+<summary><strong>WebAuthn Management</strong></summary>
+
+| Tool | Description |
+|------|-------------|
+| `add_virtual_authenticator()` | Add CTAP2/U2F authenticator |
+| `remove_virtual_authenticator()` | Remove authenticator |
+| `add_webauthn_credential()` | Add credential to authenticator |
+| `get_webauthn_credentials()` | List stored credentials |
+| `remove_webauthn_credential()` | Remove credential |
+| `set_webauthn_user_verified()` | Set user verified state |
 
 </details>
 
@@ -432,7 +706,7 @@ python src/server.py --list-sections
 | API reverse engineering | Payload inspection through chat | Manual tools only |
 | Dynamic hook system | AI-generated Python functions for real-time interception | Not available |
 | Modular architecture | 32 sections, 23–225 tools | Fixed ~20 tools |
-| Total tools | 225 (customizable) | ~20 |
+| Total tools | 225 across 32 sections (customizable) | ~20 |
 
 Tested on: LinkedIn, Instagram, Twitter/X, Amazon, banking portals, government sites, Cloudflare-protected APIs, Nike SNKRS, Ticketmaster, Supreme.
 
@@ -471,9 +745,6 @@ uv sync
 - **API reverse engineering** — Intercept requests, map endpoints, and inspect data flow
 
 All driven from a single AI agent conversation.
-
-Prompt templates: [docs/examples/claude_prompts.md](docs/examples/claude_prompts.md)
-Cookie template: [docs/examples/cookies_example.txt](docs/examples/cookies_example.txt)
 
 ---
 
